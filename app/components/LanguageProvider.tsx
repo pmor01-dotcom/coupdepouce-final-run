@@ -57,6 +57,12 @@ export function useLanguage() {
 
 // Temporary empty translations object — replace with your real translations
 const translations: Record<string, Record<string, string>> = {
-  fr: {},
-  en: {}
+  fr: {
+    "app.title": "Coup de Pouce",
+    "landing.subtitle": "Trouvez un artisan qualifié près de chez vous"
+  },
+  en: {
+    "app.title": "Helping Hand",
+    "landing.subtitle": "Find a qualified craftsman near you"
+  }
 }
