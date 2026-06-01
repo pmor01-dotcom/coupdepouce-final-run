@@ -35,7 +35,7 @@ export default function Home() {
           </div>
           
           {/* Right Image */}
-          <div className="bg-white rounded-lg shadow-lg p-6 ml-48">
+          <div className="bg-white rounded-lg shadow-lg p-6">
             <img 
               src="/images/satisfied-clients.jpg" 
               alt="Happy clients with completed projects"
