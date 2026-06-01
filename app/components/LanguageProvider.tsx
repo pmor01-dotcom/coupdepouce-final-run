@@ -36,7 +36,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: string): string => {
-    if (!mounted) return key
     return translations[language]?.[key] || key
   }
 
