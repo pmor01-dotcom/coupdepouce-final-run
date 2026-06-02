@@ -301,6 +301,11 @@ export const emailTemplates = {
 // Email service class
 export class EmailService {
   static async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
+      console.error('Missing SMTP credentials: SMTP_USER and SMTP_PASSWORD are required')
+      return false
+    }
+
     try {
       // Create transporter lazily at send time to avoid initializing during build
       const transporter = nodemailer.createTransport({
@@ -314,7 +319,7 @@ export class EmailService {
       })
 
       const mailOptions = {
-        from: process.env.EMAIL_FROM || 'noreply@coupdepouce.com',
+        from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'noreply@coupdepouce.com',
         to,
         subject,
         html,
