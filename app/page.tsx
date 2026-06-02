@@ -11,6 +11,10 @@ export default function Home() {
     <>
       <main className="min-h-screen home-page">
         <div className="container mx-auto px-4 py-16">
+          <div className="site-title">
+            <h2>Coupdepouce</h2>
+          </div>
+
           <div className="promo-banner">
             <p className="promo-banner-title">
               {t('home.freePromoBanner')}

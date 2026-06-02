@@ -203,6 +203,19 @@ body {
   background: linear-gradient(to bottom, #6B8E23, #D4E4BC);
 }
 
+.site-title {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.site-title h2 {
+  margin: 0;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #000;
+  letter-spacing: 0.5px;
+}
+
 .promo-banner {
   margin-bottom: 2rem;
   padding: 1.25rem 1.5rem;
