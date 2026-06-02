@@ -1,8 +1,36 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useLanguage } from './components/LanguageProvider'
 import Footer from './components/Footer'
+
+function HeroImage({
+  src,
+  alt,
+}: {
+  src: string
+  alt: string
+}) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
+
+  return (
+    <div className="hero-card-image-wrapper">
+      <img
+        src={src}
+        alt={alt}
+        className={`hero-card-image ${status}`}
+        onLoad={() => setStatus('loaded')}
+        onError={() => setStatus('error')}
+      />
+      {status !== 'loaded' && (
+        <div className="hero-card-image-placeholder">
+          <span>{status === 'error' ? 'Image indisponible' : 'Chargement...'}</span>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Home() {
   const { t } = useLanguage()
@@ -22,10 +50,9 @@ export default function Home() {
 
           <section className="hero-grid">
             <article className="hero-card">
-              <img
+              <HeroImage
                 src="/artisan-photo.jpg"
                 alt="Professional artisans working"
-                className="hero-card-image"
               />
               <div className="hero-card-content">
                 <h3>{t('home.qualifiedArtisans')}</h3>
@@ -34,10 +61,9 @@ export default function Home() {
             </article>
 
             <article className="hero-card">
-              <img
+              <HeroImage
                 src="/images/satisfied-clients.jpg"
                 alt="Happy clients with completed projects"
-                className="hero-card-image"
               />
               <div className="hero-card-content">
                 <h3>{t('home.satisfiedClients')}</h3>
