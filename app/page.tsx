@@ -1,6 +1,6 @@
-'use client'
+ 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useLanguage } from './components/LanguageProvider'
 import Footer from './components/Footer'
@@ -13,15 +13,34 @@ function HeroImage({
   alt: string
 }) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
+  const [currentSrc, setCurrentSrc] = useState(src)
+
+  useEffect(() => {
+    try {
+      const img = new Image()
+      img.src = currentSrc
+      if (img.complete) setStatus('loaded')
+    } catch (e) {
+      // ignore
+    }
+  }, [currentSrc])
+  const fallbackSvg =
+    'data:image/svg+xml;utf8,' +
+    encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-size="20">Image indisponible</text></svg>'
+    )
 
   return (
     <div className="hero-card-image-wrapper">
       <img
-        src={src}
+        src={currentSrc}
         alt={alt}
-        className={`hero-card-image ${status}`}
+        className={`hero-card-image ${status === 'loaded' ? 'loaded' : ''}`}
         onLoad={() => setStatus('loaded')}
-        onError={() => setStatus('error')}
+        onError={() => {
+          if (currentSrc !== fallbackSvg) setCurrentSrc(fallbackSvg)
+          setStatus('error')
+        }}
       />
       {status !== 'loaded' && (
         <div className="hero-card-image-placeholder">
