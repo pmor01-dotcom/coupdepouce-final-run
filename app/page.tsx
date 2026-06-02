@@ -1,55 +1,8 @@
  'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useLanguage } from './components/LanguageProvider'
 import Footer from './components/Footer'
-
-function HeroImage({
-  src,
-  alt,
-}: {
-  src: string
-  alt: string
-}) {
-  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
-  const [currentSrc, setCurrentSrc] = useState(src)
-
-  useEffect(() => {
-    try {
-      const img = new Image()
-      img.src = currentSrc
-      if (img.complete) setStatus('loaded')
-    } catch (e) {
-      // ignore
-    }
-  }, [currentSrc])
-  const fallbackSvg =
-    'data:image/svg+xml;utf8,' +
-    encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-size="20">Image indisponible</text></svg>'
-    )
-
-  return (
-    <div className="hero-card-image-wrapper">
-      <img
-        src={currentSrc}
-        alt={alt}
-        className={`hero-card-image ${status === 'loaded' ? 'loaded' : ''}`}
-        onLoad={() => setStatus('loaded')}
-        onError={() => {
-          if (currentSrc !== fallbackSvg) setCurrentSrc(fallbackSvg)
-          setStatus('error')
-        }}
-      />
-      {status !== 'loaded' && (
-        <div className="hero-card-image-placeholder">
-          <span>{status === 'error' ? 'Image indisponible' : 'Chargement...'}</span>
-        </div>
-      )}
-    </div>
-  )
-}
 
 export default function Home() {
   const { t } = useLanguage()
@@ -69,9 +22,11 @@ export default function Home() {
 
           <section className="hero-grid">
             <article className="hero-card">
-              <HeroImage
+              <img
                 src="/artisan-photo.jpg"
                 alt="Professional artisans working"
+                className="hero-card-image"
+                loading="lazy"
               />
               <div className="hero-card-content">
                 <h3>{t('home.qualifiedArtisans')}</h3>
@@ -80,9 +35,11 @@ export default function Home() {
             </article>
 
             <article className="hero-card">
-              <HeroImage
+              <img
                 src="/images/satisfied-clients.jpg"
                 alt="Happy clients with completed projects"
+                className="hero-card-image"
+                loading="lazy"
               />
               <div className="hero-card-content">
                 <h3>{t('home.satisfiedClients')}</h3>

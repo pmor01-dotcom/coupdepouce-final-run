@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   description: 'Connectez-vous avec des artisans qualifiés pour vos projets',
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
+
 export default function RootLayout({
   children,
 }: {
