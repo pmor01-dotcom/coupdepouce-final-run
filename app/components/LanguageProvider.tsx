@@ -66,6 +66,8 @@ const translations: Record<string, Record<string, string>> = {
     "landing.subtitle": "Trouvez un artisan qualifié près de chez vous",
     
     // Home
+    "home.freePromoBanner": "Inscription gratuite pour artisans et clients pendant 6 mois.",
+    "home.freePromoBannerSub": "Profitez de toutes les fonctionnalités sans frais pendant une période limitée.",
     "home.qualifiedArtisans": "Artisans qualifiés",
     "home.qualifiedArtisansDesc": "Des professionnels vérifiés et expérimentés à votre service",
     "home.satisfiedClients": "Clients satisfaits",
@@ -174,6 +176,13 @@ const translations: Record<string, Record<string, string>> = {
     "payment.support": "Support prioritaire",
     "payment.noCommitment": "Sans engagement",
     "payment.hourlyRate": "Tarif horaire",
+    "payment.freePromoTitle": "Accès gratuit pendant 6 mois",
+    "payment.freePromoSubtitle": "Toutes les fonctionnalités sont offertes gratuitement pendant une période limitée.",
+    "payment.freePromoNote": "Aucun paiement n'est requis pour les six prochains mois.",
+    "payment.freePromoContinue": "Continuer vers le tableau de bord",
+    "payment.freePromoBack": "Retour à l'inscription",
+    "payment.freeStatusTitle": "Service gratuit pendant 6 mois",
+    "payment.freeStatusSubtitle": "Profitez de l'accès complet sans abonnement pendant cette période.",
     
     // Artisan Signup
     "artisanSignup.title": "Inscription Artisan",
@@ -219,6 +228,8 @@ const translations: Record<string, Record<string, string>> = {
     "landing.subtitle": "Find a qualified craftsman near you",
     
     // Home
+    "home.freePromoBanner": "Free sign-ups for artisans and clients for 6 months.",
+    "home.freePromoBannerSub": "Enjoy all features free for a limited time.",
     "home.qualifiedArtisans": "Qualified Artisans",
     "home.qualifiedArtisansDesc": "Verified and experienced professionals at your service",
     "home.satisfiedClients": "Satisfied Clients",
@@ -327,6 +338,13 @@ const translations: Record<string, Record<string, string>> = {
     "payment.support": "Priority support",
     "payment.noCommitment": "No commitment",
     "payment.hourlyRate": "Hourly rate",
+    "payment.freePromoTitle": "Free access for 6 months",
+    "payment.freePromoSubtitle": "All features are available for free for a limited time.",
+    "payment.freePromoNote": "No payment is required for the next six months.",
+    "payment.freePromoContinue": "Continue to dashboard",
+    "payment.freePromoBack": "Back to sign-up",
+    "payment.freeStatusTitle": "Free service for 6 months",
+    "payment.freeStatusSubtitle": "Enjoy full access without subscription during this period.",
     
     // Artisan Signup
     "artisanSignup.title": "Craftsman Sign Up",

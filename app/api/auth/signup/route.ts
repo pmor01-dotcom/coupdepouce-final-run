@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
+import EmailService from '../../../../lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,6 +46,21 @@ export async function POST(request: NextRequest) {
         subscriptions: true
       }
     });
+
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'pmor01@free.fr'
+    const notificationSent = await EmailService.sendNewSignupNotification(adminEmail, {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      location: user.location,
+      department: user.department,
+      metier: user.metier,
+      phone: user.phone,
+    })
+
+    if (!notificationSent) {
+      console.error(`Failed to send signup notification to ${adminEmail}`)
+    }
 
     // Return user without password
     const { password_hash, ...userWithoutPassword } = user;

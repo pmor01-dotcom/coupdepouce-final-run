@@ -94,6 +94,10 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
       console.log('Disconnected from messaging server')
     })
 
+    if (typeof window !== 'undefined') {
+      ;(window as any).socket = socketInstance
+    }
+
     socketInstance.on('new-message', (message: Message) => {
       setMessages(prev => [...prev, message])
       

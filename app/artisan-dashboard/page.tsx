@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
-import { MessagingProvider, useMessaging } from '../components/MessagingProvider'
+import { MessagingProvider } from '../components/MessagingProvider'
 import MessagingInterface from '../components/MessagingInterface'
 import MessageNotifications from '../components/MessageNotifications'
 import SearchFilters from '../components/SearchFilters'
@@ -68,6 +68,8 @@ export default function ArtisanDashboard() {
   }
   const [demands, setDemands] = useState<Demand[]>([])
   const [proposals, setProposals] = useState<Proposal[]>([])
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [isNotificationsLoading, setIsNotificationsLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   const handleLogout = () => {
@@ -139,6 +141,33 @@ export default function ArtisanDashboard() {
   const handleCreateProposal = (demand: Demand) => {
     window.location.href = `/create-proposal?demand=${demand.id}`
   }
+
+  const loadNotifications = async () => {
+    if (!user?.id) return
+    setIsNotificationsLoading(true)
+
+    try {
+      const response = await fetch(`/api/notifications?userId=${user.id}`)
+      const data = await response.json()
+      if (data.success) {
+        setNotifications(data.notifications)
+      }
+    } catch (error) {
+      console.error('Failed to load notifications:', error)
+    } finally {
+      setIsNotificationsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    const socket = (window as any).socket
+    if (socket) {
+      socket.emit('join-user-room', user.id.toString())
+    }
+    loadNotifications()
+  }, [user?.id])
 
   if (isLoading) {
     return (
@@ -215,6 +244,37 @@ export default function ArtisanDashboard() {
       {/* Payment Status */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
         <PaymentStatus />
+        <div className="mt-4 grid gap-4">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Notifications du tableau de bord</h2>
+                <p className="text-sm text-gray-500">Vous recevez ici les nouvelles demandes publiées dans votre département.</p>
+              </div>
+              <button
+                className="btn-secondary text-sm"
+                onClick={loadNotifications}
+              >
+                Actualiser
+              </button>
+            </div>
+            {isNotificationsLoading ? (
+              <p className="text-sm text-gray-600">Chargement des notifications...</p>
+            ) : notifications.length === 0 ? (
+              <p className="text-sm text-gray-600">Aucune notification pour le moment.</p>
+            ) : (
+              <div className="space-y-3">
+                {notifications.slice(0, 5).map((notification) => (
+                  <div key={notification.id} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+                    <p className="text-sm font-semibold text-gray-900">{notification.title}</p>
+                    <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                    <p className="text-xs text-gray-500 mt-2">{new Date(notification.created_at).toLocaleString('fr-FR')}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       

@@ -2,6 +2,16 @@ import { Server as NetServer } from 'http'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Server as ServerIO } from 'socket.io'
 
+declare global {
+  var socketIO: ServerIO | undefined
+}
+
+let socketIO: ServerIO | null = null
+
+export const getSocketInstance = (): ServerIO | null => {
+  return socketIO || globalThis.socketIO || null
+}
+
 export const config = {
   api: {
     bodyParser: false,
@@ -170,6 +180,8 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
       })
     })
 
+    socketIO = io
+    globalThis.socketIO = io
     res.socket.server.io = io
   }
   res.end()

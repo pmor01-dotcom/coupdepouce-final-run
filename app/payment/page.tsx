@@ -308,6 +308,7 @@ export default function PaymentPage() {
   const router = useRouter()
   const { t } = useLanguage()
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
+  const isFreeTrialPeriod = true
 
   const pricing = {
     monthly: 20.00,
@@ -325,6 +326,30 @@ export default function PaymentPage() {
       return
     }
   }, [router])
+
+  if (isFreeTrialPeriod) {
+    return (
+      <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+        <div className="max-w-3xl w-full">
+          <div className="card p-8 bg-white shadow-xl rounded-3xl border border-green-100">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('payment.freePromoTitle')}</h2>
+              <p className="text-lg text-gray-700 mb-4">{t('payment.freePromoSubtitle')}</p>
+              <p className="text-sm text-gray-600 mb-8">{t('payment.freePromoNote')}</p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link href="/artisan-dashboard" className="btn-primary w-full sm:w-auto">
+                  {t('payment.freePromoContinue')}
+                </Link>
+                <Link href="/signup-artisan" className="btn-secondary w-full sm:w-auto">
+                  {t('payment.freePromoBack')}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <Elements stripe={stripePromise}>

@@ -42,6 +42,7 @@ model User {
   messages         Message[]          @relation("MessageSender")
   receivedMessages Message[]          @relation("MessageReceiver")
   subscriptions     Subscription[]
+  notifications     Notification[]
 
   @@map("users")
 }
@@ -123,6 +124,22 @@ model Subscription {
   user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  type        String
+  title       String
+  message     String
+  data        Json?
+  is_read     Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
 
 // Note: For SQLite, we use String types instead of enums

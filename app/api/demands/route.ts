@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
+import EmailService from '../../../lib/email';
+import { getSocketInstance } from '../../../lib/socket';
 
 export const dynamic = 'force-dynamic'
 
@@ -139,6 +141,82 @@ export async function POST(request: NextRequest) {
           }
         }
       });
+
+      const artisans = await prisma.user.findMany({
+        where: {
+          role: 'ARTISAN',
+          department: {
+            equals: department,
+            mode: 'insensitive'
+          }
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true
+        }
+      });
+
+      const notificationCreates = artisans.map((artisan) =>
+        prisma.notification.create({
+          data: {
+            user_id: artisan.id,
+            type: 'DEMAND',
+            title: `Nouvelle demande disponible : ${demand.title}`,
+            message: `${demand.client?.name || 'Un client'} a publié une demande dans votre département (${demand.department}).`,
+            data: {
+              demandId: demand.id,
+              clientName: demand.client?.name || 'Client',
+              location: demand.location,
+              department: demand.department,
+              budget_range: demand.budget_range || null,
+              urgency: demand.urgency
+            }
+          }
+        })
+      );
+
+      await Promise.all(notificationCreates);
+
+      const socket = getSocketInstance();
+      if (socket) {
+        artisans.forEach((artisan) => {
+          socket.to(`user-${artisan.id}`).emit('new-demand-notification', {
+            demandId: demand.id,
+            title: `Nouvelle demande disponible : ${demand.title}`,
+            message: `${demand.client?.name || 'Un client'} a publié une demande dans votre département (${demand.department}).`,
+            location: demand.location,
+            department: demand.department,
+            budgetRange: demand.budget_range || 'Non spécifié',
+            urgency: demand.urgency,
+            clientName: demand.client?.name || 'Client'
+          })
+        })
+      }
+
+      if (artisans.length > 0) {
+        const emailResults = await Promise.allSettled(
+          artisans.map((artisan) =>
+            EmailService.sendNewDemandNotification(
+              artisan.email,
+              artisan.name,
+              demand.client?.name || 'Client',
+              demand.title,
+              demand.description,
+              demand.location,
+              demand.department,
+              demand.budget_range || 'Non spécifié',
+              demand.urgency
+            )
+          )
+        );
+
+        emailResults.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(`Unable to notify artisan ${artisans[index].email}:`, result.reason);
+          }
+        });
+      }
 
       return NextResponse.json({
         demand,

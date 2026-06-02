@@ -11,6 +11,14 @@ export default function Home() {
     <>
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         <div className="container mx-auto px-4 py-16">
+          <div className="mb-8 rounded-3xl bg-yellow-100 border border-yellow-300 text-yellow-900 px-6 py-5 shadow-sm text-center">
+            <p className="text-lg font-semibold">
+              {t('home.freePromoBanner')}
+            </p>
+            <p className="text-sm mt-2 text-yellow-800">
+              {t('home.freePromoBannerSub')}
+            </p>
+          </div>
 
           {/* Top Image Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">

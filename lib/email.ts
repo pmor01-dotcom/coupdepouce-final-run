@@ -205,6 +205,97 @@ export const emailTemplates = {
       </div>
     `,
   }),
+  newDemandNotification: (
+    artisanName: string,
+    clientName: string,
+    demandTitle: string,
+    demandDescription: string,
+    location: string,
+    department: string,
+    budgetRange: string,
+    urgency: string
+  ) => ({
+    subject: `Nouvelle demande dans votre département : ${demandTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(to bottom, #6B8E23, #D4E4BC); padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Coup de Pouce</h1>
+          <p style="color: white; margin: 5px 0 0;">Nouvelle demande disponible</p>
+        </div>
+        
+        <div style="background: white; padding: 30px;">
+          <h2 style="color: #333; margin-bottom: 20px;">Bonjour ${artisanName},</h2>
+          <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+            Une nouvelle demande vient d'être publiée dans votre département (${department}).
+          </p>
+          <h3 style="color: #333; margin-bottom: 10px;">${demandTitle}</h3>
+          <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">${demandDescription}</p>
+          <table style="width:100%; border-collapse: collapse; color: #666; margin-bottom: 20px;">
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Client</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${clientName}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Lieu</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${location}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Département</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${department}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Budget</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${budgetRange}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Urgence</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${urgency}</td></tr>
+          </table>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${getAppUrl()}/artisan-dashboard" 
+               style="background: #6B8E23; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              Voir la demande
+            </a>
+          </div>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+          <p>© ${getCurrentYear()} Coup de Pouce. Tous droits réservés.</p>
+        </div>
+      </div>
+    `,
+  }),
+  newSignupNotification: (user: {
+    name: string
+    email: string
+    role: string
+    location?: string | null
+    department?: string | null
+    metier?: string | null
+    phone?: string | null
+  }) => ({
+    subject: `Nouvelle inscription sur Coup de Pouce : ${user.name}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(to bottom, #6B8E23, #D4E4BC); padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Coup de Pouce</h1>
+          <p style="color: white; margin: 5px 0 0;">Nouvelle inscription</p>
+        </div>
+        
+        <div style="background: white; padding: 30px;">
+          <h2 style="color: #333; margin-bottom: 20px;">Un nouvel utilisateur vient de s'inscrire</h2>
+          <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+            Voici les détails de l'inscription :
+          </p>
+          <table style="width:100%; border-collapse: collapse; color: #666;">
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Nom</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${user.name}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Email</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${user.email}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Rôle</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${user.role}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Localisation</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${user.location || 'Non spécifié'}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Département</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${user.department || 'Non spécifié'}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Métier</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${user.metier || 'Non spécifié'}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Téléphone</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${user.phone || 'Non spécifié'}</td></tr>
+          </table>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${getAppUrl()}/login" 
+               style="background: #6B8E23; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              Voir le site
+            </a>
+          </div>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+          <p>© ${getCurrentYear()} Coup de Pouce. Tous droits réservés.</p>
+        </div>
+      </div>
+    `,
+  }),
 }
 
 // Email service class
@@ -260,6 +351,46 @@ export class EmailService {
 
   static async sendNewProposalEmail(to: string, artisanName: string, demandTitle: string, clientName: string): Promise<boolean> {
     const template = emailTemplates.newProposal(artisanName, demandTitle, clientName)
+    return this.sendEmail(to, template.subject, template.html)
+  }
+
+  static async sendNewDemandNotification(
+    to: string,
+    artisanName: string,
+    clientName: string,
+    demandTitle: string,
+    demandDescription: string,
+    location: string,
+    department: string,
+    budgetRange: string,
+    urgency: string
+  ): Promise<boolean> {
+    const template = emailTemplates.newDemandNotification(
+      artisanName,
+      clientName,
+      demandTitle,
+      demandDescription,
+      location,
+      department,
+      budgetRange,
+      urgency
+    )
+    return this.sendEmail(to, template.subject, template.html)
+  }
+
+  static async sendNewSignupNotification(
+    to: string,
+    user: {
+      name: string
+      email: string
+      role: string
+      location?: string | null
+      department?: string | null
+      metier?: string | null
+      phone?: string | null
+    }
+  ): Promise<boolean> {
+    const template = emailTemplates.newSignupNotification(user)
     return this.sendEmail(to, template.subject, template.html)
   }
 }

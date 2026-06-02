@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from './AuthProvider'
+import { useLanguage } from './LanguageProvider'
 
 interface SubscriptionStatus {
   plan: 'monthly' | 'yearly'
@@ -15,6 +16,7 @@ interface SubscriptionStatus {
 
 export default function PaymentStatus() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -41,6 +43,10 @@ export default function PaymentStatus() {
     return null
   }
 
-  // Service is now free - no subscription required
-  return null
+  return (
+    <div className="rounded-2xl bg-green-50 border border-green-200 p-4 text-sm text-green-900 shadow-sm">
+      <h3 className="font-semibold text-green-800">{t('payment.freeStatusTitle')}</h3>
+      <p className="mt-1 text-green-700">{t('payment.freeStatusSubtitle')}</p>
+    </div>
+  )
 }
