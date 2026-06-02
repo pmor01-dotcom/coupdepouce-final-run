@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useLanguage } from '../components/LanguageProvider'
+import { useAuth } from '../components/AuthProvider'
 
 export default function ArtisanSignup() {
   const router = useRouter()
   const { t } = useLanguage()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     // Basic info
     firstName: '',
@@ -115,13 +117,37 @@ export default function ArtisanSignup() {
     }
 
     try {
-      // Save artisan data to localStorage for demo
-      localStorage.setItem('artisanSignupData', JSON.stringify(formData))
-      
-      // Redirect directly to dashboard (payment disabled for now)
-      router.push('/artisan-dashboard')
-    } catch (err) {
-      setError(t('signup.signupError'))
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          password: formData.password,
+          role: 'artisan',
+          location: formData.city,
+          department: formData.department,
+          metier: formData.workType,
+          phone: formData.phone
+        })
+      })
+
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || t('signup.signupError'))
+      }
+
+      const loginSuccess = await login(formData.email, formData.password, 'artisan', `${formData.firstName} ${formData.lastName}`)
+      if (loginSuccess) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+        router.push('/artisan-dashboard')
+      } else {
+        setError(t('common.error'))
+      }
+    } catch (err: any) {
+      setError(err?.message || t('signup.signupError'))
     } finally {
       setLoading(false)
     }

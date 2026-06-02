@@ -40,32 +40,33 @@ export default function Signup() {
     }
 
     try {
-      // For now, we'll simulate a successful signup
-      // In production, this would be an API call
-      const user = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        role: role as string,
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: 'client'
+        })
+      })
+
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de l\'inscription')
       }
 
-      const loginSuccess = await login(formData.email, formData.password, role as 'client' | 'artisan')
-      
+      const loginSuccess = await login(formData.email, formData.password, 'client', formData.name)
       if (loginSuccess) {
-        // Wait a moment for the auth state to be set
         await new Promise(resolve => setTimeout(resolve, 100))
-        
-        // Redirect based on role
-        if (role === 'client') {
-          window.location.href = '/client-dashboard'
-        } else {
-          window.location.href = '/artisan-dashboard-inscription-info'
-        }
+        window.location.href = '/client-dashboard'
       } else {
         setError(t('common.error'))
       }
-    } catch (err) {
-      setError('Une erreur est survenue lors de l\'inscription')
+    } catch (err: any) {
+      setError(err?.message || 'Une erreur est survenue lors de l\'inscription')
     } finally {
       setIsLoading(false)
     }

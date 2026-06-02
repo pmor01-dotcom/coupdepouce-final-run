@@ -47,6 +47,11 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    const welcomeSent = await EmailService.sendWelcomeEmail(user.email, user.name)
+    if (!welcomeSent) {
+      console.error(`Failed to send welcome email to ${user.email}`)
+    }
+
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'pmor01@free.fr'
     const notificationSent = await EmailService.sendNewSignupNotification(adminEmail, {
       name: user.name,
