@@ -360,6 +360,21 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  .site-title,
+  .hero-main {
+    text-align: left;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .site-title h2,
+  .hero-main h1 {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+}
+
 .gap-8 {
   gap: 2rem;
 }
