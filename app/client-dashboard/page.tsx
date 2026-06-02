@@ -166,13 +166,14 @@ export default function ClientDashboard() {
                 {t('createDemand.welcome')}, {getFirstName(user?.name)}
               </h1>
             </div>
-            <div className="flex items-center space-x-4" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
-              <Link href="/create-demand" className="btn-primary text-sm px-4 py-2">
+            <div className="flex items-center space-x-4" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', marginLeft: 'auto', justifyContent: 'flex-end' }}>
+              <Link href="/create-demand" className="btn-primary text-sm px-4 py-2" style={{ minWidth: '140px' }}>
                 {t('createDemand.title')}
               </Link>
               <button
                 onClick={logout}
                 className="btn-secondary"
+                style={{ minWidth: '120px' }}
               >
                 {t('dashboard.logout')}
               </button>
@@ -184,7 +185,7 @@ export default function ClientDashboard() {
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <div className="border-b border-gray-200">
-          <div className="flex space-x-1 mb-6">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
             <button
               onClick={() => setActiveTab('artisans')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${

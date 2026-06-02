@@ -182,49 +182,6 @@ export default function ArtisanDashboard() {
   return (
     <MessagingProvider>
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-      {/* Floating Top Right Buttons */}
-      <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 50, display: 'flex', gap: '8px' }}>
-        <Link href="/artisan-dashboard-inscription-info" className="btn-secondary text-sm">
-          Mes informations
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="btn-secondary text-sm"
-        >
-          Déconnexion
-        </button>
-        <button
-          onClick={() => setActiveTab('demands')}
-          className="btn-secondary text-sm"
-        >
-          Demandes disponibles
-        </button>
-        <button
-          onClick={() => setActiveTab('proposals')}
-          className="btn-secondary text-sm"
-        >
-          Mes propositions
-        </button>
-        <button
-          onClick={() => setActiveTab('messages')}
-          className="btn-secondary text-sm"
-        >
-          Messages
-        </button>
-        <button
-          onClick={() => setActiveTab('search')}
-          className="btn-secondary text-sm"
-        >
-          Recherche
-        </button>
-        <Link href="/artisan-contacts" className="btn-secondary text-sm">
-          Mes contacts en cours
-        </Link>
-        <Link href="/artisan-search-zone" className="btn-secondary text-sm">
-          Élargir ma zone de recherche
-        </Link>
-      </div>
-
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -241,7 +198,66 @@ export default function ArtisanDashboard() {
         </div>
       </header>
 
-      {/* Payment Status */}
+      <section style={{ padding: '1rem 1rem 0', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
+          <Link href="/artisan-dashboard-inscription-info" className="btn-secondary text-sm" style={{ width: '100%', textAlign: 'center' }}>
+            Mes informations
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="btn-secondary text-sm"
+            style={{ width: '100%' }}
+          >
+            Déconnexion
+          </button>
+          <button
+            onClick={() => setActiveTab('demands')}
+            className="btn-secondary text-sm"
+            style={{ width: '100%' }}
+          >
+            Demandes disponibles
+          </button>
+          <button
+            onClick={() => setActiveTab('proposals')}
+            className="btn-secondary text-sm"
+            style={{ width: '100%' }}
+          >
+            Mes propositions
+          </button>
+          <button
+            onClick={() => setActiveTab('messages')}
+            className="btn-secondary text-sm"
+            style={{ width: '100%' }}
+          >
+            Messages
+          </button>
+          <button
+            onClick={() => setActiveTab('search')}
+            className="btn-secondary text-sm"
+            style={{ width: '100%' }}
+          >
+            Recherche
+          </button>
+          <Link href="/artisan-contacts" className="btn-secondary text-sm" style={{ width: '100%', textAlign: 'center' }}>
+            Mes contacts en cours
+          </Link>
+          <Link href="/artisan-search-zone" className="btn-secondary text-sm" style={{ width: '100%', textAlign: 'center' }}>
+            Élargir ma zone de recherche
+          </Link>
+          <button
+            onClick={() => {
+              if (confirm(t('unsubscribe.confirm'))) {
+                logout()
+                router.push('/')
+              }
+            }}
+            className="btn-secondary text-sm"
+            style={{ width: '100%' }}
+          >
+            {t('unsubscribe.title')}
+          </button>
+        </div>
+      </section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
         <PaymentStatus />
         <div className="mt-4 grid gap-4">
@@ -438,26 +454,6 @@ export default function ArtisanDashboard() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Floating Unsubscribe Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          onClick={() => {
-            if (confirm(t('unsubscribe.confirm'))) {
-              // Handle unsubscribe logic here
-              logout()
-              router.push('/')
-            }
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200"
-          title={t('unsubscribe.title')}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
-        </button>
       </div>
 
           </main>
