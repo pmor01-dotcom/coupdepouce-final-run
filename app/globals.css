@@ -363,7 +363,7 @@ body {
 @media (max-width: 640px) {
   .site-title,
   .hero-main {
-    text-align: left;
+    text-align: center;
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
