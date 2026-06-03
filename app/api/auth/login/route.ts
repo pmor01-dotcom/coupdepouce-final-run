@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
-import bcrypt from 'bcryptjs';
+import { supabase } from '../../../../lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user in database
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (authError || !authData.session) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -30,17 +41,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password_hash);
-
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
-    }
-
-    // Return user data without password
     const { password_hash, ...userWithoutPassword } = user;
 
     return NextResponse.json({

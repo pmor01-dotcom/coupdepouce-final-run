@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { supabase } from '../../lib/supabase'
 
 interface User {
   id: number
@@ -21,8 +22,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string, role: 'client' | 'artisan', name?: string) => Promise<boolean>
-  logout: () => void
+  login: (email: string, password: string, role?: 'client' | 'artisan', name?: string) => Promise<boolean>
+  logout: () => Promise<void>
   isLoading: boolean
 }
 
@@ -33,51 +34,43 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is logged in on mount
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser)
-        // Validate the parsed user data
         if (parsedUser && typeof parsedUser.email === 'string' && parsedUser.name && parsedUser.role) {
           setUser(parsedUser)
         } else {
-          // Invalid user data, clear localStorage
           localStorage.removeItem('user')
         }
       } catch (error) {
         console.error('Error parsing user data:', error)
-        // Clear invalid data
         localStorage.removeItem('user')
       }
     }
     setIsLoading(false)
   }, [])
 
-  const login = async (email: string, password: string, role: 'client' | 'artisan', name?: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Validate inputs
-      if (!email || !password || !role) {
-        throw new Error('Email, password, and role are required')
+      if (!email || !password) {
+        throw new Error('Email and password are required')
       }
 
-      // Validate email is a string
-      if (typeof email !== 'string' || !email.includes('@')) {
-        throw new Error('Invalid email format')
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+
+      const data = await response.json()
+      if (!response.ok || !data.user) {
+        console.error('Login failed:', data.error)
+        return false
       }
 
-      // Mock authentication - in real app, this would call an API
-      const mockUser: User = {
-        id: Math.floor(Math.random() * 1000),
-        email,
-        name: name || (typeof email === 'string' && email.includes('@') ? email.split('@')[0] : 'User'),
-        role,
-        isPaid: role === 'client', // Clients are paid by default
-        subscription: role === 'artisan' ? null : undefined, // Artisans need to pay
-      }
-
-      setUser(mockUser)
-      localStorage.setItem('user', JSON.stringify(mockUser))
+      setUser(data.user)
+      localStorage.setItem('user', JSON.stringify(data.user))
       return true
     } catch (error: any) {
       console.error('Login error:', error instanceof Error ? error.message : 'Unknown error')
@@ -85,10 +78,14 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.warn('Supabase sign out failed:', error)
+    }
     setUser(null)
     localStorage.removeItem('user')
-    // Redirect to front page
     window.location.href = '/'
   }
 

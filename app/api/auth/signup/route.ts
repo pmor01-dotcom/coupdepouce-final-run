@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
+import { supabase, supabaseAdmin } from '../../../../lib/supabase-server';
 import bcrypt from 'bcryptjs';
 import EmailService from '../../../../lib/email';
 
@@ -14,7 +15,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
@@ -26,10 +26,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
+    let supabaseUserId: string | null = null
+
+    if (supabaseAdmin) {
+      const { data, error: supabaseError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          name,
+          role
+        }
+      })
+
+      if (supabaseError) {
+        console.error('Supabase signup error:', supabaseError.message)
+        return NextResponse.json(
+          { error: supabaseError.message || 'Could not create Supabase user' },
+          { status: 500 }
+        )
+      }
+
+      supabaseUserId = data.user?.id ?? null
+    } else {
+      const { data, error: supabaseError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role
+          }
+        }
+      })
+
+      if (supabaseError) {
+        console.error('Supabase signup error:', supabaseError.message)
+        return NextResponse.json(
+          { error: supabaseError.message || 'Could not create Supabase user' },
+          { status: 500 }
+        )
+      }
+
+      supabaseUserId = data.user?.id ?? null
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         email,
@@ -40,7 +83,7 @@ export async function POST(request: NextRequest) {
         department: department || null,
         metier: metier || null,
         phone: phone || null,
-        is_paid: role.toLowerCase() === 'client' // Clients are free, artisans need payment
+        is_paid: role.toLowerCase() === 'client'
       },
       include: {
         subscriptions: true
@@ -67,7 +110,6 @@ export async function POST(request: NextRequest) {
       console.error(`Failed to send signup notification to ${adminEmail}`)
     }
 
-    // Return user without password
     const { password_hash, ...userWithoutPassword } = user;
 
     return NextResponse.json({
