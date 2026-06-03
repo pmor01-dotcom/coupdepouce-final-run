@@ -254,6 +254,11 @@ export default function ArtisanSignup() {
                     required
                   />
                 </div>
+                <div className="text-right text-sm">
+                  <Link href="/reset-password" className="text-blue-600 hover:text-blue-500">
+                    {t('signup.forgotPassword')}
+                  </Link>
+                </div>
               </div>
             </div>
 
