@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         estimated_duration: estimated_duration || null,
         availability: availability || null,
         demand_id: parseInt(demand_id),
-        artisan_id: parseInt(artisan_id)
+        artisan_id
       },
       include: {
         artisan: {
