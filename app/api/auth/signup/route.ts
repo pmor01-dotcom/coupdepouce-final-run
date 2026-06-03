@@ -49,6 +49,13 @@ export async function POST(request: NextRequest) {
 
       supabaseUserId = data.user?.id ?? null
     } else {
+      if (!supabase) {
+        return NextResponse.json(
+          { error: 'Supabase is not configured' },
+          { status: 500 }
+        )
+      }
+
       const { data, error: supabaseError } = await supabase.auth.signUp({
         email,
         password,
