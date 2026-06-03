@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,10 +9,12 @@ export async function GET(request: NextRequest) {
     const artisanId = searchParams.get('artisanId');
     const demandId = searchParams.get('demandId');
 
+    // -----------------------------------------
+    // GET proposals for a specific artisan (UUID)
+    // -----------------------------------------
     if (artisanId) {
-      // Get proposals for specific artisan
       const proposals = await prisma.proposal.findMany({
-        where: { artisan_id: parseInt(artisanId) },
+        where: { artisan_id: artisanId }, // UUID string
         include: {
           demand: {
             include: {
@@ -30,8 +32,12 @@ export async function GET(request: NextRequest) {
       });
 
       return NextResponse.json(proposals);
-    } else if (demandId) {
-      // Get proposals for specific demand
+    }
+
+    // -----------------------------------------
+    // GET proposals for a specific demand (INT)
+    // -----------------------------------------
+    if (demandId) {
       const proposals = await prisma.proposal.findMany({
         where: { demand_id: parseInt(demandId) },
         include: {
@@ -79,8 +85,8 @@ export async function POST(request: NextRequest) {
         proposed_price,
         estimated_duration: estimated_duration || null,
         availability: availability || null,
-        demand_id: parseInt(demand_id),
-        artisan_id
+        demand_id: parseInt(demand_id), // INT
+        artisan_id // UUID string
       },
       include: {
         artisan: {
