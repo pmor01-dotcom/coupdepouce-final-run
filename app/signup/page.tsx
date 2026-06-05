@@ -58,7 +58,6 @@ export default function Signup() {
         throw new Error(result.error || 'Erreur lors de l\'inscription')
       }
 
-      // 🔥 FIXED: login() requires arguments — now correctly called
       const loginSuccess = await login(
         formData.email,
         formData.password,
@@ -111,7 +110,6 @@ export default function Signup() {
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          {/* Role Selection */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t('signup.subtitle')}
@@ -149,7 +147,6 @@ export default function Signup() {
             </div>
           </div>
 
-          {/* Client Signup Form */}
           {role === 'client' && (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -221,3 +218,39 @@ export default function Signup() {
               )}
 
               <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary w-full"
+              >
+                {isLoading ? t('common.loading') : t('signup.continue')}
+              </button>
+            </form>
+          )}
+
+          {role === 'artisan' && (
+            <div className="text-center py-4">
+              <p className="text-gray-600 mb-4">
+                {t('signup.artisanRedirect')}
+              </p>
+              <div className="animate-pulse">
+                <span className="text-blue-600">{t('common.redirecting')}</span>
+              </div>
+            </div>
+          )}
+
+          {!role && (
+            <div className="text-center text-gray-500">
+              {t('signup.selectRole')}
+            </div>
+          )}
+        </div>
+
+        <div className="text-center text-sm text-gray-600">
+          <Link href="/" className="hover:text-gray-900">
+            {t('app.back')}
+          </Link>
+        </div>
+      </div>
+    </main>
+  )
+}
