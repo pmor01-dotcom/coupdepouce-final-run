@@ -110,11 +110,9 @@ export default function ArtisanSignup() {
         return
       }
 
-      // (optionnel) connecter l’utilisateur dans ton contexte
-      await login?.()
+  // User already authenticated by Supabase — no need to call login()
+router.push('/artisan-dashboard')
 
-      // 3️⃣ Rediriger vers le dashboard artisan
-      router.push('/artisan-dashboard')
     } catch (err: any) {
       setError('Une erreur inattendue est survenue.')
     } finally {
