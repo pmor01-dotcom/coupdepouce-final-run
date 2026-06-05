@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
     if (artisanId) {
       // Get proposals for specific artisan (UUID)
       const proposals = await prisma.proposal.findMany({
-        where: { artisan_id: artisanId }, // UUID string
+        where: { artisan_id: Number(artisanId) },
+
         include: {
           demand: {
             include: {
