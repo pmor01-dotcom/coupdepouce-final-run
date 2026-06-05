@@ -1,8 +1,8 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = createServerComponentClient({ cookies })
 
   const { data, error } = await supabase
     .from('artisans')
@@ -11,7 +11,10 @@ export async function GET() {
 
   if (error) {
     console.error('Error fetching artisans:', error)
-    return Response.json({ error: 'Failed to fetch artisans' }, { status: 500 })
+    return Response.json(
+      { error: 'Failed to fetch artisans' },
+      { status: 500 }
+    )
   }
 
   return Response.json(data)
