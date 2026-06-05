@@ -1,266 +1,51 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../lib/prisma';
-import EmailService from '../../../lib/email';
-import { getSocketInstance } from '../../../lib/socket';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
-// In-memory storage for mock mode (resets on server restart)
-let mockDemandsStore: any[] = [];
+// GET — fetch all demands for the logged-in client
+export async function GET() {
+  const supabase = createRouteHandlerClient({ cookies })
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const clientId = searchParams.get('clientId');
+  const { data: { user } } = await supabase.auth.getUser()
 
-    // Force mock response for development to avoid slow database connections
-    console.log('Using mock response for development (forced mode)');
-    
-    const mockDemands = [
-      {
-        id: 1,
-        title: "Installation plomberie cuisine",
-        description: "Besoin d'installer un nouveau évier et des tuyaux pour la cuisine",
-        category: "Plomberie",
-        location: "Toulouse",
-        department: "31 - Haute-Garonne",
-        budget_range: "500-800",
-        urgency: "NORMAL",
-        status: "OPEN",
-        client_id: 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        client: {
-          id: 1,
-          name: "Jean Client",
-          location: "Toulouse"
-        },
-        proposals: []
-      },
-        {
-          id: 2,
-          title: "Réparation toiture",
-          description: "Fuite dans la toiture à réparer rapidement",
-          category: "Couvreur",
-          location: "Paris",
-          department: "75 - Paris",
-          budget_range: "1000-1500",
-          urgency: "URGENT",
-          status: "OPEN",
-          client_id: 2,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          client: {
-            id: 2,
-            name: "Marie Client",
-            location: "Paris"
-          },
-          proposals: []
-        }
-      ];
-      
-      if (clientId) {
-        // Filter mock demands for specific client
-        const clientDemands = mockDemands.filter(demand => demand.client_id === parseInt(clientId));
-        
-        // Also include any demands created by this user in the mock store
-        const userCreatedDemands = mockDemandsStore.filter(demand => demand.client_id === parseInt(clientId));
-        
-        if (clientDemands.length === 0 && userCreatedDemands.length === 0) {
-          // Create a sample demand for this client if none exist
-          const sampleDemand = {
-            id: 999,
-            title: "Votre demande exemple",
-            description: "Ceci est une demande exemple pour le client " + clientId,
-            category: "Plomberie",
-            location: "Votre ville",
-            department: "Votre département",
-            budget_range: "Non spécifié",
-            urgency: "NORMAL",
-            status: "OPEN",
-            client_id: parseInt(clientId),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            client: {
-              id: parseInt(clientId),
-              name: "Vous",
-              location: "Votre ville"
-            },
-            proposals: []
-          };
-          return NextResponse.json([sampleDemand]);
-        }
-        
-        return NextResponse.json([...clientDemands, ...userCreatedDemands]);
-      } else {
-        // Return all demands (both hardcoded and user-created)
-        const allDemands = [...mockDemands, ...mockDemandsStore];
-        return NextResponse.json(allDemands);
-      }
+  const { data, error } = await supabase
+    .from('demands')
+    .select('*')
+    .eq('client_id', user.id)
+    .order('created_at', { ascending: false })
 
-  } catch (error) {
-    console.error('Get demands error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    );
+  if (error) {
+    console.error('Error fetching demands:', error)
+    return Response.json({ error: 'Failed to fetch demands' }, { status: 500 })
   }
+
+  return Response.json(data)
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { title, description, category, location, department, budget_range, urgency, client_id } = await request.json();
+// POST — create a new demand
+export async function POST(req: Request) {
+  const supabase = createRouteHandlerClient({ cookies })
+  const body = await req.json()
 
-    if (!title || !description || !category || !location || !department || !client_id) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+  const { data: { user } } = await supabase.auth.getUser()
 
-    // Try database connection first
-    try {
-      const demand = await prisma.demand.create({
-        data: {
-          title,
-          description,
-          category,
-          location,
-          department,
-          budget_range: budget_range || null,
-          urgency: urgency || 'NORMAL',
-          client_id: parseInt(client_id)
-        },
-        include: {
-          client: {
-            select: {
-              id: true,
-              name: true,
-              location: true
-            }
-          }
-        }
-      });
+  const { error } = await supabase.from('demands').insert({
+    id: crypto.randomUUID(),
+    client_id: user.id,
+    title: body.title,
+    description: body.description,
+    category: body.category,
+    location: body.location,
+    department: body.department,
+    budget_range: body.budget_range,
+    urgency: body.urgency
+  })
 
-      const artisans = await prisma.user.findMany({
-        where: {
-          role: 'ARTISAN',
-          department: {
-            equals: department,
-            mode: 'insensitive'
-          }
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true
-        }
-      });
-
-      const notificationCreates = artisans.map((artisan) =>
-        prisma.notification.create({
-          data: {
-            user_id: artisan.id,
-            type: 'DEMAND',
-            title: `Nouvelle demande disponible : ${demand.title}`,
-            message: `${demand.client?.name || 'Un client'} a publié une demande dans votre département (${demand.department}).`,
-            data: {
-              demandId: demand.id,
-              clientName: demand.client?.name || 'Client',
-              location: demand.location,
-              department: demand.department,
-              budget_range: demand.budget_range || null,
-              urgency: demand.urgency
-            }
-          }
-        })
-      );
-
-      await Promise.all(notificationCreates);
-
-      const socket = getSocketInstance();
-      if (socket) {
-        artisans.forEach((artisan) => {
-          socket.to(`user-${artisan.id}`).emit('new-demand-notification', {
-            demandId: demand.id,
-            title: `Nouvelle demande disponible : ${demand.title}`,
-            message: `${demand.client?.name || 'Un client'} a publié une demande dans votre département (${demand.department}).`,
-            location: demand.location,
-            department: demand.department,
-            budgetRange: demand.budget_range || 'Non spécifié',
-            urgency: demand.urgency,
-            clientName: demand.client?.name || 'Client'
-          })
-        })
-      }
-
-      if (artisans.length > 0) {
-        const emailResults = await Promise.allSettled(
-          artisans.map((artisan) =>
-            EmailService.sendNewDemandNotification(
-              artisan.email,
-              artisan.name,
-              demand.client?.name || 'Client',
-              demand.title,
-              demand.description,
-              demand.location,
-              demand.department,
-              demand.budget_range || 'Non spécifié',
-              demand.urgency
-            )
-          )
-        );
-
-        emailResults.forEach((result, index) => {
-          if (result.status === 'rejected') {
-            console.error(`Unable to notify artisan ${artisans[index].email}:`, result.reason);
-          }
-        });
-      }
-
-      return NextResponse.json({
-        demand,
-        message: 'Demand created successfully'
-      });
-    } catch (dbError) {
-      // If database connection fails, provide mock response for development
-      console.warn('Database connection failed, using mock response:', dbError);
-      
-      const mockDemand = {
-        id: Date.now(), // Use timestamp for unique ID
-        title,
-        description,
-        category,
-        location,
-        department,
-        budget_range: budget_range || null,
-        urgency: urgency || 'NORMAL',
-        status: 'OPEN',
-        client_id: parseInt(client_id),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        client: {
-          id: parseInt(client_id),
-          name: 'Mock Client',
-          location: location
-        },
-        proposals: []
-      };
-
-      // Store the demand in memory for retrieval
-      mockDemandsStore.push(mockDemand);
-
-      return NextResponse.json({
-        demand: mockDemand,
-        message: 'Demand created successfully (mock mode)'
-      });
-    }
-
-  } catch (error) {
-    console.error('Create demand error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    );
+  if (error) {
+    console.error('Error creating demand:', error)
+    return Response.json({ error: 'Failed to create demand' }, { status: 400 })
   }
+
+  return Response.json({ success: true })
 }
