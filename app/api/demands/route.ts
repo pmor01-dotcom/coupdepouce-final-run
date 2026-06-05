@@ -32,11 +32,9 @@ export async function GET() {
   return Response.json(data)
 }
 
-// POST – create a new demand
 export async function POST(req: Request) {
   const supabase = createServerComponentClient({ cookies })
   const body = await req.json()
 
-  // You can implement POST logic later
   return Response.json({ ok: true })
 }
