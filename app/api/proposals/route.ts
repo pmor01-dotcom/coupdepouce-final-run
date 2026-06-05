@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,9 +10,9 @@ export async function GET(request: NextRequest) {
     const demandId = searchParams.get('demandId');
 
     if (artisanId) {
-      // Get proposals for specific artisan
+      // Get proposals for specific artisan (UUID)
       const proposals = await prisma.proposal.findMany({
-        where: { artisan_id: parseInt(artisanId) },
+        where: { artisan_id: artisanId }, // UUID — no parseInt
         include: {
           demand: {
             include: {
@@ -30,8 +30,10 @@ export async function GET(request: NextRequest) {
       });
 
       return NextResponse.json(proposals);
-    } else if (demandId) {
-      // Get proposals for specific demand
+    }
+
+    if (demandId) {
+      // Get proposals for specific demand (INT)
       const proposals = await prisma.proposal.findMany({
         where: { demand_id: parseInt(demandId) },
         include: {
@@ -64,7 +66,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, proposed_price, estimated_duration, availability, demand_id, artisan_id } = await request.json();
+    const {
+      message,
+      proposed_price,
+      estimated_duration,
+      availability,
+      demand_id,
+      artisan_id
+    } = await request.json();
 
     if (!message || !proposed_price || !demand_id || !artisan_id) {
       return NextResponse.json(
@@ -79,8 +88,8 @@ export async function POST(request: NextRequest) {
         proposed_price,
         estimated_duration: estimated_duration || null,
         availability: availability || null,
-        demand_id: parseInt(demand_id),
-        artisan_id: parseInt(artisan_id)
+        demand_id: parseInt(demand_id), // INT
+        artisan_id: artisan_id          // UUID — no parseInt
       },
       include: {
         artisan: {
