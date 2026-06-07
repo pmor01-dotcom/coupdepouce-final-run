@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let supabaseUserId: string | null = null
+    let supabaseUserId: string | null = null;
 
     if (supabaseAdmin) {
       const { data, error: supabaseError } = await supabaseAdmin.auth.admin.createUser({
@@ -38,23 +38,23 @@ export async function POST(request: NextRequest) {
           name,
           role
         }
-      })
+      });
 
       if (supabaseError) {
-        console.error('Supabase signup error:', supabaseError.message)
+        console.error('Supabase signup error:', supabaseError.message);
         return NextResponse.json(
           { error: supabaseError.message || 'Could not create Supabase user' },
           { status: 500 }
-        )
+        );
       }
 
-      supabaseUserId = data.user?.id ?? null
+      supabaseUserId = data.user?.id ?? null;
     } else {
       if (!supabase) {
         return NextResponse.json(
           { error: 'Supabase is not configured' },
           { status: 500 }
-        )
+        );
       }
 
       const { data, error: supabaseError } = await supabase.auth.signUp({
@@ -66,17 +66,17 @@ export async function POST(request: NextRequest) {
             role
           }
         }
-      })
+      });
 
       if (supabaseError) {
-        console.error('Supabase signup error:', supabaseError.message)
+        console.error('Supabase signup error:', supabaseError.message);
         return NextResponse.json(
           { error: supabaseError.message || 'Could not create Supabase user' },
           { status: 500 }
-        )
+        );
       }
 
-      supabaseUserId = data.user?.id ?? null
+      supabaseUserId = data.user?.id ?? null;
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -98,12 +98,12 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const welcomeSent = await EmailService.sendWelcomeEmail(user.email, user.name)
+    const welcomeSent = await EmailService.sendWelcomeEmail(user.email, user.name);
     if (!welcomeSent) {
-      console.error(`Failed to send welcome email to ${user.email}`)
+      console.error(`Failed to send welcome email to ${user.email}`);
     }
 
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'pmor01@free.fr'
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'pmor01@free.fr';
     const notificationSent = await EmailService.sendNewSignupNotification(adminEmail, {
       name: user.name,
       email: user.email,
@@ -112,10 +112,10 @@ export async function POST(request: NextRequest) {
       department: user.department,
       metier: user.metier,
       phone: user.phone,
-    })
+    });
 
     if (!notificationSent) {
-      console.error(`Failed to send signup notification to ${adminEmail}`)
+      console.error(`Failed to send signup notification to ${adminEmail}`);
     }
 
     const { password_hash, ...userWithoutPassword } = user;
