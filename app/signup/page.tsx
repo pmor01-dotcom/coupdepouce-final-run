@@ -33,7 +33,8 @@ export default function Signup() {
     }
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      // SIGNUP
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
       })
@@ -44,21 +45,15 @@ export default function Signup() {
         return
       }
 
-      await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const user = signUpData.user
 
       if (!user) {
-        setError("Impossible de récupérer l'utilisateur.")
+        setError("Veuillez vérifier votre email pour confirmer votre compte.")
         setIsLoading(false)
         return
       }
 
+      // INSERT PROFILE
       const { error: profileError } = await supabase.from('clients').insert({
         id: user.id,
         name: formData.name,
@@ -103,10 +98,12 @@ export default function Signup() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             {t('signup.title')}
           </h2>
+
+          {/* FIXED: wrong login text was showing on signup page */}
           <p className="mt-2 text-center text-sm text-gray-600">
-            {t('login.subtitle')}{' '}
+            {t('signup.alreadyHaveAccount')}{' '}
             <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              {t('login.signup')}
+              {t('signup.goToLogin')}
             </Link>
           </p>
         </div>
@@ -118,6 +115,7 @@ export default function Signup() {
             </label>
 
             <div className="space-y-3">
+
               {/* CLIENT */}
               <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                 <input
@@ -149,6 +147,7 @@ export default function Signup() {
                   <p className="text-sm text-gray-600">{t('signup.artisan.desc')}</p>
                 </div>
               </label>
+
             </div>
           </div>
 
