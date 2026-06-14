@@ -1,256 +1,64 @@
-'use client'
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setError('')
+  setIsLoading(true)
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useLanguage } from '../components/LanguageProvider'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+  if (!role) {
+    setError("Veuillez sélectionner un rôle.")
+    setIsLoading(false)
+    return
+  }
 
-export default function Signup() {
-  const { t } = useLanguage()
-  const router = useRouter()
-  const supabase = createClientComponentClient()
+  if (formData.password !== formData.confirmPassword) {
+    setError('Les mots de passe ne correspondent pas')
+    setIsLoading(false)
+    return
+  }
 
-  const [role, setRole] = useState<'client' | 'artisan' | null>(null)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  try {
+    // 1️⃣ CREATE AUTH USER
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+    })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+    if (signUpError) {
+      setError(signUpError.message)
       setIsLoading(false)
       return
     }
 
-    try {
-      // SIGNUP
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      })
-
-      if (signUpError) {
-        setError(signUpError.message)
-        setIsLoading(false)
-        return
-      }
-
-      const user = signUpData.user
-
-      if (!user) {
-        setError("Veuillez vérifier votre email pour confirmer votre compte.")
-        setIsLoading(false)
-        return
-      }
-
-      // INSERT PROFILE
-      const { error: profileError } = await supabase.from('clients').insert({
-        id: user.id,
-        name: formData.name,
-        email: formData.email,
-      })
-
-      if (profileError) {
-        setError(profileError.message)
-        setIsLoading(false)
-        return
-      }
-
-      router.push('/client-dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Erreur inconnue')
-    } finally {
+    const user = signUpData.user
+    if (!user) {
+      setError("Veuillez vérifier votre email pour confirmer votre compte.")
       setIsLoading(false)
+      return
     }
-  }
 
-  const handleRoleSelection = (selectedRole: 'client' | 'artisan') => {
-    setRole(selectedRole)
-    setError('')
+    // 2️⃣ INSERT INTO public.users
+    const { error: profileError } = await supabase.from('users').insert({
+      id: user.id,
+      name: formData.name,
+      email: formData.email,
+      role: role,
+    })
 
-    if (selectedRole === 'artisan') {
+    if (profileError) {
+      setError(profileError.message)
+      setIsLoading(false)
+      return
+    }
+
+    // 3️⃣ REDIRECT
+    if (role === 'client') {
+      router.push('/client-dashboard')
+    } else {
       router.push('/signup-artisan')
     }
+
+  } catch (err: any) {
+    setError(err.message || 'Erreur inconnue')
+  } finally {
+    setIsLoading(false)
   }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
-  }
-
-  return (
-    <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-green-700 to-green-200">
-      <div className="max-w-md w-full space-y-8">
-
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {t('signup.title')}
-          </h2>
-
-          {/* FIXED: wrong login text was showing on signup page */}
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {t('signup.alreadyHaveAccount')}{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              {t('signup.goToLogin')}
-            </Link>
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('signup.subtitle')}
-            </label>
-
-            <div className="space-y-3">
-
-              {/* CLIENT */}
-              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                <input
-                  type="radio"
-                  name="role"
-                  value="client"
-                  checked={role === 'client'}
-                  onChange={() => handleRoleSelection('client')}
-                  className="mr-3"
-                />
-                <div>
-                  <span className="font-medium">{t('signup.client')}</span>
-                  <p className="text-sm text-gray-600">{t('signup.client.desc')}</p>
-                </div>
-              </label>
-
-              {/* ARTISAN */}
-              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                <input
-                  type="radio"
-                  name="role"
-                  value="artisan"
-                  checked={role === 'artisan'}
-                  onChange={() => handleRoleSelection('artisan')}
-                  className="mr-3"
-                />
-                <div>
-                  <span className="font-medium">{t('signup.artisan')}</span>
-                  <p className="text-sm text-gray-600">{t('signup.artisan.desc')}</p>
-                </div>
-              </label>
-
-            </div>
-          </div>
-
-          {/* CLIENT FORM */}
-          {role === 'client' && (
-            <form onSubmit={handleSubmit} className="space-y-6">
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.firstName')} *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('login.email')} *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('login.password')} *
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('signup.confirmPassword')} *
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              {error && (
-                <div className="text-red-600 text-sm">{error}</div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="btn-primary w-full"
-              >
-                {isLoading ? t('common.loading') : t('signup.continue')}
-              </button>
-            </form>
-          )}
-
-          {/* ARTISAN REDIRECT */}
-          {role === 'artisan' && (
-            <div className="text-center py-4">
-              <p className="text-gray-600 mb-4">
-                {t('signup.artisanRedirect')}
-              </p>
-              <div className="animate-pulse">
-                <span className="text-blue-600">{t('common.redirecting')}</span>
-              </div>
-            </div>
-          )}
-
-          {/* NO ROLE SELECTED */}
-          {!role && (
-            <div className="text-center text-gray-500">
-              {t('signup.selectRole')}
-            </div>
-          )}
-        </div>
-
-        <div className="text-center text-sm text-gray-600">
-          <Link href="/" className="hover:text-gray-900">
-            {t('app.back')}
-          </Link>
-        </div>
-      </div>
-    </main>
-  )
 }
