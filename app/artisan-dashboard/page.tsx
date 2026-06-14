@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '../components/AuthProvider'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useLanguage } from '../components/LanguageProvider'
 import { MessagingProvider } from '../components/MessagingProvider'
 import MessagingInterface from '../components/MessagingInterface'
@@ -10,37 +10,18 @@ import SearchFilters from '../components/SearchFilters'
 import SearchResults from '../components/SearchResults'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import PaymentStatus from '../components/PaymentStatus'
-
-interface Demand {
-  id: number
-  title: string
-  description: string
-  category: string
-  location: string
-  department: string
-  budget: string
-  status: string
-  createdAt: string
-  clientName: string
-  hasResponded: boolean
-}
-
-interface Proposal {
-  id: number
-  demandId: number
-  demandTitle: string
-  message: string
-  proposedPrice: string
-  status: string
-  createdAt: string
-}
 
 export default function ArtisanDashboard() {
-  const { user, logout } = useAuth()
+  const supabase = createClientComponentClient()
   const { t } = useLanguage()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages' | 'search'>('demands')
+
+  const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'demands' | 'messages' | 'search'>('demands')
+
+  const [openDemands, setOpenDemands] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [searchFilters, setSearchFilters] = useState({
     category: '',
@@ -61,120 +42,63 @@ export default function ArtisanDashboard() {
     sortOrder: 'desc'
   })
 
-  // Helper function to get first name
-  const getFirstName = (fullName?: string) => {
-    if (!fullName) return ''
-    return fullName.split(' ')[0]
-  }
-  const [demands, setDemands] = useState<Demand[]>([])
-  const [proposals, setProposals] = useState<Proposal[]>([])
-  const [notifications, setNotifications] = useState<any[]>([])
-  const [isNotificationsLoading, setIsNotificationsLoading] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  // Load auth user
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    loadUser()
+  }, [])
 
-  const handleLogout = () => {
-    logout()
+  // Load artisan profile + open demands
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user) return
+
+      try {
+        // Load artisan profile
+        const { data: artisanProfile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        setProfile(artisanProfile)
+
+        // Load OPEN demands in same departement
+        if (artisanProfile?.departement) {
+          const { data: demandsData } = await supabase
+            .from('demands')
+            .select('*')
+            .eq('status', 'OPEN')
+            .eq('departement', artisanProfile.departement)
+            .order('created_at', { ascending: false })
+
+          setOpenDemands(demandsData || [])
+        }
+
+      } catch (err) {
+        console.error('Error loading artisan dashboard:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadData()
+  }, [user])
+
+  const logout = async () => {
+    await supabase.auth.signOut()
     router.push('/')
   }
 
-  useEffect(() => {
-    // Mock data for demonstration
-    const mockDemands: Demand[] = [
-      {
-        id: 1,
-        title: 'Installation cuisine',
-        description: 'Besoin d\'installer un nouveau évier et robinetterie dans la cuisine',
-        category: 'Plomberie',
-        location: 'Toulouse',
-        department: '31',
-        budget: '500-800',
-        status: 'open',
-        createdAt: '2024-01-15',
-        clientName: 'Jean Dupont',
-        hasResponded: false
-      },
-      {
-        id: 2,
-        title: 'Réparation électrique salon',
-        description: 'Problème de court-circuit dans le salon, besoin d\'intervention rapide',
-        category: 'Électricité',
-        location: 'Paris',
-        department: '75',
-        budget: '300-500',
-        status: 'open',
-        createdAt: '2024-01-14',
-        clientName: 'Marie Martin',
-        hasResponded: true
-      },
-      {
-        id: 3,
-        title: 'Tonte de pelouse et taille de haies',
-        description: 'Jardin de 200m² à entretenir, tonte et taille des haies',
-        category: 'Jardinage',
-        location: 'Lyon',
-        department: '69',
-        budget: '150-300',
-        status: 'open',
-        createdAt: '2024-01-13',
-        clientName: 'Pierre Durand',
-        hasResponded: false
-      }
-    ]
-
-    const mockProposals: Proposal[] = [
-      {
-        id: 1,
-        demandId: 1,
-        demandTitle: 'Installation cuisine',
-        message: 'Je peux réaliser cette installation rapidement. J\'ai 10 ans d\'expérience.',
-        proposedPrice: '650',
-        status: 'pending',
-        createdAt: '2024-01-16'
-      }
-    ]
-
-    setDemands(mockDemands)
-    setProposals(mockProposals)
-    setIsLoading(false)
-  }, [])
-
-  const handleCreateProposal = (demand: Demand) => {
-    window.location.href = `/create-proposal?demand=${demand.id}`
-  }
-
-  const loadNotifications = async () => {
-    if (!user?.id) return
-    setIsNotificationsLoading(true)
-
-    try {
-      const response = await fetch(`/api/notifications?userId=${user.id}`)
-      const data = await response.json()
-      if (data.success) {
-        setNotifications(data.notifications)
-      }
-    } catch (error) {
-      console.error('Failed to load notifications:', error)
-    } finally {
-      setIsNotificationsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (!user?.id) return
-
-    const socket = (window as any).socket
-    if (socket) {
-      socket.emit('join-user-room', user.id.toString())
-    }
-    loadNotifications()
-  }, [user?.id])
+  const getFirstName = () => profile?.firstname || ''
 
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p>Chargement...</p>
-        </div>
+        <p>Chargement...</p>
       </main>
     )
   }
@@ -182,281 +106,143 @@ export default function ArtisanDashboard() {
   return (
     <MessagingProvider>
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-semibold text-gray-900">
-                Espace Artisan
+        
+        {/* HEADER */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <h1 className="text-xl font-semibold text-gray-900">
+                {t('createDemand.welcome')}, {getFirstName()}
               </h1>
-              <span className="ml-2 text-sm text-gray-500">
-                {getFirstName(user?.name)} - {user?.metier}
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
 
-      <section style={{ padding: '1rem 1rem 0', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
-          <Link href="/artisan-dashboard-inscription-info" className="btn-secondary text-sm" style={{ width: '100%', textAlign: 'center' }}>
-            Mes informations
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="btn-secondary text-sm"
-            style={{ width: '100%' }}
-          >
-            Déconnexion
-          </button>
-          <button
-            onClick={() => setActiveTab('demands')}
-            className="btn-secondary text-sm"
-            style={{ width: '100%' }}
-          >
-            Demandes disponibles
-          </button>
-          <button
-            onClick={() => setActiveTab('proposals')}
-            className="btn-secondary text-sm"
-            style={{ width: '100%' }}
-          >
-            Mes propositions
-          </button>
-          <button
-            onClick={() => setActiveTab('messages')}
-            className="btn-secondary text-sm"
-            style={{ width: '100%' }}
-          >
-            Messages
-          </button>
-          <button
-            onClick={() => setActiveTab('search')}
-            className="btn-secondary text-sm"
-            style={{ width: '100%' }}
-          >
-            Recherche
-          </button>
-          <Link href="/artisan-contacts" className="btn-secondary text-sm" style={{ width: '100%', textAlign: 'center' }}>
-            Mes contacts en cours
-          </Link>
-          <Link href="/artisan-search-zone" className="btn-secondary text-sm" style={{ width: '100%', textAlign: 'center' }}>
-            Élargir ma zone de recherche
-          </Link>
-          <button
-            onClick={() => {
-              if (confirm(t('unsubscribe.confirm'))) {
-                logout()
-                router.push('/')
-              }
-            }}
-            className="btn-secondary text-sm"
-            style={{ width: '100%' }}
-          >
-            {t('unsubscribe.title')}
-          </button>
-        </div>
-      </section>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-        <PaymentStatus />
-        <div className="mt-4 grid gap-4">
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Notifications du tableau de bord</h2>
-                <p className="text-sm text-gray-500">Vous recevez ici les nouvelles demandes publiées dans votre département.</p>
-              </div>
-              <button
-                className="btn-secondary text-sm"
-                onClick={loadNotifications}
-              >
-                Actualiser
+              <button onClick={logout} className="btn-secondary">
+                {t('dashboard.logout')}
               </button>
             </div>
-            {isNotificationsLoading ? (
-              <p className="text-sm text-gray-600">Chargement des notifications...</p>
-            ) : notifications.length === 0 ? (
-              <p className="text-sm text-gray-600">Aucune notification pour le moment.</p>
-            ) : (
-              <div className="space-y-3">
-                {notifications.slice(0, 5).map((notification) => (
-                  <div key={notification.id} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
-                    <p className="text-sm font-semibold text-gray-900">{notification.title}</p>
-                    <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                    <p className="text-xs text-gray-500 mt-2">{new Date(notification.created_at).toLocaleString('fr-FR')}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+          </div>
+        </header>
+
+        {/* TABS */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+          <div className="border-b border-gray-200">
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button
+                onClick={() => setActiveTab('demands')}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  activeTab === 'demands' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                Demandes ouvertes
+              </button>
+
+              <button
+                onClick={() => setActiveTab('messages')}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  activeTab === 'messages' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {t('clientDashboard.messages')}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('search')}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  activeTab === 'search' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {t('clientDashboard.search')}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'demands' && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Demandes des clients
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Consultez les demandes des clients et proposez vos services. 
-              Les clients pourront ensuite vous contacter directement.
-            </p>
-            
-            <div className="space-y-4">
-              {demands.map((demand) => (
-                <div key={demand.id} className="card" style={{ maxWidth: '50%', margin: '0 auto' }}>
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-gray-900">
-                        {demand.title}
-                      </h3>
-                      <p className="text-xs text-gray-600 mt-1">
-                        {demand.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        demand.status === 'open'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {demand.status === 'open' ? 'Ouverte' : 'Fermée'}
-                      </span>
-                      {demand.hasResponded && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          Répondu
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600 mb-2">
-                    <div>
-                      <span className="font-medium">Catégorie:</span> {demand.category}
-                    </div>
-                    <div>
-                      <span className="font-medium">Localisation:</span> {demand.location}
-                    </div>
-                    <div>
-                      <span className="font-medium">Département:</span> {demand.department}
-                    </div>
-                    <div>
-                      <span className="font-medium">Budget:</span> {demand.budget}
-                    </div>
-                  </div>
+        {/* CONTENT */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-xs text-gray-600">
-                        <span className="font-medium">Client:</span> {demand.clientName}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Publiée le {demand.createdAt}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleCreateProposal(demand)}
-                      disabled={demand.hasResponded || demand.status !== 'open'}
-                      className="btn-success disabled:opacity-50 disabled:cursor-not-allowed text-xs px-2 py-1"
-                    >
-                      {demand.hasResponded 
-                        ? 'Déjà répondu' 
-                        : demand.status !== 'open'
-                        ? 'Demande fermée'
-                        : 'Proposer'
-                      }
-                    </button>
-                  </div>
+          {/* OPEN DEMANDS */}
+          {activeTab === 'demands' && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Demandes ouvertes dans votre département
+              </h2>
+
+              {openDemands.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">
+                    Aucune demande ouverte actuellement dans votre département.
+                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              )}
 
-        {activeTab === 'proposals' && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Mes propositions
-            </h2>
-            {proposals.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">
-                  Vous n'avez pas encore fait de propositions
-                </p>
-                <button
-                  onClick={() => setActiveTab('demands')}
-                  className="btn-success"
-                >
-                  Voir les demandes
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {proposals.map((proposal) => (
-                  <div key={proposal.id} className="card">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {proposal.demandTitle}
-                    </h3>
-                    <p className="text-gray-600 mb-2">
-                      {proposal.message}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-2">
-                      Prix proposé: {proposal.proposedPrice}
-                    </p>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      proposal.status === 'PENDING'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : proposal.status === 'ACCEPTED'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {proposal.status === 'PENDING'
-                        ? 'En attente'
-                        : proposal.status === 'ACCEPTED'
-                        ? 'Acceptée'
-                        : 'Refusée'}
-                    </span>
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-gray-500">
-                        En attente de réponse du client
-                      </p>
-                      <Link href={`/proposals/${proposal.id}`} className="btn-secondary">
-                        Voir les détails
-                      </Link>
+              {openDemands.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {openDemands.map((demand) => (
+                    <div key={demand.id} className="card p-4">
+
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">{demand.title}</h3>
+                          <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                            {demand.description}
+                          </p>
+                        </div>
+
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Ouverte
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+                        <div><span className="font-medium">Catégorie:</span> {demand.category || '—'}</div>
+                        <div><span className="font-medium">Localisation:</span> {demand.location || '—'}</div>
+                        <div><span className="font-medium">Budget:</span> {demand.budget_range || 'Non spécifié'}</div>
+                        <div><span className="font-medium">Département:</span> {demand.departement || '—'}</div>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">
+                          Créée le {new Date(demand.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+
+                        <div className="flex space-x-2">
+                          <Link href={`/demands/${demand.id}`} className="btn-secondary">
+                            Voir la demande
+                          </Link>
+                          <Link href={`/demands/${demand.id}/propose`} className="btn-primary">
+                            Envoyer une proposition
+                          </Link>
+                        </div>
+                      </div>
+
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'search' && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Recherche de demandes
-            </h2>
-            <div className="space-y-6">
-              <SearchFilters
-                type="demands"
-                onFiltersChange={setSearchFilters}
-                onSearch={setSearchQuery}
-              />
-              <SearchResults
-                type="demands"
-                query={searchQuery}
-                filters={searchFilters}
-              />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        )}
-      </div>
+          )}
 
-          </main>
+          {/* MESSAGES */}
+          {activeTab === 'messages' && (
+            <div className="h-96">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Messages</h2>
+              <MessagingInterface />
+            </div>
+          )}
+
+          {/* SEARCH */}
+          {activeTab === 'search' && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Recherche avancée</h2>
+              <div className="space-y-6">
+                <SearchFilters type="artisans" onFiltersChange={setSearchFilters} onSearch={setSearchQuery} />
+                <SearchResults type="artisans" query={searchQuery} filters={searchFilters} />
+              </div>
+            </div>
+          )}
+
+        </div>
+      </main>
+
       <MessageNotifications />
     </MessagingProvider>
   )
