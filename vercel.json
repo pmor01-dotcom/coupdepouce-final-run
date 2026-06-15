@@ -5,12 +5,13 @@
   ],
   "routes": [
     {
-      "src": "/api/socket/io",
-      "dest": "/api/socket"
-    },
-    {
       "src": "/(.*)",
       "dest": "/$1"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
 }
