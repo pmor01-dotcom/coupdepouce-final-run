@@ -31,13 +31,13 @@ export default function MessagingInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
 
+  // FIXED: user.id is a string
   useEffect(() => {
-  if (user && isConnected) {
-    joinUserRoom(user.id)
-    loadConversations(user.id)
-  }
-}, [user, isConnected])
-
+    if (user && isConnected) {
+      joinUserRoom(user.id)
+      loadConversations(user.id)
+    }
+  }, [user, isConnected])
 
   useEffect(() => {
     scrollToBottom()
@@ -51,9 +51,9 @@ export default function MessagingInterface() {
     if (selectedConversation) {
       leaveConversation(selectedConversation)
     }
-    
+
     if (!user) return
-    
+
     setSelectedConversation(conversationId)
     loadConversation(conversationId, user.id)
     markMessagesAsRead(conversationId, user.id)
@@ -77,7 +77,7 @@ export default function MessagingInterface() {
 
   const handleInputChange = (value: string) => {
     setMessageInput(value)
-    
+
     if (!isTyping && value.trim()) {
       setIsTyping(true)
       if (currentConversation && user) {
@@ -85,12 +85,10 @@ export default function MessagingInterface() {
       }
     }
 
-    // Clear typing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current)
     }
 
-    // Set new timeout to stop typing
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false)
       if (currentConversation && user) {
@@ -124,7 +122,7 @@ export default function MessagingInterface() {
             </span>
           )}
         </div>
-        
+
         <div className="flex-1 overflow-y-auto">
           {conversations.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
@@ -190,15 +188,17 @@ export default function MessagingInterface() {
                     {currentConversation.otherUser.name}
                   </h4>
                   <p className="text-sm text-gray-500">
-                    {currentConversation.otherUser.role === 'ARTISAN' 
-                      ? currentConversation.otherUser.metier 
+                    {currentConversation.otherUser.role === 'ARTISAN'
+                      ? currentConversation.otherUser.metier
                       : 'Client'}
                   </p>
                 </div>
               </div>
               <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
                 <p className="font-medium text-gray-700">{currentConversation.demand.title}</p>
-                <p className="text-gray-600">{currentConversation.demand.category} • {currentConversation.demand.location}</p>
+                <p className="text-gray-600">
+                  {currentConversation.demand.category} • {currentConversation.demand.location}
+                </p>
               </div>
             </div>
 
@@ -207,7 +207,9 @@ export default function MessagingInterface() {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.senderId === user.id ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${
+                    message.senderId === user.id ? 'justify-end' : 'justify-start'
+                  }`}
                 >
                   <div
                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
@@ -217,16 +219,18 @@ export default function MessagingInterface() {
                     }`}
                   >
                     <p className="text-sm">{message.content}</p>
-                    <p className={`text-xs mt-1 ${
-                      message.senderId === user.id ? 'text-blue-100' : 'text-gray-500'
-                    }`}>
+                    <p
+                      className={`text-xs mt-1 ${
+                        message.senderId === user.id ? 'text-blue-100' : 'text-gray-500'
+                      }`}
+                    >
                       {formatTime(message.createdAt)}
                       {message.readAt && message.senderId === user.id && ' • Lu'}
                     </p>
                   </div>
                 </div>
               ))}
-              
+
               {typingUser && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
@@ -234,7 +238,7 @@ export default function MessagingInterface() {
                   </div>
                 </div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
 
@@ -245,7 +249,11 @@ export default function MessagingInterface() {
                   type="text"
                   value={messageInput}
                   onChange={(e) => handleInputChange(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+                  onKeyPress={(e) =>
+                    e.key === 'Enter' &&
+                    !e.shiftKey &&
+                    (e.preventDefault(), handleSendMessage())
+                  }
                   placeholder="Tapez votre message..."
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -263,12 +271,26 @@ export default function MessagingInterface() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.003 9.003 0 00-8.587-8.98l-2.007.98A3.003 3.003 0 0012 15c0 1.664 1.368 3 3.05 3h2.858c.083.44.174.876.27 1.314L12 21l2.822-2.686c.096-.438.187-.874.27-1.314A3.003 3.003 0 0018 15c0-1.664-1.368-3-3.05-3h-2.858z"></path>
+                <svg
+                  className="w-8 h-8 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.003 9.003 0 00-8.587-8.98l-2.007.98A3.003 3.003 0 0012 15c0 1.664 1.368 3 3.05 3h2.858c.083.44.174.876.27 1.314L12 21l2.822-2.686c.096-.438.187-.874.27-1.314A3.003 3.003 0 0018 15c0-1.664-1.368-3-3.05-3h-2.858z"
+                  ></path>
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Sélectionnez une conversation</h3>
-              <p className="text-gray-500">Choisissez une conversation dans la liste pour commencer à discuter</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Sélectionnez une conversation
+              </h3>
+              <p className="text-gray-500">
+                Choisissez une conversation dans la liste pour commencer à discuter
+              </p>
             </div>
           </div>
         )}
