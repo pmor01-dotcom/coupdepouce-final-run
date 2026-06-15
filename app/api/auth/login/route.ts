@@ -12,6 +12,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+if (!supabase) {
+  return NextResponse.json({ error: 'Supabase client not initialized' }, { status: 500 })
+}
 
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
