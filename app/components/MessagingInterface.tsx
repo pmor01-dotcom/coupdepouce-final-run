@@ -32,11 +32,12 @@ export default function MessagingInterface() {
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
-    if (user && isConnected) {
-      joinUserRoom(user.id: string)
-      loadConversations(user.id: string)
-    }
-  }, [user, isConnected])
+  if (user && isConnected) {
+    joinUserRoom(user.id)
+    loadConversations(user.id)
+  }
+}, [user, isConnected])
+
 
   useEffect(() => {
     scrollToBottom()
