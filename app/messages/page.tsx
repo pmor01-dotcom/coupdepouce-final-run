@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useAuth } from '@/app/components/AuthProvider'
-import { useLanguage } from '@/app/components/LanguageProvider'
+import { useAuth } from '@/components/AuthProvider'
+import { useLanguage } from '@/components/LanguageProvider'
+
 
 export default function MessagesPage() {
   const supabase = createClientComponentClient()
