@@ -1,148 +1,255 @@
- <button
-                        onClick={() => handleContactArtisan(artisan)}
-                        className="w-full btn-primary text-sm py-2"
-                      >
-                        {t('dashboard.contactArtisan')}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+'use client'
 
-        {/* Messages Tab Content */}
-        {activeTab === 'messages' && (
-          <div className="h-96">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Messages
-            </h2>
-            <div className="h-full">
-              <MessagingInterface />
-            </div>
-          </div>
-        )}
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useLanguage } from '../components/LanguageProvider'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
-        {/* Search Tab Content */}
-        {activeTab === 'search' && (
+export default function ArtisanSignupPage() {
+  const router = useRouter()
+  const supabase = createClientComponentClient()
+  const { t } = useLanguage()
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    metier: '',
+    department: '',
+    city: '',
+  })
+
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    if (formData.password !== formData.confirmPassword) {
+      setError(t('signup.passwordMismatch'))
+      setLoading(false)
+      return
+    }
+
+    try {
+      // 1) Create Supabase Auth user
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            role: 'artisan',
+            metier: formData.metier,
+            department: formData.department,
+            city: formData.city,
+          },
+        },
+      })
+
+      if (signUpError) {
+        setError(signUpError.message)
+        setLoading(false)
+        return
+      }
+
+      const user = data.user
+      if (!user) {
+        setError(t('signup.signupError'))
+        setLoading(false)
+        return
+      }
+
+      // 2) Insert into artisans table
+      const { error: profileError } = await supabase.from('artisans').insert({
+        id: user.id,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        metier: formData.metier,
+        department: formData.department,
+        city: formData.city,
+      })
+
+      if (profileError) {
+        setError(profileError.message)
+        setLoading(false)
+        return
+      }
+
+      // 3) Redirect to artisan dashboard
+      router.push('/artisan-dashboard')
+    } catch (err: any) {
+      setError(err.message || t('common.error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
+      <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
+
+        <h2 className="text-3xl font-bold text-center text-gray-900">
+          {t('artisanSignup.title')}
+        </h2>
+
+        <p className="text-center text-gray-600">
+          {t('artisanSignup.subtitle')}
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* First Name */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Recherche avancée
-            </h2>
-            <div className="space-y-6">
-              <SearchFilters
-                type="artisans"
-                onFiltersChange={setSearchFilters}
-                onSearch={setSearchQuery}
-              />
-              <SearchResults
-                type="artisans"
-                query={searchQuery}
-                filters={searchFilters}
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.firstName')} *
+            </label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
           </div>
-        )}
 
-        {/* Demands Tab Content */}
-        {activeTab === 'demands' && (
+          {/* Last Name */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Mes demandes
-            </h2>
-            {demands.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">
-                  Vous n'avez pas encore de demandes
-                </p>
-                <Link href="/create-demand" className="btn-primary">
-                  Créer une demande
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {demands.map((demand) => (
-                  <div key={demand.id} className="card">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {demand.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {demand.description}
-                        </p>
-                      </div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      demand.status === 'OPEN'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : demand.status === 'IN_PROGRESS'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                        {getDemandStatusText(demand.status)}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-                      <div>
-                        <span className="font-medium">Catégorie:</span> {demand.category}
-                      </div>
-                      <div>
-                        <span className="font-medium">Localisation:</span> {demand.location}
-                      </div>
-                      <div>
-                        <span className="font-medium">Budget:</span> {demand.budget_range || 'Non spécifié'}
-                      </div>
-                      <div>
-                        <span className="font-medium">Réponses:</span> {demand.proposals?.length || 0}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">
-                        Créée le {new Date(demand.created_at).toLocaleDateString('fr-FR')}
-                      </span>
-                      <div className="flex space-x-2">
-                        {demand.proposals && demand.proposals.length > 0 && (
-                          <Link href={`/demands/${demand.id}`} className="btn-secondary">
-                            Voir les propositions ({demand.proposals.length})
-                          </Link>
-                        )}
-                        <Link href={`/demands/${demand.id}`} className="btn-primary">
-                          Voir les détails
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nom *
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
           </div>
-        )}
-      </div>
 
-      {/* Floating Unsubscribe Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          onClick={() => {
-            if (confirm(t('unsubscribe.confirm'))) {
-              // Handle unsubscribe logic here
-              logout()
-              router.push('/')
-            }
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200"
-          title={t('unsubscribe.title')}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
-        </button>
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('login.email')} *
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('login.password')} *
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('signup.confirmPassword')} *
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
+
+          {/* Metier */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Métier *
+            </label>
+            <input
+              type="text"
+              name="metier"
+              value={formData.metier}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
+
+          {/* Department */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.department')} *
+            </label>
+            <input
+              type="text"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
+
+          {/* City */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.city')} *
+            </label>
+            <input
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
+
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full"
+          >
+            {loading ? t('artisanSignup.creating') : t('artisanSignup.submit')}
+          </button>
+        </form>
+
+        <div className="text-center text-sm text-gray-600">
+          <Link href="/" className="hover:text-gray-900">
+            {t('app.back')}
+          </Link>
+        </div>
       </div>
     </main>
-      <MessageNotifications />
-    </MessagingProvider>
   )
 }

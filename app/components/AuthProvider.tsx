@@ -1,13 +1,19 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { supabase } from '../../lib/supabase'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
-interface User {
-  id: number
+interface UserProfile {
+  id: string
   email: string
-  name: string
-  role: 'client' | 'artisan'
+  name?: string
+  role?: 'client' | 'artisan'
   isPaid?: boolean
   location?: string
   department?: string
@@ -21,86 +27,110 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string, role?: 'client' | 'artisan', name?: string) => Promise<boolean>
-  logout: () => Promise<void>
+  user: UserProfile | null
   isLoading: boolean
+  login: (email: string, password: string) => Promise<boolean>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const supabase = createClientComponentClient()
+
+  const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Load session on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser)
-        if (parsedUser && typeof parsedUser.email === 'string' && parsedUser.name && parsedUser.role) {
-          setUser(parsedUser)
-        } else {
-          localStorage.removeItem('user')
+    const loadSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session?.user) {
+        const profile = {
+          id: session.user.id,
+          email: session.user.email ?? '',
+          ...session.user.user_metadata,
         }
-      } catch (error) {
-        console.error('Error parsing user data:', error)
+        setUser(profile)
+        localStorage.setItem('user', JSON.stringify(profile))
+      } else {
+        setUser(null)
         localStorage.removeItem('user')
       }
-    }
-    setIsLoading(false)
-  }, [])
 
+      setIsLoading(false)
+    }
+
+    loadSession()
+
+    // Listen for login/logout events
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          const profile = {
+            id: session.user.id,
+            email: session.user.email ?? '',
+            ...session.user.user_metadata,
+          }
+          setUser(profile)
+          localStorage.setItem('user', JSON.stringify(profile))
+        } else {
+          setUser(null)
+          localStorage.removeItem('user')
+        }
+      }
+    )
+
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [supabase])
+
+  // LOGIN
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      if (!email || !password) {
-        throw new Error('Email and password are required')
-      }
-
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      const data = await response.json()
-      if (!response.ok || !data.user) {
-        console.error('Login failed:', data.error)
-        return false
+      if (error || !data.user) return false
+
+      const profile = {
+        id: data.user.id,
+        email: data.user.email ?? '',
+        ...data.user.user_metadata,
       }
 
-      setUser(data.user)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      setUser(profile)
+      localStorage.setItem('user', JSON.stringify(profile))
+
       return true
-    } catch (error: any) {
-      console.error('Login error:', error instanceof Error ? error.message : 'Unknown error')
+    } catch {
       return false
     }
   }
 
+  // LOGOUT
   const logout = async () => {
-    try {
-      await supabase.auth.signOut()
-    } catch (error) {
-      console.warn('Supabase sign out failed:', error)
-    }
+    await supabase.auth.signOut()
     setUser(null)
     localStorage.removeItem('user')
     window.location.href = '/'
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider')
+  return ctx
 }
-export { AuthProvider }

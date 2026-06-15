@@ -1,74 +1,63 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useLanguage } from '../components/LanguageProvider'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
-type FormData = {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  password: string
-  confirmPassword: string
-  siret: string
-  jobType: string
-  specialties: string
-  city: string
-  department: string
-  distanceKm: string
-  description: string
-}
-
-export default function ArtisanSignup() {
+export default function ArtisanSignupPage() {
   const router = useRouter()
-  const { t } = useLanguage()
   const supabase = createClientComponentClient()
+  const { t } = useLanguage()
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
-    siret: '',
-    jobType: '',
-    specialties: '',
-    city: '',
+    metier: '',
     department: '',
-    distanceKm: '',
-    description: '',
+    city: '',
   })
 
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState('')
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
+    setError('')
     setLoading(true)
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.')
+      setError(t('signup.passwordMismatch'))
       setLoading(false)
       return
     }
 
     try {
-      // 1️⃣ Create auth user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      // 1) Create Supabase Auth user
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            role: 'artisan',
+            metier: formData.metier,
+            department: formData.department,
+            city: formData.city,
+          },
+        },
       })
 
       if (signUpError) {
@@ -77,28 +66,22 @@ export default function ArtisanSignup() {
         return
       }
 
-      const user = signUpData.user
+      const user = data.user
       if (!user) {
-        setError("Veuillez vérifier votre email pour confirmer votre compte.")
+        setError(t('signup.signupError'))
         setLoading(false)
         return
       }
 
-      // 2️⃣ Insert artisan profile into unified table
-      const { error: profileError } = await supabase.from('users').insert({
+      // 2) Insert into artisans table
+      const { error: profileError } = await supabase.from('artisans').insert({
         id: user.id,
-        role: 'artisan',
-        firstname: formData.firstName,
-        lastname: formData.lastName,
-        phone: formData.phone,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
-        siret: formData.siret,
-        job_type: formData.jobType,
-        specialties: formData.specialties,
-        city: formData.city,
+        metier: formData.metier,
         department: formData.department,
-        distance_km: formData.distanceKm ? Number(formData.distanceKm) : null,
-        description: formData.description,
+        city: formData.city,
       })
 
       if (profileError) {
@@ -107,175 +90,166 @@ export default function ArtisanSignup() {
         return
       }
 
-      // 3️⃣ Redirect
+      // 3) Redirect to artisan dashboard
       router.push('/artisan-dashboard')
-
-    } catch (err) {
-      setError('Une erreur inattendue est survenue.')
+    } catch (err: any) {
+      setError(err.message || t('common.error'))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-2xl bg-white shadow-md rounded-lg p-8">
-        <h1 className="text-2xl font-semibold mb-6">
-          {t ? t('signup.artisanTitle') : 'Inscription Artisan'}
-        </h1>
+    <main className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
+      <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
 
-        {error && (
-          <div className="mb-4 rounded bg-red-100 text-red-700 px-4 py-2 text-sm">
-            {error}
-          </div>
-        )}
+        <h2 className="text-3xl font-bold text-center text-gray-900">
+          {t('artisanSignup.title')}
+        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Prénom / Nom */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Prénom</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-                required
-              />
-            </div>
+        <p className="text-center text-gray-600">
+          {t('artisanSignup.subtitle')}
+        </p>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Nom</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* First Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.firstName')} *
+            </label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
           </div>
 
-          {/* Email / Téléphone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-                required
-              />
-            </div>
+          {/* Last Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nom *
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Téléphone</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('login.email')} *
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
           </div>
 
           {/* Password */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Mot de passe</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Confirmer le mot de passe</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Artisan fields */}
           <div>
-            <label className="block text-sm font-medium mb-1">SIRET</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('login.password')} *
+            </label>
             <input
-              type="text"
-              name="siret"
-              value={formData.siret}
+              type="password"
+              name="password"
+              value={formData.password}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="input-field"
+              required
             />
           </div>
 
+          {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">Métier / Type d'activité</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('signup.confirmPassword')} *
+            </label>
             <input
-              type="text"
-              name="jobType"
-              value={formData.jobType}
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="input-field"
+              required
             />
           </div>
 
+          {/* Metier */}
           <div>
-            <label className="block text-sm font-medium mb-1">Spécialités</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Métier *
+            </label>
             <input
               type="text"
-              name="specialties"
-              value={formData.specialties}
+              name="metier"
+              value={formData.metier}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="input-field"
+              required
             />
           </div>
 
-          {/* Localisation */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Ville</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
+          {/* Department */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.department')} *
+            </label>
+            <input
+              type="text"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Département</label>
-              <input
-                type="text"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
+          {/* City */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.city')} *
+            </label>
+            <input
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Distance max (km)</label>
-              <input
-                type="number"
-                name="distanceKm"
-                value={formData.distanceKm}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
-            </div>
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full"
+          >
+            {loading ? t('artisanSignup.creating') : t('artisanSignup.submit')}
+          </button>
+        </form>
+
+        <div className="text-center text-sm text-gray-600">
+          <Link href="/" className="hover:text-gray-900">
+            {t('app.back')}
+          </Link>
+        </div>
+      </div>
+    </main>
+  )
+}
