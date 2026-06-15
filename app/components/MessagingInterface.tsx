@@ -33,8 +33,8 @@ export default function MessagingInterface() {
 
   useEffect(() => {
     if (user && isConnected) {
-      joinUserRoom(user.id)
-      loadConversations(user.id)
+      joinUserRoom(user.id: string)
+      loadConversations(user.id: string)
     }
   }, [user, isConnected])
 
