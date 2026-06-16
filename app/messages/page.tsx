@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import AuthProvider from '@/app/components/AuthProvider'
-import LanguageProvider from '@/app/components/LanguageProvider'
+import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider'
+
 
 
 export default function MessagesPage() {
