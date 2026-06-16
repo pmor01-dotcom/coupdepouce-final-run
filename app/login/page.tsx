@@ -24,7 +24,8 @@ export default function Login() {
       // For demo purposes, we'll determine the role based on email
       const role = formData.email.includes('artisan') ? 'artisan' : 'client'
       
-      const success = await login(formData.email, formData.password, role)
+      const success = await login(formData.email, formData.password)
+
       
       if (success) {
         // Redirect based on role
