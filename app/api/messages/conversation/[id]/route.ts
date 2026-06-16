@@ -19,9 +19,9 @@ export async function GET(
 
     const userIdNum = parseInt(userId)
 
-    // Parse conversation ID to get user IDs and demand ID
+    // Parse conversation ID: "id1-id2-demandId"
     const [id1, id2, demandId] = conversationId.split('-').map(Number)
-    
+
     // Verify user is part of this conversation
     if (userIdNum !== id1 && userIdNum !== id2) {
       return NextResponse.json(
@@ -30,7 +30,7 @@ export async function GET(
       )
     }
 
-    // Get all messages for this conversation
+    // Fetch messages
     const messages = await prisma.message.findMany({
       where: {
         demand_id: demandId || null,
@@ -60,25 +60,24 @@ export async function GET(
       }
     })
 
-    // Get demand info if demandId exists
-    let demand = null
-    if (demandId) {
-      demand = await prisma.demand.findUnique({
-        where: { id: demandId },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          category: true,
-          budget_range: true,
-          location: true,
-          department: true,
-          status: true
-        }
-      })
-    }
+    // Fetch demand info (TypeScript-safe)
+    const demand = demandId
+      ? await prisma.demand.findUnique({
+          where: { id: demandId },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            category: true,
+            budget_range: true,
+            location: true,
+            department: true,
+            status: true
+          }
+        })
+      : null
 
-    // Get other user info
+    // Fetch the other user
     const otherUserId = userIdNum === id1 ? id2 : id1
     const otherUser = await prisma.user.findUnique({
       where: { id: otherUserId },
