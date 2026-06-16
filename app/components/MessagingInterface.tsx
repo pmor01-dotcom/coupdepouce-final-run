@@ -31,11 +31,11 @@ export default function MessagingInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // FIXED: user.id is a string
+  // Convert user.id to number for messaging functions
   useEffect(() => {
     if (user && isConnected) {
-      joinUserRoom(user.id)
-      loadConversations(user.id)
+      joinUserRoom(parseInt(user.id))
+      loadConversations(parseInt(user.id))
     }
   }, [user, isConnected])
 
@@ -55,8 +55,8 @@ export default function MessagingInterface() {
     if (!user) return
 
     setSelectedConversation(conversationId)
-    loadConversation(conversationId, user.id)
-    markMessagesAsRead(conversationId, user.id)
+    loadConversation(conversationId, parseInt(user.id))
+    markMessagesAsRead(conversationId, parseInt(user.id))
   }
 
   const handleSendMessage = () => {
@@ -64,7 +64,7 @@ export default function MessagingInterface() {
 
     const messageData = {
       conversationId: currentConversation.conversationId,
-      senderId: user.id,
+      senderId: parseInt(user.id),
       receiverId: currentConversation.otherUser.id,
       content: messageInput.trim(),
       demandId: currentConversation.demand.id
@@ -72,7 +72,7 @@ export default function MessagingInterface() {
 
     sendMessage(messageData)
     setMessageInput('')
-    stopTyping(currentConversation.conversationId, user.id)
+    stopTyping(currentConversation.conversationId, parseInt(user.id))
   }
 
   const handleInputChange = (value: string) => {
@@ -81,7 +81,7 @@ export default function MessagingInterface() {
     if (!isTyping && value.trim()) {
       setIsTyping(true)
       if (currentConversation && user) {
-        setTyping(currentConversation.conversationId, user.id, user.name)
+        setTyping(currentConversation.conversationId, parseInt(user.id), user.name || 'User')
       }
     }
 
@@ -92,7 +92,7 @@ export default function MessagingInterface() {
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false)
       if (currentConversation && user) {
-        stopTyping(currentConversation.conversationId, user.id)
+        stopTyping(currentConversation.conversationId, parseInt(user.id))
       }
     }, 1000)
   }
@@ -208,12 +208,12 @@ export default function MessagingInterface() {
                 <div
                   key={message.id}
                   className={`flex ${
-                    message.senderId === user.id ? 'justify-end' : 'justify-start'
+                    message.senderId === parseInt(user.id) ? 'justify-end' : 'justify-start'
                   }`}
                 >
                   <div
                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      message.senderId === user.id
+                      message.senderId === parseInt(user.id)
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-900'
                     }`}
@@ -221,11 +221,11 @@ export default function MessagingInterface() {
                     <p className="text-sm">{message.content}</p>
                     <p
                       className={`text-xs mt-1 ${
-                        message.senderId === user.id ? 'text-blue-100' : 'text-gray-500'
+                        message.senderId === parseInt(user.id) ? 'text-blue-100' : 'text-gray-500'
                       }`}
                     >
                       {formatTime(message.createdAt)}
-                      {message.readAt && message.senderId === user.id && ' • Lu'}
+                      {message.readAt && message.senderId === parseInt(user.id) && ' • Lu'}
                     </p>
                   </div>
                 </div>
