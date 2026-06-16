@@ -21,10 +21,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let event: Stripe.Event
+    let event: any
 
-    const stripe = getStripe()
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+const stripe = getStripe()
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
     if (!webhookSecret) {
       console.error('Missing STRIPE_WEBHOOK_SECRET')
       return NextResponse.json({ error: 'Missing webhook secret' }, { status: 500 })
