@@ -71,15 +71,15 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Get demand title if demandId exists
-    let demandTitle = null
-    if (demandId) {
-      const demand = await prisma.demand.findUnique({
-        where: { id: demandId },
-        select: { title: true }
-      })
-      demandTitle = demand?.title || null
-    }
+    // Get demand title if demandId exists (TypeScript-safe)
+    const demandTitle: string | null = demandId
+      ? (
+          await prisma.demand.findUnique({
+            where: { id: demandId },
+            select: { title: true }
+          })
+        )?.title || null
+      : null
 
     return NextResponse.json({
       success: true,
