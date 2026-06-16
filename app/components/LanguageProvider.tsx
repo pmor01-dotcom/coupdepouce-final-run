@@ -1,6 +1,12 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode
+} from 'react'
 
 type Language = 'fr' | 'en'
 
@@ -12,59 +18,20 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('fr')
-  const [mounted, setMounted] = useState(false)
-
-  // Safe client-side check
-  useEffect(() => {
-    setMounted(true)
-
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('language') as Language
-      if (savedLanguage === 'fr' || savedLanguage === 'en') {
-        setLanguage(savedLanguage)
-      }
-    }
-  }, [])
-
-  const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang)
-    if (mounted && typeof window !== 'undefined') {
-      localStorage.setItem('language', lang)
-    }
-  }
-
-  const t = (key: string): string => {
-    return translations[language]?.[key] || key
-  }
-
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  )
-}
-
-export function useLanguage() {
-  const context = useContext(LanguageContext)
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
-  }
-  return context
-}
-
-const translations: Record<string, Record<string, string>> = {
+// ----------------------
+// TRANSLATIONS
+// ----------------------
+const translations: Record<Language, Record<string, string>> = {
   fr: {
     // App
     "app.title": "Coup de Pouce",
     "app.createAccount": "Créer un compte",
     "app.connect": "Se connecter",
     "app.back": "Retour",
-    
+
     // Landing
     "landing.subtitle": "Trouvez un artisan qualifié près de chez vous",
-    
+
     // Home
     "home.freePromoBanner": "Inscription gratuite pour artisans et clients pendant 6 mois.",
     "home.freePromoBannerSub": "Profitez de toutes les fonctionnalités sans frais pendant une période limitée.",
@@ -75,7 +42,7 @@ const translations: Record<string, Record<string, string>> = {
     "welcome.line1": "Bienvenue sur Coup de Pouce, votre plateforme de mise en relation avec des artisans qualifiés.",
     "welcome.line2": "Trouvez rapidement le professionnel idéal pour tous vos travaux de rénovation, de réparation ou d'entretien.",
     "welcome.line3": "Nos artisans sont vérifiés, notés et prêts à répondre à vos besoins.",
-    
+
     // About
     "about.title": "À propos de nous",
     "about.subtitle": "Découvrez notre mission et nos valeurs",
@@ -106,7 +73,7 @@ const translations: Record<string, Record<string, string>> = {
     "about.signUp": "S'inscrire",
     "about.contactUs": "Nous contacter",
     "about.backHome": "← Retour à l'accueil",
-    
+
     // Login
     "login.title": "Connexion",
     "login.subtitle": "Pas encore de compte ?",
@@ -116,37 +83,36 @@ const translations: Record<string, Record<string, string>> = {
     "login.password": "Mot de passe",
     "login.button": "Se connecter",
     "login.noAccount": "Pas encore de compte ?",
-    
-   // Signup
-"signup.title": "Inscription",
-"signup.subtitle": "Je suis un",
-"signup.client": "Client",
-"signup.client.desc": "Je cherche un artisan pour mes travaux",
-"signup.artisan": "Artisan",
-"signup.artisan.desc": "Je propose mes services aux clients",
-"signup.confirmPassword": "Confirmer le mot de passe",
-"signup.forgotPassword": "Mot de passe oublié ?",
-"signup.continue": "Continuer",
-"signup.artisanRedirect": "Redirection vers le formulaire artisan...",
-"signup.selectRole": "Veuillez sélectionner votre type de compte",
-"signup.passwordMismatch": "Les mots de passe ne correspondent pas",
-"signup.acceptTerms": "Vous devez accepter les conditions générales",
-"signup.selectWorkDay": "Veuillez sélectionner au moins un jour de travail",
-"signup.signupError": "Erreur lors de l'inscription",
-"signup.alreadyHaveAccount": "Vous avez déjà un compte ?",
-"signup.goToLogin": "Se connecter",
 
-    
+    // Signup
+    "signup.title": "Inscription",
+    "signup.subtitle": "Je suis un",
+    "signup.client": "Client",
+    "signup.client.desc": "Je cherche un artisan pour mes travaux",
+    "signup.artisan": "Artisan",
+    "signup.artisan.desc": "Je propose mes services aux clients",
+    "signup.confirmPassword": "Confirmer le mot de passe",
+    "signup.forgotPassword": "Mot de passe oublié ?",
+    "signup.continue": "Continuer",
+    "signup.artisanRedirect": "Redirection vers le formulaire artisan...",
+    "signup.selectRole": "Veuillez sélectionner votre type de compte",
+    "signup.passwordMismatch": "Les mots de passe ne correspondent pas",
+    "signup.acceptTerms": "Vous devez accepter les conditions générales",
+    "signup.selectWorkDay": "Veuillez sélectionner au moins un jour de travail",
+    "signup.signupError": "Erreur lors de l'inscription",
+    "signup.alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "signup.goToLogin": "Se connecter",
+
     // Form
     "form.firstName": "Prénom",
     "form.city": "Ville",
     "form.department": "Département",
-    
+
     // Common
     "common.loading": "Chargement...",
     "common.error": "Une erreur est survenue",
     "common.redirecting": "Redirection...",
-    
+
     // Payment
     "payment.title": "Choisissez votre abonnement",
     "payment.subtitle": "Débloquez toutes les fonctionnalités pour trouver plus de clients",
@@ -187,7 +153,7 @@ const translations: Record<string, Record<string, string>> = {
     "payment.freePromoBack": "Retour à l'inscription",
     "payment.freeStatusTitle": "Service gratuit pendant 6 mois",
     "payment.freeStatusSubtitle": "Profitez de l'accès complet sans abonnement pendant cette période.",
-    
+
     // Artisan Signup
     "artisanSignup.title": "Inscription Artisan",
     "artisanSignup.subtitle": "Créez votre profil professionnel",
@@ -195,42 +161,43 @@ const translations: Record<string, Record<string, string>> = {
     "artisanSignup.business": "Informations professionnelles",
     "artisanSignup.creating": "Création en cours...",
     "artisanSignup.submit": "S'inscrire",
-    
+
     // Dashboard
     "dashboard.logout": "Déconnexion",
     "dashboard.artisans.title": "Artisans disponibles",
     "dashboard.noArtisans": "Aucun artisan disponible",
     "dashboard.contactArtisan": "Contacter",
     "dashboard.responseRate": "taux de réponse",
-    
+
     // Client Dashboard
     "clientDashboard.artisans": "Artisans",
     "clientDashboard.myDemands": "Mes demandes",
     "clientDashboard.messages": "Messages",
     "clientDashboard.search": "Recherche",
-    
+
     // Create Demand
     "createDemand.title": "Créer une demande",
     "createDemand.welcome": "Bienvenue",
     "createDemand.artisanSelected": "Artisan sélectionné",
-    
+
     // Unsubscribe
     "unsubscribe.title": "Se désabonner",
     "unsubscribe.confirm": "Êtes-vous sûr de vouloir vous désabonner ?",
-    
+
     // Language
     "language": "fr"
   },
+
   en: {
     // App
     "app.title": "Helping Hand",
     "app.createAccount": "Create account",
     "app.connect": "Connect",
     "app.back": "Back",
-    
+
     // Landing
     "landing.subtitle": "Find a qualified craftsman near you",
-    
+
     // Home
     "home.freePromoBanner": "Free sign-ups for artisans and clients for 6 months.",
     "home.freePromoBannerSub": "Enjoy all features free for a limited time.",
@@ -241,7 +208,7 @@ const translations: Record<string, Record<string, string>> = {
     "welcome.line1": "Welcome to Helping Hand, your platform for connecting with qualified craftsmen.",
     "welcome.line2": "Quickly find the ideal professional for all your renovation, repair, or maintenance work.",
     "welcome.line3": "Our craftsmen are verified, rated, and ready to meet your needs.",
-    
+
     // About
     "about.title": "About Us",
     "about.subtitle": "Discover our mission and values",
@@ -272,7 +239,7 @@ const translations: Record<string, Record<string, string>> = {
     "about.signUp": "Sign Up",
     "about.contactUs": "Contact Us",
     "about.backHome": "← Back to Home",
-    
+
     // Login
     "login.title": "Login",
     "login.subtitle": "Don't have an account?",
@@ -282,36 +249,36 @@ const translations: Record<string, Record<string, string>> = {
     "login.password": "Password",
     "login.button": "Connect",
     "login.noAccount": "Don't have an account?",
-    
-   // Signup
-"signup.title": "Sign Up",
-"signup.subtitle": "I am a",
-"signup.client": "Client",
-"signup.client.desc": "I'm looking for a craftsman for my work",
-"signup.artisan": "Craftsman",
-"signup.artisan.desc": "I offer my services to clients",
-"signup.confirmPassword": "Confirm password",
-"signup.forgotPassword": "Forgot password?",
-"signup.continue": "Continue",
-"signup.artisanRedirect": "Redirecting to craftsman form...",
-"signup.selectRole": "Please select your account type",
-"signup.passwordMismatch": "Passwords do not match",
-"signup.acceptTerms": "You must accept the terms and conditions",
-"signup.selectWorkDay": "Please select at least one work day",
-"signup.signupError": "Error during registration",
-"signup.alreadyHaveAccount": "Already have an account?",
-"signup.goToLogin": "Log in",
+
+    // Signup
+    "signup.title": "Sign Up",
+    "signup.subtitle": "I am a",
+    "signup.client": "Client",
+    "signup.client.desc": "I'm looking for a craftsman for my work",
+    "signup.artisan": "Craftsman",
+    "signup.artisan.desc": "I offer my services to clients",
+    "signup.confirmPassword": "Confirm password",
+    "signup.forgotPassword": "Forgot password?",
+    "signup.continue": "Continue",
+    "signup.artisanRedirect": "Redirecting to craftsman form...",
+    "signup.selectRole": "Please select your account type",
+    "signup.passwordMismatch": "Passwords do not match",
+    "signup.acceptTerms": "You must accept the terms and conditions",
+    "signup.selectWorkDay": "Please select at least one work day",
+    "signup.signupError": "Error during registration",
+    "signup.alreadyHaveAccount": "Already have an account?",
+    "signup.goToLogin": "Log in",
 
     // Form
     "form.firstName": "First name",
     "form.city": "City",
     "form.department": "Department",
-    
+
     // Common
     "common.loading": "Loading...",
     "common.error": "An error occurred",
     "common.redirecting": "Redirecting...",
-    
+
     // Payment
     "payment.title": "Choose your subscription",
     "payment.subtitle": "Unlock all features to find more clients",
@@ -352,7 +319,7 @@ const translations: Record<string, Record<string, string>> = {
     "payment.freePromoBack": "Back to sign-up",
     "payment.freeStatusTitle": "Free service for 6 months",
     "payment.freeStatusSubtitle": "Enjoy full access without subscription during this period.",
-    
+
     // Artisan Signup
     "artisanSignup.title": "Craftsman Sign Up",
     "artisanSignup.subtitle": "Create your professional profile",
@@ -360,30 +327,77 @@ const translations: Record<string, Record<string, string>> = {
     "artisanSignup.business": "Business Information",
     "artisanSignup.creating": "Creating...",
     "artisanSignup.submit": "Sign Up",
-    
+
     // Dashboard
     "dashboard.logout": "Logout",
     "dashboard.artisans.title": "Available Craftsmen",
     "dashboard.noArtisans": "No craftsmen available",
     "dashboard.contactArtisan": "Contact",
     "dashboard.responseRate": "response rate",
-    
+
     // Client Dashboard
     "clientDashboard.artisans": "Craftsmen",
     "clientDashboard.myDemands": "My Requests",
     "clientDashboard.messages": "Messages",
     "clientDashboard.search": "Search",
-    
+
     // Create Demand
     "createDemand.title": "Create a request",
     "createDemand.welcome": "Welcome",
     "createDemand.artisanSelected": "Selected craftsman",
-    
+
     // Unsubscribe
     "unsubscribe.title": "Unsubscribe",
     "unsubscribe.confirm": "Are you sure you want to unsubscribe?",
-    
+
     // Language
     "language": "en"
   }
+}
+
+// ----------------------
+// PROVIDER
+// ----------------------
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguage] = useState<Language>('fr')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('language') as Language
+      if (saved === 'fr' || saved === 'en') {
+        setLanguage(saved)
+      }
+    }
+  }, [])
+
+  const handleSetLanguage = (lang: Language) => {
+    setLanguage(lang)
+    if (mounted && typeof window !== 'undefined') {
+      localStorage.setItem('language', lang)
+    }
+  }
+
+  const t = (key: string): string => {
+    return translations[language]?.[key] || key
+  }
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  )
+}
+
+// ----------------------
+// HOOK
+// ----------------------
+export function useLanguage() {
+  const context = useContext(LanguageContext)
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider')
+  }
+  return context
 }
