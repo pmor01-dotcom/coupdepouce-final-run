@@ -8,6 +8,7 @@ import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider
 
 
 
+
 export default function MessagesPage() {
   const supabase = createClientComponentClient()
   const { user } = useAuth()
