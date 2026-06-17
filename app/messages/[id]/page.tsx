@@ -17,7 +17,9 @@ export default function ConversationPage() {
 const params = useParams()
 const id = params?.id as string
 
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState<any[]>([])
+
+  
   const [text, setText] = useState('')
   const bottomRef = useRef(null)
 
