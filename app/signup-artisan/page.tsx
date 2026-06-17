@@ -4,12 +4,16 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useLanguage } from '../components/LanguageProvider'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 
 export default function ArtisanSignupPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
   const { t } = useLanguage()
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -44,7 +48,6 @@ export default function ArtisanSignupPage() {
     }
 
     try {
-      // 1) Create Supabase Auth user
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -73,7 +76,6 @@ export default function ArtisanSignupPage() {
         return
       }
 
-      // 2) Insert into artisans table
       const { error: profileError } = await supabase.from('artisans').insert({
         id: user.id,
         first_name: formData.firstName,
@@ -90,7 +92,6 @@ export default function ArtisanSignupPage() {
         return
       }
 
-      // 3) Redirect to artisan dashboard
       router.push('/artisan-dashboard')
     } catch (err: any) {
       setError(err.message || t('common.error'))
@@ -112,7 +113,6 @@ export default function ArtisanSignupPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-
           {/* First Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
