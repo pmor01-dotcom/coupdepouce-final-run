@@ -11,7 +11,20 @@ import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider
 
 export default function MessagesPage() {
   const supabase = createClientComponentClient()
-  const { user } = useAuth()
+  const supabase = createClientComponentClient()
+const [user, setUser] = useState<any>(null)
+
+useEffect(() => {
+  const loadUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    setUser(user)
+  }
+  loadUser()
+}, [])
+
+
   const { t } = useLanguage()
 
   const [conversations, setConversations] = useState([])
