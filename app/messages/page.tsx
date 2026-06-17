@@ -27,7 +27,8 @@ useEffect(() => {
 
   const { t } = useLanguage()
 
-  const [conversations, setConversations] = useState([])
+ const [conversations, setConversations] = useState<any[]>([])
+
 
   useEffect(() => {
     if (!user) return
