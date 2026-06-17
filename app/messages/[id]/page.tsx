@@ -9,7 +9,8 @@ import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider
 
 
 export default function ConversationPage() {
-  const { id } = useParams()
+ const { id } = useParams()
+
   const supabase = createClientComponentClient()
   const { user } = useAuth()
   const { t } = useLanguage()
