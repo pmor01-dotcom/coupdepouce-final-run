@@ -21,7 +21,8 @@ const id = params?.id as string
 
   
   const [text, setText] = useState('')
-  const bottomRef = useRef(null)
+  const bottomRef = useRef<HTMLDivElement | null>(null)
+
 
   useEffect(() => {
     if (!id) return
