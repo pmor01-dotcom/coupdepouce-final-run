@@ -10,7 +10,7 @@ import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider
 
 
 export default function MessagesPage() {
-  const supabase = createClientComponentClient()
+  
   const supabase = createClientComponentClient()
 const [user, setUser] = useState<any>(null)
 
