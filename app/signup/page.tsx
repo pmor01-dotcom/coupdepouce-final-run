@@ -99,7 +99,146 @@ export default function SignupPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
-      {/* …rest of your JSX */}
+      <div className="max-w-md w-full space-y-8">
+
+        <div>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            {t('signup.title')}
+          </h2>
+
+          <p className="mt-2 text-center text-sm text-gray-600">
+            {t('signup.alreadyHaveAccount')}{' '}
+            <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+              {t('signup.goToLogin')}
+            </Link>
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('signup.subtitle')}
+          </label>
+
+          <div className="space-y-3 mb-6">
+
+            {/* CLIENT */}
+            <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input
+                type="radio"
+                name="role"
+                value="client"
+                checked={role === 'client'}
+                onChange={() => handleRoleSelection('client')}
+                className="mr-3"
+              />
+              <div>
+                <span className="font-medium">{t('signup.client')}</span>
+                <p className="text-sm text-gray-600">{t('signup.client.desc')}</p>
+              </div>
+            </label>
+
+            {/* ARTISAN */}
+            <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input
+                type="radio"
+                name="role"
+                value="artisan"
+                checked={role === 'artisan'}
+                onChange={() => handleRoleSelection('artisan')}
+                className="mr-3"
+              />
+              <div>
+                <span className="font-medium">{t('signup.artisan')}</span>
+                <p className="text-sm text-gray-600">{t('signup.artisan.desc')}</p>
+              </div>
+            </label>
+          </div>
+
+          {/* CLIENT FORM */}
+          {role === 'client' && (
+            <form onSubmit={handleSubmit} className="space-y-6">
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('form.firstName')} *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('login.email')} *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('login.password')} *
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('signup.confirmPassword')} *
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              {error && <p className="text-red-600 text-sm">{error}</p>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full"
+              >
+                {loading ? t('common.loading') : t('signup.continue')}
+              </button>
+            </form>
+          )}
+
+          {!role && (
+            <p className="text-center text-gray-500">
+              {t('signup.selectRole')}
+            </p>
+          )}
+        </div>
+
+        <div className="text-center text-sm text-gray-600">
+          <Link href="/" className="hover:text-gray-900">
+            {t('app.back')}
+          </Link>
+        </div>
+      </div>
     </main>
   )
 }

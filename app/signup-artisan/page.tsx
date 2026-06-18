@@ -113,7 +113,7 @@ export default function ArtisanSignupPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* First Name */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('form.firstName')} *
@@ -128,7 +128,6 @@ export default function ArtisanSignupPage() {
             />
           </div>
 
-          {/* Last Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nom *
@@ -143,7 +142,6 @@ export default function ArtisanSignupPage() {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('login.email')} *
@@ -158,7 +156,6 @@ export default function ArtisanSignupPage() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('login.password')} *
@@ -173,7 +170,6 @@ export default function ArtisanSignupPage() {
             />
           </div>
 
-          {/* Confirm Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('signup.confirmPassword')} *
@@ -188,7 +184,6 @@ export default function ArtisanSignupPage() {
             />
           </div>
 
-          {/* Metier */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Métier *
@@ -203,7 +198,6 @@ export default function ArtisanSignupPage() {
             />
           </div>
 
-          {/* Department */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('form.department')} *
@@ -218,7 +212,6 @@ export default function ArtisanSignupPage() {
             />
           </div>
 
-          {/* City */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('form.city')} *
