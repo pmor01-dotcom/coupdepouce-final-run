@@ -80,8 +80,8 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
       const { error: profileError } = await supabase.from('artisans').insert({
         id: user.id,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
+        firstname: formData.firstName,
+        lastname: formData.lastName,
         email: formData.email,
         metier: formData.metier,
         department: formData.department,
