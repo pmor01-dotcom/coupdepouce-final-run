@@ -83,7 +83,7 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
         firstname: formData.firstName,
         lastname: formData.lastName,
         email: formData.email,
-        metier: formData.metier,
+        job_type: formData.metier,
         department: formData.department,
         city: formData.city,
       })
