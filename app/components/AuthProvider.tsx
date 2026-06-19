@@ -12,8 +12,8 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 interface UserProfile {
   id: string
   email: string
-  name?: string
   role?: 'client' | 'artisan'
+  name?: string
   isPaid?: boolean
   location?: string
   department?: string
@@ -49,11 +49,20 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       } = await supabase.auth.getSession()
 
       if (session?.user) {
-        const profile = {
+        const metadata = session.user.user_metadata || {}
+
+        const profile: UserProfile = {
           id: session.user.id,
           email: session.user.email ?? '',
-          ...session.user.user_metadata,
+          role: metadata.role,
+          name: metadata.name,
+          isPaid: metadata.isPaid,
+          location: metadata.location,
+          department: metadata.department,
+          metier: metadata.metier,
+          subscription: metadata.subscription || null,
         }
+
         setUser(profile)
         localStorage.setItem('user', JSON.stringify(profile))
       } else {
@@ -66,15 +75,23 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
     loadSession()
 
-    // Listen for login/logout events
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {
-          const profile = {
+          const metadata = session.user.user_metadata || {}
+
+          const profile: UserProfile = {
             id: session.user.id,
             email: session.user.email ?? '',
-            ...session.user.user_metadata,
+            role: metadata.role,
+            name: metadata.name,
+            isPaid: metadata.isPaid,
+            location: metadata.location,
+            department: metadata.department,
+            metier: metadata.metier,
+            subscription: metadata.subscription || null,
           }
+
           setUser(profile)
           localStorage.setItem('user', JSON.stringify(profile))
         } else {
@@ -99,10 +116,18 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error || !data.user) return false
 
-      const profile = {
+      const metadata = data.user.user_metadata || {}
+
+      const profile: UserProfile = {
         id: data.user.id,
         email: data.user.email ?? '',
-        ...data.user.user_metadata,
+        role: metadata.role,
+        name: metadata.name,
+        isPaid: metadata.isPaid,
+        location: metadata.location,
+        department: metadata.department,
+        metier: metadata.metier,
+        subscription: metadata.subscription || null,
       }
 
       setUser(profile)

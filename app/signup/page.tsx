@@ -1,10 +1,10 @@
 'use client'
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useLanguage } from '../components/LanguageProvider'
 import { createClient } from '@supabase/supabase-js'
+import email from '@/lib/email'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -16,12 +16,15 @@ export default function SignupPage() {
   )
 
   const [role, setRole] = useState<'client' | 'artisan' | null>(null)
+
   const [formData, setFormData] = useState({
-    name: '',
+    name: '',       // Prénom
+    nom: '',        // Nom
     email: '',
     password: '',
     confirmPassword: '',
   })
+
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -59,6 +62,7 @@ export default function SignupPage() {
         options: {
           data: {
             name: formData.name,
+            nom: formData.nom,     // ⭐ Added
             role: 'client',
           },
         },
@@ -77,11 +81,14 @@ export default function SignupPage() {
         return
       }
 
-      const { error: profileError } = await supabase.from('clients').insert({
-        id: user.id,
-        name: formData.name,
-        email: formData.email,
-      })
+    const { error: profileError } = await supabase.from('clients').insert({
+  id: user.id,
+  name: formData.name,   // Prénom
+  nom: formData.nom,    
+  role: 'client', // ⭐ Add this
+  email: formData.email,
+})
+
 
       if (profileError) {
         setError(profileError.message)
@@ -158,10 +165,12 @@ export default function SignupPage() {
           {role === 'client' && (
             <form onSubmit={handleSubmit} className="space-y-6">
 
+              {/* Prénom */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.firstName')} *
-                </label>
+               <label className="block text-sm font-medium text-gray-700 mb-1">
+  {t('form.lastName')} *
+</label>
+
                 <input
                   type="text"
                   name="name"
@@ -172,6 +181,22 @@ export default function SignupPage() {
                 />
               </div>
 
+              {/* Nom */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom *
+                </label>
+                <input
+                  type="text"
+                  name="nom"
+                  value={formData.nom}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('login.email')} *
@@ -186,6 +211,7 @@ export default function SignupPage() {
                 />
               </div>
 
+              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('login.password')} *
@@ -200,6 +226,7 @@ export default function SignupPage() {
                 />
               </div>
 
+              {/* Confirm Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('signup.confirmPassword')} *

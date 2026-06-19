@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const welcomeSent = await EmailService.sendWelcomeEmail(user.email, user.name);
+    const welcomeSent = await EmailService.sendWelcomeEmail(user.email, user.name, user.role);
     if (!welcomeSent) {
       console.error(`Failed to send welcome email to ${user.email}`);
     }

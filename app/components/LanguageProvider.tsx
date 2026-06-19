@@ -105,6 +105,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Form
     "form.firstName": "Prénom",
+    "form.lastName": "Nom",
     "form.city": "Ville",
     "form.department": "Département",
 
@@ -273,6 +274,7 @@ const translations: Record<Language, Record<string, string>> = {
     "form.firstName": "First name",
     "form.city": "City",
     "form.department": "Department",
+    "form.lastName": "Last name",
 
     // Common
     "common.loading": "Loading...",

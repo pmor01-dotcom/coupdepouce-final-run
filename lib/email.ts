@@ -6,43 +6,48 @@ const getCurrentYear = () => new Date().getFullYear()
 
 // Email templates
 export const emailTemplates = {
-  welcome: (name: string) => ({
-    subject: 'Bienvenue sur Coup de Pouce !',
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(to bottom, #6B8E23, #D4E4BC); padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">Coup de Pouce</h1>
-          <p style="color: white; margin: 5px 0 0;">La plateforme de confiance pour vos projets</p>
-        </div>
-        
-        <div style="background: white; padding: 30px;">
-          <h2 style="color: #333; margin-bottom: 20px;">Bienvenue ${name} !</h2>
-          <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-            Nous sommes ravis de vous accueillir sur Coup de Pouce ! Votre compte a été créé avec succès.
-          </p>
-          <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-            Que vous soyez client ou artisan, vous pouvez maintenant :
-          </p>
-          <ul style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-            <li>Publier ou répondre à des demandes de services</li>
-            <li>Communiquer directement avec des professionnels</li>
-            <li>Gérer vos projets et vos collaborations</li>
-          </ul>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${getAppUrl()}/login" 
-               style="background: #6B8E23; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              Me connecter
-            </a>
+  welcome: (name: string, role?: string) => {
+    const redirectUrl = role?.toLowerCase() === 'artisan' 
+      ? '/artisan-dashboard' 
+      : '/client-dashboard'
+    return {
+      subject: 'Bienvenue sur Coup de Pouce !',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(to bottom, #6B8E23, #D4E4BC); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0;">Coup de Pouce</h1>
+            <p style="color: white; margin: 5px 0 0;">La plateforme de confiance pour vos projets</p>
+          </div>
+          
+          <div style="background: white; padding: 30px;">
+            <h2 style="color: #333; margin-bottom: 20px;">Bienvenue ${name} !</h2>
+            <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+              Nous sommes ravis de vous accueillir sur Coup de Pouce ! Votre compte a été créé avec succès.
+            </p>
+            <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+              Que vous soyez client ou artisan, vous pouvez maintenant :
+            </p>
+            <ul style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+              <li>Publier ou répondre à des demandes de services</li>
+              <li>Communiquer directement avec des professionnels</li>
+              <li>Gérer vos projets et vos collaborations</li>
+            </ul>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${getAppUrl()}/login?redirect=${encodeURIComponent(redirectUrl)}" 
+                 style="background: #6B8E23; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Me connecter
+              </a>
+            </div>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+            <p>© ${getCurrentYear()} Coup de Pouce. Tous droits réservés.</p>
+            <p>123 Rue de la République, 75001 Paris, France</p>
           </div>
         </div>
-        
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
-          <p>© ${getCurrentYear()} Coup de Pouce. Tous droits réservés.</p>
-          <p>123 Rue de la République, 75001 Paris, France</p>
-        </div>
-      </div>
-    `,
-  }),
+      `,
+    }
+  },
 
   passwordReset: (name: string, resetToken: string) => ({
     subject: 'Réinitialisation de votre mot de passe',
@@ -334,8 +339,8 @@ export class EmailService {
     }
   }
 
-  static async sendWelcomeEmail(to: string, name: string): Promise<boolean> {
-    const template = emailTemplates.welcome(name)
+  static async sendWelcomeEmail(to: string, name: string, role?: string): Promise<boolean> {
+    const template = emailTemplates.welcome(name, role)
     return this.sendEmail(to, template.subject, template.html)
   }
 
