@@ -181,20 +181,7 @@ export default function SignupPage() {
                 />
               </div>
 
-              {/* Nom */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom *
-                </label>
-                <input
-                  type="text"
-                  name="nom"
-                  value={formData.nom}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
+             
 
               {/* Email */}
               <div>
