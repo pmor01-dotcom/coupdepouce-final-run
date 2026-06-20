@@ -82,7 +82,7 @@ export default function SignupPage() {
       }
 
     const { error: profileError } = await supabase.from('clients').insert({
-  id: user.id,
+  
   name: formData.name,   // Prénom
   nom: formData.nom,    
   role: 'client', // ⭐ Add this
