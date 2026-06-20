@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
 
   // 1. If NOT logged in → redirect to login (except if already on login or signup pages)
-  const publicPaths = ['/login', '/signup-client', '/signup-artisan']
+  const publicPaths = ['/login', '/signup', '/signup-client', '/signup-artisan', '/forgot-password', '/reset-password']
   const isPublic = publicPaths.includes(pathname)
 
   if (!user && !isPublic) {
