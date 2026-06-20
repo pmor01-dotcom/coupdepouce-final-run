@@ -3,21 +3,17 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useLanguage } from '../components/LanguageProvider'
 
-export default function ArtisanSignupPage() {
+export default function ClientSignupPage() {
   const router = useRouter()
-  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    department: '',
     location: '',
-    metier: '',
-    phone: '',
+    department: '',
   })
 
   const [loading, setLoading] = useState(false)
@@ -51,11 +47,9 @@ export default function ArtisanSignupPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: 'artisan',
+          role: 'client',
           location: formData.location,
           department: formData.department,
-          metier: formData.metier,
-          phone: formData.phone,
         }),
       })
 
@@ -82,11 +76,11 @@ export default function ArtisanSignupPage() {
       <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
 
         <h2 className="text-3xl font-bold text-center text-gray-900">
-          Créer un compte artisan
+          Créer un compte client
         </h2>
 
         <p className="text-center text-gray-600">
-          Proposez vos services aux clients
+          Trouvez des artisans qualifiés pour vos projets
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -149,12 +143,12 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Métier *
+              Ville *
             </label>
             <input
               type="text"
-              name="metier"
-              value={formData.metier}
+              name="location"
+              value={formData.location}
               onChange={handleChange}
               className="input-field"
               required
@@ -172,33 +166,6 @@ export default function ArtisanSignupPage() {
               onChange={handleChange}
               className="input-field"
               required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ville *
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Téléphone
-            </label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="input-field"
             />
           </div>
 
