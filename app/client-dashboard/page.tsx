@@ -1,35 +1,28 @@
-'use client'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+export default async function ClientDashboard() {
+  const supabase = createServerComponentClient({ cookies })
 
-export default function ArtisanDashboard() {
-  const router = useRouter()
-  const supabase = createClientComponentClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true)
+  // If not logged in → redirect to login
+  if (!user) {
+    redirect('/login')
+  }
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setLoading(false)
-
-      if (!data.session) {
-        router.push('/login')
-      }
-    })
-  }, [])
-
-  if (loading) {
-    return <div>Chargement...</div>
+  // If logged in but not a client → redirect to artisan dashboard
+  if (user.user_metadata.role !== 'client') {
+    redirect('/artisan-dashboard')
   }
 
   return (
-    <main>
-      <h1>Dashboard Artisan</h1>
-      {/* your dashboard content */}
-    </main>
+    <div style={{ padding: 40 }}>
+      <h1>Tableau de bord Client</h1>
+      <p>Bienvenue, {user.email}</p>
+    </div>
   )
 }

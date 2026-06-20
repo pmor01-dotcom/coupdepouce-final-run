@@ -1,41 +1,25 @@
 'use client'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useLanguage } from '../components/LanguageProvider'
-import { createClient } from '@supabase/supabase-js'
-import email from '@/lib/email'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
-export default function SignupPage() {
+export default function SignupClientPage() {
   const router = useRouter()
-  const { t } = useLanguage()
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-  const [role, setRole] = useState<'client' | 'artisan' | null>(null)
+  const supabase = createClientComponentClient()
 
   const [formData, setFormData] = useState({
-    name: '',       // Prénom
-    nom: '',        // Nom
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
+    city: '',
+    department: '',
   })
 
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  const handleRoleSelection = (selected: 'client' | 'artisan') => {
-    setRole(selected)
-    setError('')
-
-    if (selected === 'artisan') {
-      router.push('/signup-artisan')
-    }
-  }
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -50,20 +34,23 @@ export default function SignupPage() {
     setLoading(true)
 
     if (formData.password !== formData.confirmPassword) {
-      setError(t('signup.passwordMismatch'))
+      setError('Les mots de passe ne correspondent pas')
       setLoading(false)
       return
     }
 
     try {
+      // 1. Create Supabase user (NO session created because email confirmation is ON)
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
-            name: formData.name,
-            nom: formData.nom,     // ⭐ Added
             role: 'client',
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            city: formData.city,
+            department: formData.department,
           },
         },
       })
@@ -76,19 +63,20 @@ export default function SignupPage() {
 
       const user = data.user
       if (!user) {
-        setError(t('signup.signupError'))
+        setError("Une erreur est survenue lors de l'inscription")
         setLoading(false)
         return
       }
 
-    const { error: profileError } = await supabase.from('clients').insert({
-  
-  name: formData.name,   // Prénom
-  nom: formData.nom,    
-  role: 'client', // ⭐ Add this
-  email: formData.email,
-})
-
+      // 2. Insert into your "clients" table
+      const { error: profileError } = await supabase.from('clients').insert({
+        id: user.id,
+        firstname: formData.firstName,
+        lastname: formData.lastName,
+        email: formData.email,
+        city: formData.city,
+        department: formData.department,
+      })
 
       if (profileError) {
         setError(profileError.message)
@@ -96,163 +84,35 @@ export default function SignupPage() {
         return
       }
 
-      router.push('/client-dashboard')
+      // 3. Redirect to check-email page (correct flow)
+      router.push('/check-email')
+
     } catch (err: any) {
-      setError(err.message || t('common.error'))
+      setError(err.message || 'Erreur inconnue')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
-      <div className="max-w-md w-full space-y-8">
+    <div style={{ padding: 40 }}>
+      <h1>Créer un compte client</h1>
 
-        <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            {t('signup.title')}
-          </h2>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <input name="firstName" placeholder="Prénom" value={formData.firstName} onChange={handleChange} required />
+        <input name="lastName" placeholder="Nom" value={formData.lastName} onChange={handleChange} required />
+        <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
+        <input name="password" type="password" placeholder="Mot de passe" value={formData.password} onChange={handleChange} required />
+        <input name="confirmPassword" type="password" placeholder="Confirmer le mot de passe" value={formData.confirmPassword} onChange={handleChange} required />
+        <input name="city" placeholder="Ville" value={formData.city} onChange={handleChange} required />
+        <input name="department" placeholder="Département" value={formData.department} onChange={handleChange} required />
 
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {t('signup.alreadyHaveAccount')}{' '}
-            <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
-              {t('signup.goToLogin')}
-            </Link>
-          </p>
-        </div>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('signup.subtitle')}
-          </label>
-
-          <div className="space-y-3 mb-6">
-
-            {/* CLIENT */}
-            <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="radio"
-                name="role"
-                value="client"
-                checked={role === 'client'}
-                onChange={() => handleRoleSelection('client')}
-                className="mr-3"
-              />
-              <div>
-                <span className="font-medium">{t('signup.client')}</span>
-                <p className="text-sm text-gray-600">{t('signup.client.desc')}</p>
-              </div>
-            </label>
-
-            {/* ARTISAN */}
-            <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="radio"
-                name="role"
-                value="artisan"
-                checked={role === 'artisan'}
-                onChange={() => handleRoleSelection('artisan')}
-                className="mr-3"
-              />
-              <div>
-                <span className="font-medium">{t('signup.artisan')}</span>
-                <p className="text-sm text-gray-600">{t('signup.artisan.desc')}</p>
-              </div>
-            </label>
-          </div>
-
-          {/* CLIENT FORM */}
-          {role === 'client' && (
-            <form onSubmit={handleSubmit} className="space-y-6">
-
-              {/* Prénom */}
-              <div>
-               <label className="block text-sm font-medium text-gray-700 mb-1">
-  {t('form.lastName')} *
-</label>
-
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-             
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('login.email')} *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('login.password')} *
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('signup.confirmPassword')} *
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              {error && <p className="text-red-600 text-sm">{error}</p>}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary w-full"
-              >
-                {loading ? t('common.loading') : t('signup.continue')}
-              </button>
-            </form>
-          )}
-
-          {!role && (
-            <p className="text-center text-gray-500">
-              {t('signup.selectRole')}
-            </p>
-          )}
-        </div>
-
-        <div className="text-center text-sm text-gray-600">
-          <Link href="/" className="hover:text-gray-900">
-            {t('app.back')}
-          </Link>
-        </div>
-      </div>
-    </main>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Création...' : 'Créer mon compte'}
+        </button>
+      </form>
+    </div>
   )
 }

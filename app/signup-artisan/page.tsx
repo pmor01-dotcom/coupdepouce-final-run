@@ -23,7 +23,6 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
     email: '',
     password: '',
     confirmPassword: '',
-    metier: '',
     department: '',
     city: '',
   })
@@ -58,7 +57,6 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
             firstName: formData.firstName,
             lastName: formData.lastName,
             role: 'artisan',
-            metier: formData.metier,
             department: formData.department,
             city: formData.city,
           },
@@ -83,7 +81,6 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
         firstname: formData.firstName,
         lastname: formData.lastName,
         email: formData.email,
-        job_type: formData.metier,
         department: formData.department,
         city: formData.city,
       })
@@ -93,8 +90,9 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
         setLoading(false)
         return
       }
-
-      router.push('/artisan-dashboard')
+// Success → send user to check email page
+      router.push('/check-email')
+      
     } catch (err: any) {
       setError(err.message || t('common.error'))
     } finally {
@@ -186,19 +184,6 @@ console.log("SUPABASE KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Métier *
-            </label>
-            <input
-              type="text"
-              name="metier"
-              value={formData.metier}
-              onChange={handleChange}
-              className="input-field"
-              required
-            />
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import AuthProvider from './components/AuthProvider'
-import { LanguageProvider } from './components/LanguageProvider'
+import { Providers } from './providers'
 import LanguageToggle from './components/LanguageToggle'
 
 export const metadata: Metadata = {
@@ -14,21 +13,14 @@ export const viewport = {
   initialScale: 1,
 }
 
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
       <body>
-        <LanguageProvider>
+        <Providers>
           <LanguageToggle />
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </LanguageProvider>
+          {children}
+        </Providers>
       </body>
     </html>
   )

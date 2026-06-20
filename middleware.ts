@@ -45,6 +45,7 @@ export const config = {
     '/signup-artisan',
     '/dashboard-client',
     '/dashboard-artisan',
-    '/',
+     '/check-email'
   ],
 }
+
