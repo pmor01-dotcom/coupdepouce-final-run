@@ -26,11 +26,11 @@ export async function middleware(req: NextRequest) {
     const role = user.user_metadata.role
 
     if (role === 'client') {
-      return NextResponse.redirect(new URL('/dashboard-client', req.url))
+      return NextResponse.redirect(new URL('/client-dashboard', req.url))
     }
 
     if (role === 'artisan') {
-      return NextResponse.redirect(new URL('/dashboard-artisan', req.url))
+      return NextResponse.redirect(new URL('/artisan-dashboard', req.url))
     }
   }
 
@@ -43,8 +43,8 @@ export const config = {
     '/login',
     '/signup-client',
     '/signup-artisan',
-    '/dashboard-client',
-    '/dashboard-artisan',
+    '/client-dashboard',
+    '/artisan-dashboard',
      '/check-email'
   ],
 }
