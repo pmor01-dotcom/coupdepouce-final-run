@@ -162,6 +162,12 @@ export default function Login() {
               {isLoading ? t('common.loading') : t('login.button')}
             </button>
           </div>
+
+          <div className="text-center">
+            <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+              Mot de passe oublié ?
+            </Link>
+          </div>
         </form>
       </div>
         </div>

@@ -44,6 +44,8 @@ export const config = {
     '/signup',
     '/signup-client',
     '/signup-artisan',
+    '/forgot-password',
+    '/reset-password',
     '/client-dashboard',
     '/artisan-dashboard',
      '/check-email'
