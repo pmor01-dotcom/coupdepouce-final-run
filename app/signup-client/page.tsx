@@ -8,12 +8,13 @@ export default function ClientSignupPage() {
   const router = useRouter()
 
   const [formData, setFormData] = useState({
-    name: '',
+    prenom: '',
+    nom: '',
     email: '',
     password: '',
     confirmPassword: '',
-    location: '',
-    department: '',
+    city: '',
+    departement: '',
   })
 
   const [loading, setLoading] = useState(false)
@@ -44,12 +45,13 @@ export default function ClientSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          prenom: formData.prenom,
+          nom: formData.nom,
           email: formData.email,
           password: formData.password,
           role: 'client',
-          location: formData.location,
-          department: formData.department,
+          city: formData.city,
+          departement: formData.departement,
         }),
       })
 
@@ -61,7 +63,6 @@ export default function ClientSignupPage() {
         return
       }
 
-      // Success → redirect to check email page
       router.push('/check-email')
 
     } catch (err: any) {
@@ -79,20 +80,30 @@ export default function ClientSignupPage() {
           Créer un compte client
         </h2>
 
-        <p className="text-center text-gray-600">
-          Trouvez des artisans qualifiés pour vos projets
-        </p>
-
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nom complet *
+              Prénom *
             </label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="prenom"
+              value={formData.prenom}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nom *
+            </label>
+            <input
+              type="text"
+              name="nom"
+              value={formData.nom}
               onChange={handleChange}
               className="input-field"
               required
@@ -147,8 +158,8 @@ export default function ClientSignupPage() {
             </label>
             <input
               type="text"
-              name="location"
-              value={formData.location}
+              name="city"
+              value={formData.city}
               onChange={handleChange}
               className="input-field"
               required
@@ -161,8 +172,8 @@ export default function ClientSignupPage() {
             </label>
             <input
               type="text"
-              name="department"
-              value={formData.department}
+              name="departement"
+              value={formData.departement}
               onChange={handleChange}
               className="input-field"
               required
