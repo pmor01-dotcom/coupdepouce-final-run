@@ -242,12 +242,13 @@ body {
   grid-template-columns: 1fr; /* mobile default */
 }
 
-@media (min-width: 768px) {
-  .hero-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)); /* desktop */
+/* Mobile-friendly title size */
+@media (max-width: 640px) {
+  .site-title h2 {
+    font-size: 2.2rem;   /* perfect size for phones */
+    line-height: 1.1;
   }
 }
-
 
 .hero-card {
   background-color: white;
