@@ -18,7 +18,7 @@ export default function Home() {
           </div>
 
           {/* Promo Banner */}
-          <div className="promo-banner text-center mb-12">
+          <div className="promo-banner text-center mb-12 px-2">
             <p className="promo-banner-title text-xl font-semibold text-white">
               {t('home.freePromoBanner')}
             </p>
@@ -28,15 +28,15 @@ export default function Home() {
           </div>
 
           {/* Hero Grid */}
-          <section className="hero-grid grid md:grid-cols-2 gap-8 mb-16">
-            <article className="hero-card bg-white rounded-lg shadow overflow-hidden">
+          <section className="hero-grid grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 px-2">
+            <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
               <img
                 src="/artisan-photo.jpg"
                 alt="Professional artisans working"
                 className="hero-card-image w-full h-56 object-cover"
                 loading="lazy"
               />
-              <div className="hero-card-content p-6">
+              <div className="hero-card-content p-6 text-center md:text-left">
                 <h3 className="text-xl font-semibold mb-2">
                   {t('home.qualifiedArtisans')}
                 </h3>
@@ -46,14 +46,14 @@ export default function Home() {
               </div>
             </article>
 
-            <article className="hero-card bg-white rounded-lg shadow overflow-hidden">
+            <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
               <img
                 src="/images/satisfied-clients.jpg"
                 alt="Happy clients with completed projects"
                 className="hero-card-image w-full h-56 object-cover"
                 loading="lazy"
               />
-              <div className="hero-card-content p-6">
+              <div className="hero-card-content p-6 text-center md:text-left">
                 <h3 className="text-xl font-semibold mb-2">
                   {t('home.satisfiedClients')}
                 </h3>
@@ -65,18 +65,18 @@ export default function Home() {
           </section>
 
           {/* Welcome Text */}
-          <section className="welcome-text text-center text-white mb-16 space-y-2">
+          <section className="welcome-text text-center text-white mb-16 space-y-2 px-4">
             <p>{t('welcome.line1')}</p>
             <p>{t('welcome.line2')}</p>
             <p>{t('welcome.line3')}</p>
           </section>
 
           {/* Main Hero Section */}
-          <section className="hero-main text-center text-white">
+          <section className="hero-main text-center text-white px-4">
             <h1 className="text-4xl font-bold mb-4">{t('app.title')}</h1>
             <p className="text-lg mb-8">{t('landing.subtitle')}</p>
 
-            <div className="hero-actions flex justify-center gap-6">
+            <div className="hero-actions flex flex-col sm:flex-row justify-center gap-6">
               <Link
                 href="/signup"
                 className="btn-primary px-6 py-3 bg-white text-green-700 font-semibold rounded-lg shadow hover:bg-gray-100"
