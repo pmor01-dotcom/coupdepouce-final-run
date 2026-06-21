@@ -19,7 +19,7 @@ export default function Home() {
 
           {/* Promo Banner */}
           <div className="promo-banner text-center mb-12">
-            <p classname="promo-banner-title text-xl font-semibold text-white">
+            <p className="promo-banner-title text-xl font-semibold text-white">
               {t('home.freePromoBanner')}
             </p>
             <p className="promo-banner-subtitle text-white opacity-90">
