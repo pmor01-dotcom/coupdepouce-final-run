@@ -35,6 +35,8 @@ export default function ArtisanSignupPage() {
     setError('')
     setLoading(true)
 
+    console.log('Form submitted with data:', formData)
+
     if (formData.password !== formData.confirmPassword) {
       setError('Les mots de passe ne correspondent pas')
       setLoading(false)
@@ -42,6 +44,7 @@ export default function ArtisanSignupPage() {
     }
 
     try {
+      console.log('Sending signup request to /api/auth/signup')
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -59,7 +62,9 @@ export default function ArtisanSignupPage() {
         }),
       })
 
+      console.log('Response received:', response.status, response.statusText)
       const data = await response.json()
+      console.log('Response data:', data)
 
       if (!response.ok) {
         setError(data.error || 'Erreur lors de l\'inscription')
@@ -71,6 +76,7 @@ export default function ArtisanSignupPage() {
       router.push('/check-email')
 
     } catch (err: any) {
+      console.error('Signup error:', err)
       setError(err.message || 'Erreur inconnue')
     } finally {
       setLoading(false)
