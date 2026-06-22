@@ -35,6 +35,7 @@ export async function GET(
       )
     }
 
+    
     // Fetch messages
     const { data: messages, error: msgError } = await supabase
       .from('messages')
