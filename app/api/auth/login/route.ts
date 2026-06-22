@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-
 import { supabase } from '../../../../lib/supabase-server';
 
 export async function POST(request: NextRequest) {
@@ -7,62 +6,38 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
-if (!supabase) {
-  return NextResponse.json({ error: 'Supabase client not initialized' }, { status: 500 })
-}
+
+    if (!supabase) {
+      return NextResponse.json({ error: 'Supabase client not initialized' }, { status: 500 });
+    }
 
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
 
     if (authError || !authData.session) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        subscriptions: {
-          where: { status: 'ACTIVE' }
-        }
-      }
-    });
+    const { data: userData, error: userError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
+    if (userError || !userData) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
-
-    const { password_hash, ...userWithoutPassword } = user;
 
     return NextResponse.json({
-      user: {
-        ...userWithoutPassword,
-        subscription: user.subscriptions[0] || null
-      },
-      message: 'Login successful'
+      user: userData,
+      message: 'Login successful',
     });
-
   } catch (error) {
-    console.error('Login error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : 'No stack trace',
-      error: error
-    });
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Login error details:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
