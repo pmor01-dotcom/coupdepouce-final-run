@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,28 +15,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Token and new password are required' },
         { status: 400 }
-    
+      )
+    }
 
-    if (!user) {
+    const { data: user, error: userError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('reset_token', token)
+      .gt('reset_token_expiry', new Date().toISOString())
+      .single()
+
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'Invalid or expired reset token' },
         { status: 400 }
       )
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 12)
 
-    // Update user password and clear reset token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
+    const { error: updateError } = await supabase
+      .from('clients')
+      .update({
         password_hash: hashedPassword,
         reset_token: null,
         reset_token_expiry: null,
-        updated_at: new Date()
-      }
-    })
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id)
+
+    if (updateError) {
+      return NextResponse.json(
+        { error: updateError.message },
+        { status: 400 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
@@ -38,7 +57,6 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Reset password error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
