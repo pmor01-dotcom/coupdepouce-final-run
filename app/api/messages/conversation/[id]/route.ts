@@ -35,7 +35,6 @@ export async function GET(
       )
     }
 
-    
     // Fetch messages
     const { data: messages, error: msgError } = await supabase
       .from('messages')
@@ -69,7 +68,7 @@ export async function GET(
     }
 
     // Fetch demand info
-    let demand = null
+    let demand: any= null
     if (demandId) {
       const { data, error } = await supabase
         .from('demands')
