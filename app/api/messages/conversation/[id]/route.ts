@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function GET(
   request: NextRequest,
@@ -31,64 +36,71 @@ export async function GET(
     }
 
     // Fetch messages
-    const messages = await prisma.message.findMany({
-      where: {
-        demand_id: demandId || null,
-        OR: [
-          { sender_id: id1, receiver_id: id2 },
-          { sender_id: id2, receiver_id: id1 }
-        ]
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            role: true
-          }
-        },
-        receiver: {
-          select: {
-            id: true,
-            name: true,
-            role: true
-          }
-        }
-      },
-      orderBy: {
-        created_at: 'asc'
-      }
-    })
+    const { data: messages, error: msgError } = await supabase
+      .from('messages')
+      .select(`
+        id,
+        content,
+        sender_id,
+        receiver_id,
+        created_at,
+        read_at,
+        sender:sender_id (
+          id,
+          name,
+          role
+        ),
+        receiver:receiver_id (
+          id,
+          name,
+          role
+        )
+      `)
+      .eq('demand_id', demandId || null)
+      .or(`and(sender_id.eq.${id1},receiver_id.eq.${id2}),and(sender_id.eq.${id2},receiver_id.eq.${id1})`)
+      .order('created_at', { ascending: true })
 
-    // Fetch demand info (TypeScript-safe)
-    const demand = demandId
-      ? await prisma.demand.findUnique({
-          where: { id: demandId },
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            category: true,
-            budget_range: true,
-            location: true,
-            department: true,
-            status: true
-          }
-        })
-      : null
+    if (msgError) {
+      return NextResponse.json(
+        { error: msgError.message },
+        { status: 500 }
+      )
+    }
+
+    // Fetch demand info
+    let demand = null
+    if (demandId) {
+      const { data, error } = await supabase
+        .from('demands')
+        .select(`
+          id,
+          title,
+          description,
+          category,
+          budget_range,
+          location,
+          department,
+          status
+        `)
+        .eq('id', demandId)
+        .single()
+
+      if (!error) demand = data
+    }
 
     // Fetch the other user
     const otherUserId = userIdNum === id1 ? id2 : id1
-    const otherUser = await prisma.user.findUnique({
-      where: { id: otherUserId },
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        metier: true,
-        location: true
-      }
-    })
+    const { data: otherUser } = await supabase
+      .from('users')
+      .select(`
+        id,
+        name,
+        role,
+        metier,
+        location
+      `)
+      .eq('id', otherUserId)
+      .single()
 
     return NextResponse.json({
       success: true,
@@ -96,7 +108,7 @@ export async function GET(
         conversationId,
         otherUser,
         demand,
-        messages: messages.map(msg => ({
+        messages: messages?.map(msg => ({
           id: msg.id,
           content: msg.content,
           senderId: msg.sender_id,
@@ -104,7 +116,7 @@ export async function GET(
           createdAt: msg.created_at,
           readAt: msg.read_at,
           sender: msg.sender
-        }))
+        })) || []
       }
     })
   } catch (error) {
