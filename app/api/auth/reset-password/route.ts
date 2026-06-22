@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../../lib/prisma'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
@@ -10,18 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Token and new password are required' },
         { status: 400 }
-      )
-    }
-
-    // Find user by reset token
-    const user = await prisma.user.findFirst({
-      where: {
-        reset_token: token,
-        reset_token_expiry: {
-          gt: new Date()
-        }
-      }
-    })
+    
 
     if (!user) {
       return NextResponse.json(
