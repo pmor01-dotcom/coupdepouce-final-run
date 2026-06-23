@@ -14,18 +14,17 @@ export default async function ArtisanDashboard() {
     redirect('/login')
   }
 
-  // TypeScript doesn't understand redirect exits, so we assert user is non-null
-  const safeUser = user!
-
   // If wrong role → redirect to client dashboard
-  if (safeUser.user_metadata.role !== 'artisan') {
+  if (user.user_metadata.role !== 'artisan') {
     redirect('/client-dashboard')
   }
 
+  // If everything is OK → show dashboard
   return (
     <div style={{ padding: 40 }}>
-      <h1>Artisan Dashboard</h1>
-      <p>Welcome, {safeUser.email}</p>
+      <h1>Bienvenue sur votre tableau de bord artisan</h1>
+      <p>Votre compte a été créé avec succès.</p>
+      <p>Bienvenue, {user.email}</p>
     </div>
   )
 }
