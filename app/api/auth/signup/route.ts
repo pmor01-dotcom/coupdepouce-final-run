@@ -1,47 +1,71 @@
-import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from "next/server";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import bcrypt from "bcryptjs";
 
-export async function POST(req: Request) {
-  const supabase = createRouteHandlerClient({ cookies: () => cookies() })
-  const body = await req.json()
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = createRouteHandlerClient({ cookies });
 
-  const { prenom, nom, email, password, city, departement, role } = body
+    const body = await request.json();
+    const {
+      name,
+      email,
+      password,
+      role,
+      location,
+      department,
+      metier,
+      phone
+    } = body;
 
-  // 1. Create Supabase auth user
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        prenom,
-        nom,
-        city,
-        departement,
-        role,
-      },
-    },
-  })
+    // Basic validation
+    if (!name || !email || !password || !role) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
 
-  if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 })
+    const password_hash = await bcrypt.hash(password, 10);
+
+    let insertData: any = {
+      name,
+      email,
+      password_hash,
+      location,
+      department,
+      phone
+    };
+
+    // Add artisan-only fields
+    if (role === "artisan") {
+      insertData.metier = metier;
+    }
+
+    // Insert into correct table
+    const table = role === "artisan" ? "artisans" : "clients";
+
+    const { error } = await supabase.from(table).insert(insertData);
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return NextResponse.json(
+        { error: "Failed to create user" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Signup successful"
+    });
+
+  } catch (error) {
+    console.error("Signup error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-
-  const user = authData.user
-
-  // 2. Insert into USERS table (correct table)
-  const { error: insertError } = await supabase.from('users').insert({
-    id: user?.id,
-    name: `${prenom} ${nom}`,
-    email,
-    role,
-    location: city,          // correct column
-    department: departement, // correct column
-  })
-
-  if (insertError) {
-    return NextResponse.json({ error: insertError.message }, { status: 400 })
-  }
-
-  return NextResponse.json({ success: true })
 }
