@@ -73,8 +73,7 @@ export default function ArtisanSignupPage() {
       }
 
       // Success → redirect to check email page
-      router.push('/check-email')
-
+      router.push('/dashboard-artisan')
     } catch (err: any) {
       console.error('Signup error:', err)
       setError(err.message || 'Erreur inconnue')
