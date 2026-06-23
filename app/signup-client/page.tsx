@@ -50,7 +50,7 @@ export default function ClientSignupPage() {
           email: formData.email,
           password: formData.password,
           role: 'client',
-          city: formData.city,
+          
           departement: formData.departement,
         }),
       })
