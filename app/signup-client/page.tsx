@@ -13,8 +13,7 @@ export default function ClientSignupPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    city: '',
-    departement: '',
+    ville: '',
   })
 
   const [loading, setLoading] = useState(false)
@@ -45,13 +44,14 @@ export default function ClientSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // FIXED FIELDS
-          name: formData.prenom + ' ' + formData.nom,
+          prenom: formData.prenom,
+          nom: formData.nom,
+          firstname: formData.prenom,
+          lastname: formData.nom,
           email: formData.email,
           password: formData.password,
           role: 'client',
-          location: formData.city,
-          department: formData.departement,
+          ville: formData.ville || null,
         }),
       })
 
@@ -157,22 +157,8 @@ export default function ClientSignupPage() {
             </label>
             <input
               type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Département *
-            </label>
-            <input
-              type="text"
-              name="departement"
-              value={formData.departement}
+              name="ville"
+              value={formData.ville}
               onChange={handleChange}
               className="input-field"
               required
