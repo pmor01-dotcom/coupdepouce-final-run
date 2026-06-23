@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     name: `${prenom} ${nom}`,
     email,
     role,
-    city,
+    location,
     departement,
   })
 
