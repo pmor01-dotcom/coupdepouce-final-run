@@ -19,54 +19,62 @@ export async function POST(request: NextRequest) {
       phone
     } = body;
 
-    // Basic validation
     if (!name || !email || !password || !role) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
+
+    // 1️⃣ CREATE AUTH USER
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { role }
+      }
+    });
+
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 400 });
+    }
+
+    const userId = authData.user.id;
+
+    // 2️⃣ HASH PASSWORD FOR YOUR OWN TABLE
     const password_hash = await bcrypt.hash(password, 10);
 
-   let insertData: any = {
-  nom: name,
-  email,
-  password_hash,
-  city: location,
-  department,
-  telephone: phone
-};
+    // 3️⃣ PREPARE INSERT DATA
+    let insertData: any = {
+      id: userId,
+      nom: name,
+      email,
+      password_hash,
+      city: location,
+      department,
+      telephone: phone
+    };
 
-if (role === "artisan") {
-  insertData.metier = metier;
-}
-
-
-    // Add artisan-only fields
     if (role === "artisan") {
       insertData.metier = metier;
     }
 
-    // Insert into correct table
     const table = role === "artisan" ? "artisans" : "clients";
 
+    // 4️⃣ INSERT INTO YOUR OWN TABLE
     const { error } = await supabase.from(table).insert(insertData);
 
     if (error) {
-      console.error("Supabase insert error:", error);
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // 5️⃣ SUCCESS — USER IS NOW LOGGED IN
     return NextResponse.json({
       success: true,
       message: "Signup successful"
     });
 
   } catch (error) {
-    console.error("Signup error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
