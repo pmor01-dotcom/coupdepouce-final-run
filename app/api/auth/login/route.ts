@@ -9,10 +9,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    if (!supabase) {
-      return NextResponse.json({ error: 'Supabase client not initialized' }, { status: 500 });
-    }
-
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -22,8 +18,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
+    // Fetch from USERS table (correct)
     const { data: userData, error: userError } = await supabase
-      .from('clients')
+      .from('users')
       .select('*')
       .eq('email', email)
       .single();
