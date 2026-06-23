@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../../lib/prisma'
+
 import EmailService from '../../../../lib/email'
 
 export async function POST(request: NextRequest) {
