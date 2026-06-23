@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import EmailService from '@/lib/email'
 
-
+// ⭐ FIX: use named import, not default import
+import { sendNewDemandNotification } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use the correct email method
-    const emailSent = await EmailService.sendNewDemandNotification(
+    // ⭐ FIX: call the named function
+    const emailSent = await sendNewDemandNotification(
       receiver.email,
       sender.name,
       demand.title
