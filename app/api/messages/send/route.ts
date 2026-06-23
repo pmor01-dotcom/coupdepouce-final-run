@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
     const body = await request.json()
-    const { senderId, receiverId, content, demandId, conversationId } = body
 
-    // Validate required fields
+    const { senderId, receiverId, content, demandId } = body
+
     if (!senderId || !receiverId || !content) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -14,34 +16,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if this is the first message between these users about this demand
-    const existingMessages = await prisma.message.findFirst({
-      where: {
-        OR: [
-          { sender_id: senderId, receiver_id: receiverId, demand_id: demandId },
-          { sender_id: receiverId, receiver_id: senderId, demand_id: demandId }
-        ]
-      }
-    })
+    // Check if previous messages exist between these users for this demand
+    const { data: existingMessages } = await supabase
+      .from('messages')
+      .select('*')
+      .or(
+        `and(sender_id.eq.${senderId},receiver_id.eq.${receiverId},demand_id.eq.${demandId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId},demand_id.eq.${demandId})`
+      )
+      .limit(1)
 
-    // Business rule: Only clients can initiate contact
-    if (!existingMessages) {
-      const sender = await prisma.user.findUnique({
-        where: { id: senderId }
-      })
+    // Business rule: only clients can initiate contact
+    if (!existingMessages || existingMessages.length === 0) {
+      const { data: sender } = await supabase
+        .from('users')
+        .select('id, role')
+        .eq('id', senderId)
+        .single()
 
-      if (!sender || sender.role !== 'CLIENT') {
+      if (!sender || sender.role !== 'client') {
         return NextResponse.json(
           { error: 'Only clients can initiate contact with artisans' },
           { status: 403 }
         )
       }
 
-      // Verify the demand belongs to the client
+      // Verify demand belongs to the client
       if (demandId) {
-        const demand = await prisma.demand.findUnique({
-          where: { id: demandId }
-        })
+        const { data: demand } = await supabase
+          .from('demands')
+          .select('id, client_id')
+          .eq('id', demandId)
+          .single()
 
         if (!demand || demand.client_id !== senderId) {
           return NextResponse.json(
@@ -53,33 +58,41 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the message
-    const message = await prisma.message.create({
-      data: {
+    const { data: message, error: messageError } = await supabase
+      .from('messages')
+      .insert({
         content,
         sender_id: senderId,
         receiver_id: receiverId,
         demand_id: demandId || null
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            role: true
-          }
-        }
-      }
-    })
+      })
+      .select(
+        `
+        id,
+        content,
+        sender:users!messages_sender_id_fkey(id, name, role)
+      `
+      )
+      .single()
 
-    // Get demand title if demandId exists (TypeScript-safe)
-    const demandTitle: string | null = demandId
-      ? (
-          await prisma.demand.findUnique({
-            where: { id: demandId },
-            select: { title: true }
-          })
-        )?.title || null
-      : null
+    if (messageError) {
+      return NextResponse.json(
+        { error: messageError.message },
+        { status: 400 }
+      )
+    }
+
+    // Fetch demand title if needed
+    let demandTitle = null
+    if (demandId) {
+      const { data: demand } = await supabase
+        .from('demands')
+        .select('title')
+        .eq('id', demandId)
+        .single()
+
+      demandTitle = demand?.title || null
+    }
 
     return NextResponse.json({
       success: true,
