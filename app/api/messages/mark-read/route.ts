@@ -1,63 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import EmailService from "../../../../lib/email";
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
 
-    const body = await request.json();
-    const { conversationId, userId } = body;
+    const { senderId, receiverId, demandId } = await request.json();
 
-    if (!conversationId || !userId) {
+    if (!senderId || !receiverId || !demandId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const userIdNum = parseInt(userId);
+    // Fetch sender
+    const { data: sender, error: senderError } = await supabase
+      .from("users")
+      .select("id, name, email")
+      .eq("id", senderId)
+      .single();
 
-    // Parse conversation ID: "id1-id2-demandId"
-    const [id1, id2, demandId] = conversationId.split("-").map(Number);
+    // Fetch receiver
+    const { data: receiver, error: receiverError } = await supabase
+      .from("users")
+      .select("id, name, email")
+      .eq("id", receiverId)
+      .single();
 
-    // Verify user is part of this conversation
-    if (userIdNum !== id1 && userIdNum !== id2) {
+    // Fetch demand
+    const { data: demand, error: demandError } = await supabase
+      .from("demands")
+      .select("id, title")
+      .eq("id", demandId)
+      .single();
+
+    if (senderError || receiverError || demandError || !sender || !receiver || !demand) {
       return NextResponse.json(
-        { error: "Unauthorized access to conversation" },
-        { status: 403 }
+        { error: "Invalid sender, receiver, or demand" },
+        { status: 400 }
       );
     }
 
-    // Build filter for messages to update
-    const filter: any = {
-      receiver_id: userIdNum,
-      read_at: null
-    };
+    // Send notification email
+    const emailSent = await EmailService.sendNewMessageNotification(
+      receiver.email,
+      sender.name,
+      demand.title
+    );
 
-    filter["demand_id"] = demandId || null;
-
-    // Mark messages as read
-    const { error } = await supabase
-      .from("messages")
-      .update({ read_at: new Date().toISOString() })
-      .match(filter);
-
-    if (error) {
-      console.error("Error marking messages as read:", error);
+    if (!emailSent) {
       return NextResponse.json(
-        { error: "Failed to mark messages as read" },
+        { error: "Failed to send notification email" },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
-      success: true
+      success: true,
+      message: "Notification sent successfully"
     });
   } catch (error) {
-    console.error("Error marking messages as read:", error);
+    console.error("Notification error:", error);
     return NextResponse.json(
-      { error: "Failed to mark messages as read" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
