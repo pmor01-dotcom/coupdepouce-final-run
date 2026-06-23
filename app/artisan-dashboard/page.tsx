@@ -11,12 +11,12 @@ export default async function ArtisanDashboard() {
 
   // If no user → redirect to login
   if (!user) {
-    redirect('/login')
+    return redirect('/login')
   }
 
   // If wrong role → redirect to client dashboard
   if (user.user_metadata?.role !== 'artisan') {
-    redirect('/client-dashboard')
+    return redirect('/client-dashboard')
   }
 
   // If everything is OK → show dashboard
