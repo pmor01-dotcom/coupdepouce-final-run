@@ -39,7 +39,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
-    const userId = authData.user.id;
+    if (!authData.user) {
+  return NextResponse.json(
+    { error: "User creation failed" },
+    { status: 500 }
+  );
+}
+
+
 
     // 2️⃣ HASH PASSWORD FOR YOUR OWN TABLE
     const password_hash = await bcrypt.hash(password, 10);
