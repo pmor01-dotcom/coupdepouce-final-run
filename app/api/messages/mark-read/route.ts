@@ -32,9 +32,10 @@ export async function POST(request: NextRequest) {
     // Build filter for messages to update
     const filter: any = {
       receiver_id: userIdNum,
-      read_at: null,
+      read_at: null
     };
 
+    // demandId can be 0 (no demand)
     if (demandId) {
       filter["demand_id"] = demandId;
     } else {
@@ -55,9 +56,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Supabase returns updated rows OR null depending on config
+    const updatedCount = Array.isArray(data) ? data.length : 0;
+
     return NextResponse.json({
       success: true,
-      updatedCount: data?.length || 0,
+      updatedCount
     });
   } catch (error) {
     console.error("Error marking messages as read:", error);
