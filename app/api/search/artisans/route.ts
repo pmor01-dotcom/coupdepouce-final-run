@@ -1,174 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server'
-
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
     const { searchParams } = new URL(request.url)
     
-    // Extract search parameters
     const query = searchParams.get('query') || ''
     const category = searchParams.get('category')
     const department = searchParams.get('department')
     const location = searchParams.get('location')
-    const minExperience = searchParams.get('minExperience')
-    const maxExperience = searchParams.get('maxExperience')
-    const hasInsurance = searchParams.get('hasInsurance')
-    const isAvailable = searchParams.get('isAvailable')
-    const minRating = searchParams.get('minRating')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const sortBy = searchParams.get('sortBy') || 'created_at'
     const sortOrder = searchParams.get('sortOrder') || 'desc'
 
-    // Build where clause for filtering
-    const whereClause: any = {
-      role: 'ARTISAN'
-      // is_paid check removed - service is free for now
-    }
+    // Build Supabase query
+    let supabaseQuery = supabase
+      .from('users')
+      .select('*', { count: 'exact' })
+      .eq('role', 'ARTISAN')
 
-    // Text search across multiple fields
+    // Text search
     if (query) {
-      whereClause.OR = [
-        { name: { contains: query, mode: 'insensitive' } },
-        { metier: { contains: query, mode: 'insensitive' } },
-        { location: { contains: query, mode: 'insensitive' } },
-        { department: { contains: query, mode: 'insensitive' } },
-        { business_address: { contains: query, mode: 'insensitive' } },
-        { company_name: { contains: query, mode: 'insensitive' } }
-      ]
+      supabaseQuery = supabaseQuery.or(`name.ilike.%${query}%,metier.ilike.%${query}%,location.ilike.%${query}%,department.ilike.%${query}%`)
     }
 
     // Category filter
     if (category) {
-      whereClause.metier = { contains: category, mode: 'insensitive' }
+      supabaseQuery = supabaseQuery.ilike('metier', `%${category}%`)
     }
 
-    // Location filters
+    // Department filter
     if (department) {
-      whereClause.department = { contains: department, mode: 'insensitive' }
+      supabaseQuery = supabaseQuery.ilike('department', `%${department}%`)
     }
-    
+
+    // Location filter
     if (location) {
-      whereClause.OR = [
-        ...(whereClause.OR || []),
-        { location: { contains: location, mode: 'insensitive' } },
-        { business_address: { contains: location, mode: 'insensitive' } }
-      ]
+      supabaseQuery = supabaseQuery.ilike('location', `%${location}%`)
     }
 
-    // Experience filters
-    if (minExperience || maxExperience) {
-      whereClause.experience_years = {}
-      if (minExperience) {
-        whereClause.experience_years.gte = parseInt(minExperience)
-      }
-      if (maxExperience) {
-        whereClause.experience_years.lte = parseInt(maxExperience)
-      }
-    }
+    // Sorting
+    const ascending = sortOrder === 'asc'
+    supabaseQuery = supabaseQuery.order(sortBy, { ascending })
 
-    // Insurance filter
-    if (hasInsurance === 'true') {
-      whereClause.insurance_number = { not: null }
-    } else if (hasInsurance === 'false') {
-      whereClause.insurance_number = null
-    }
+    // Pagination
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    supabaseQuery = supabaseQuery.range(from, to)
 
-    // Availability filter (based on work_hours)
-    if (isAvailable === 'true') {
-      whereClause.work_hours = { not: null }
-    }
+    const { data: artisans, error, count } = await supabaseQuery
 
-    // Rating filter
-    if (minRating) {
-      const minRatingFloat = parseFloat(minRating)
-      whereClause.reviews = {
-        some: {
-          rating: { gte: minRatingFloat }
-        }
-      }
-    }
+    if (error) throw error
 
-    // Build order by clause
-    const orderBy: any = {}
-    if (sortBy === 'name') {
-      orderBy.name = sortOrder
-    } else if (sortBy === 'experience') {
-      orderBy.experience_years = sortOrder
-    } else if (sortBy === 'rating') {
-      orderBy.reviews = {
-        _avg: {
-          rating: sortOrder
-        }
-      }
-    } else {
-      orderBy.created_at = sortOrder
-    }
+    const artisansWithRatings = artisans?.map(artisan => ({
+      id: artisan.id,
+      name: artisan.name,
+      metier: artisan.metier,
+      location: artisan.location,
+      department: artisan.department,
+      experience_years: artisan.experience_years,
+      insurance_number: artisan.insurance_number,
+      work_hours: artisan.work_hours,
+      business_address: artisan.business_address,
+      company_name: artisan.company_name,
+      phone: artisan.phone,
+      created_at: artisan.created_at,
+      averageRating: 0,
+      totalReviews: 0,
+      totalProposals: 0,
+      recentProposals: [],
+      hasInsurance: !!artisan.insurance_number,
+      isAvailable: !!artisan.work_hours
+    })) || []
 
-    // Calculate pagination
-    const skip = (page - 1) * limit
-
-    // Execute search with pagination
-    const [artisans, totalCount] = await Promise.all([
-      prisma.user.findMany({
-        where: whereClause,
-        include: {
-          proposals: {
-            select: {
-              id: true,
-              status: true,
-              demand: {
-                select: {
-                  id: true,
-                  title: true,
-                  category: true
-                }
-              }
-            },
-            take: 5,
-            orderBy: { created_at: 'desc' }
-          },
-          _count: {
-            select: {
-              proposals: true
-            }
-          }
-        },
-        orderBy,
-        skip,
-        take: limit
-      }),
-      prisma.user.count({ where: whereClause })
-    ])
-
-    // Calculate average rating for each artisan
-    const artisansWithRatings = artisans.map(artisan => {
-      return {
-        id: artisan.id,
-        name: artisan.name,
-        metier: artisan.metier,
-        location: artisan.location,
-        department: artisan.department,
-        experience_years: artisan.experience_years,
-        insurance_number: artisan.insurance_number,
-        work_hours: artisan.work_hours,
-        business_address: artisan.business_address,
-        company_name: artisan.company_name,
-        phone: artisan.phone,
-        created_at: artisan.created_at,
-        averageRating: 0,
-        totalReviews: 0,
-        totalProposals: artisan._count.proposals,
-        recentProposals: artisan.proposals,
-        hasInsurance: !!artisan.insurance_number,
-        isAvailable: !!artisan.work_hours
-      }
-    })
-
-    // Calculate pagination info
-    const totalPages = Math.ceil(totalCount / limit)
+    const totalPages = Math.ceil((count || 0) / limit)
     const hasNextPage = page < totalPages
     const hasPreviousPage = page > 1
 
@@ -179,7 +89,7 @@ export async function GET(request: NextRequest) {
         pagination: {
           currentPage: page,
           totalPages,
-          totalCount,
+          totalCount: count || 0,
           hasNextPage,
           hasPreviousPage,
           limit
@@ -189,11 +99,6 @@ export async function GET(request: NextRequest) {
           category,
           department,
           location,
-          minExperience,
-          maxExperience,
-          hasInsurance,
-          isAvailable,
-          minRating,
           sortBy,
           sortOrder
         }

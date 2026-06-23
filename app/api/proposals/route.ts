@@ -1,61 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     const { searchParams } = new URL(request.url);
     const artisanId = searchParams.get('artisanId');
     const demandId = searchParams.get('demandId');
 
-    // -----------------------------------------
-    // GET proposals for a specific artisan (UUID)
-    // -----------------------------------------
     if (artisanId) {
-      // Get proposals for specific artisan (UUID)
-      const proposals = await prisma.proposal.findMany({
-        where: { artisan_id: Number(artisanId) },
+      const { data: proposals, error } = await supabase
+        .from('proposals')
+        .select(`
+          *,
+          demand:demands (
+            *,
+            client:users!demands_client_id_fkey (
+              id,
+              name,
+              location
+            )
+          )
+        `)
+        .eq('artisan_id', artisanId)
+        .order('created_at', { ascending: false });
 
-        include: {
-          demand: {
-            include: {
-              client: {
-                select: {
-                  id: true,
-                  name: true,
-                  location: true
-                }
-              }
-            }
-          }
-        },
-        orderBy: { created_at: 'desc' }
-      });
-
+      if (error) throw error;
       return NextResponse.json(proposals);
     }
 
-    // -----------------------------------------
-    // GET proposals for a specific demand (INT)
-    // -----------------------------------------
     if (demandId) {
-      const proposals = await prisma.proposal.findMany({
-        where: { demand_id: parseInt(demandId) },
-        include: {
-          artisan: {
-            select: {
-              id: true,
-              name: true,
-              metier: true,
-              location: true,
-              phone: true
-            }
-          }
-        },
-        orderBy: { created_at: 'desc' }
-      });
+      const { data: proposals, error } = await supabase
+        .from('proposals')
+        .select(`
+          *,
+          artisan:users!proposals_artisan_id_fkey (
+            id,
+            name,
+            metier,
+            location,
+            phone
+          )
+        `)
+        .eq('demand_id', parseInt(demandId))
+        .order('created_at', { ascending: false });
 
+      if (error) throw error;
       return NextResponse.json(proposals);
     }
 
@@ -72,6 +65,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     const {
       message,
       proposed_price,
@@ -88,38 +82,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const proposal = await prisma.proposal.create({
-      data: {
+    const { data: proposal, error } = await supabase
+      .from('proposals')
+      .insert({
         message,
         proposed_price,
         estimated_duration: estimated_duration || null,
         availability: availability || null,
-        demand_id: parseInt(demand_id), // INT
-        artisan_id: artisan_id // UUID string
-      },
-      include: {
-        artisan: {
-          select: {
-            id: true,
-            name: true,
-            metier: true,
-            location: true,
-            phone: true
-          }
-        },
-        demand: {
-          include: {
-            client: {
-              select: {
-                id: true,
-                name: true,
-                location: true
-              }
-            }
-          }
-        }
-      }
-    });
+        demand_id: parseInt(demand_id),
+        artisan_id: artisan_id
+      })
+      .select(`
+        *,
+        artisan:users!proposals_artisan_id_fkey (
+          id,
+          name,
+          metier,
+          location,
+          phone
+        ),
+        demand:demands (
+          *,
+          client:users!demands_client_id_fkey (
+            id,
+            name,
+            location
+          )
+        )
+      `)
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({
       proposal,

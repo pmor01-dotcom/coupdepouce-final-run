@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
@@ -16,21 +18,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's subscription from database
-    const subscription = await prisma.subscription.findFirst({
-      where: { user_id: parseInt(userId) },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            is_paid: true
-          }
-        }
-      }
-    })
+    const { data: subscription, error: subError } = await supabase
+      .from('subscriptions')
+      .select(`
+        *,
+        user:users!subscriptions_user_id_fkey (
+          id,
+          email,
+          name,
+          is_paid
+        )
+      `)
+      .eq('user_id', parseInt(userId))
+      .single()
 
-    if (!subscription) {
+    if (subError || !subscription) {
       return NextResponse.json({
         subscription: null,
         user: {

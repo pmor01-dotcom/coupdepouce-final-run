@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
     const { searchParams } = new URL(request.url)
     
-    // Extract search parameters
     const query = searchParams.get('query') || ''
     const category = searchParams.get('category')
     const department = searchParams.get('department')
@@ -15,180 +16,91 @@ export async function GET(request: NextRequest) {
     const budgetRange = searchParams.get('budgetRange')
     const urgency = searchParams.get('urgency')
     const status = searchParams.get('status')
-    const minBudget = searchParams.get('minBudget')
-    const maxBudget = searchParams.get('maxBudget')
-    const hasProposals = searchParams.get('hasProposals')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const sortBy = searchParams.get('sortBy') || 'created_at'
     const sortOrder = searchParams.get('sortOrder') || 'desc'
 
-    // Build where clause for filtering
-    const whereClause: any = {}
+    // Build Supabase query
+    let supabaseQuery = supabase
+      .from('demands')
+      .select(`
+        *,
+        client:users!demands_client_id_fkey (
+          id,
+          name,
+          location
+        )
+      `, { count: 'exact' })
 
-    // Text search across multiple fields
+    // Text search
     if (query) {
-      whereClause.OR = [
-        { title: { contains: query, mode: 'insensitive' } },
-        { description: { contains: query, mode: 'insensitive' } },
-        { location: { contains: query, mode: 'insensitive' } },
-        { department: { contains: query, mode: 'insensitive' } },
-        { category: { contains: query, mode: 'insensitive' } }
-      ]
+      supabaseQuery = supabaseQuery.or(`title.ilike.%${query}%,description.ilike.%${query}%,location.ilike.%${query}%,department.ilike.%${query}%,category.ilike.%${query}%`)
     }
 
     // Category filter
     if (category) {
-      whereClause.category = { contains: category, mode: 'insensitive' }
+      supabaseQuery = supabaseQuery.ilike('category', `%${category}%`)
     }
 
-    // Location filters
+    // Department filter
     if (department) {
-      whereClause.department = { contains: department, mode: 'insensitive' }
+      supabaseQuery = supabaseQuery.ilike('department', `%${department}%`)
     }
-    
+
+    // Location filter
     if (location) {
-      whereClause.OR = [
-        ...(whereClause.OR || []),
-        { location: { contains: location, mode: 'insensitive' } }
-      ]
+      supabaseQuery = supabaseQuery.ilike('location', `%${location}%`)
     }
 
-    // Budget filters
+    // Budget filter
     if (budgetRange) {
-      whereClause.budget_range = { contains: budgetRange, mode: 'insensitive' }
-    }
-
-    // Budget range filters
-    if (minBudget || maxBudget) {
-      const budgetConditions: any[] = []
-      
-      if (minBudget) {
-        budgetConditions.push({
-          budget_range: { contains: minBudget, mode: 'insensitive' }
-        })
-      }
-      
-      if (maxBudget) {
-        budgetConditions.push({
-          budget_range: { contains: maxBudget, mode: 'insensitive' }
-        })
-      }
-      
-      if (budgetConditions.length > 0) {
-        whereClause.AND = budgetConditions
-      }
+      supabaseQuery = supabaseQuery.ilike('budget_range', `%${budgetRange}%`)
     }
 
     // Urgency filter
     if (urgency) {
-      whereClause.urgency = urgency
+      supabaseQuery = supabaseQuery.eq('urgency', urgency)
     }
 
     // Status filter
     if (status) {
-      whereClause.status = status
+      supabaseQuery = supabaseQuery.eq('status', status)
     }
 
-    // Proposals filter
-    if (hasProposals === 'true') {
-      whereClause.proposals = {
-        some: {}
-      }
-    } else if (hasProposals === 'false') {
-      whereClause.proposals = {
-        none: {}
-      }
-    }
+    // Sorting
+    const ascending = sortOrder === 'asc'
+    supabaseQuery = supabaseQuery.order(sortBy, { ascending })
 
-    // Build order by clause
-    const orderBy: any = {}
-    if (sortBy === 'title') {
-      orderBy.title = sortOrder
-    } else if (sortBy === 'budget') {
-      orderBy.budget_range = sortOrder
-    } else if (sortBy === 'urgency') {
-      orderBy.urgency = sortOrder
-    } else if (sortBy === 'proposals') {
-      orderBy.proposals = {
-        _count: sortOrder
-      }
-    } else {
-      orderBy.created_at = sortOrder
-    }
+    // Pagination
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    supabaseQuery = supabaseQuery.range(from, to)
 
-    // Calculate pagination
-    const skip = (page - 1) * limit
+    const { data: demands, error, count } = await supabaseQuery
 
-    // Execute search with pagination
-    const [demands, totalCount] = await Promise.all([
-      prisma.demand.findMany({
-        where: whereClause,
-        include: {
-          client: {
-            select: {
-              id: true,
-              name: true,
-              location: true
-            }
-          },
-          proposals: {
-            select: {
-              id: true,
-              status: true,
-              proposed_price: true,
-              artisan: {
-                select: {
-                  id: true,
-                  name: true,
-                  metier: true
-                }
-              }
-            },
-            orderBy: { created_at: 'desc' },
-            take: 5
-          },
-          _count: {
-            select: {
-              proposals: true
-            }
-          }
-        },
-        orderBy,
-        skip,
-        take: limit
-      }),
-      prisma.demand.count({ where: whereClause })
-    ])
+    if (error) throw error
 
-    // Process demands with additional calculated fields
-    const processedDemands = demands.map(demand => {
-      const proposals = demand.proposals || []
-      const hasValidProposals = proposals.some(p => p.status === 'ACCEPTED')
-      const pendingProposals = proposals.filter(p => p.status === 'PENDING')
-      
-      return {
-        id: demand.id,
-        title: demand.title,
-        description: demand.description,
-        category: demand.category,
-        location: demand.location,
-        department: demand.department,
-        budget_range: demand.budget_range,
-        urgency: demand.urgency,
-        status: demand.status,
-        created_at: demand.created_at,
-        client: demand.client,
-        totalProposals: demand._count.proposals,
-        pendingProposals: pendingProposals.length,
-        hasValidProposals,
-        recentProposals: proposals.slice(0, 3),
-        urgency_level: demand.urgency === 'HIGH' ? 3 : demand.urgency === 'MEDIUM' ? 2 : 1
-      }
-    })
+    const processedDemands = demands?.map(demand => ({
+      id: demand.id,
+      title: demand.title,
+      description: demand.description,
+      category: demand.category,
+      location: demand.location,
+      department: demand.department,
+      budget_range: demand.budget_range,
+      urgency: demand.urgency,
+      status: demand.status,
+      created_at: demand.created_at,
+      client: demand.client,
+      totalProposals: 0,
+      pendingProposals: 0,
+      hasValidProposals: false,
+      recentProposals: [],
+      urgency_level: demand.urgency === 'HIGH' ? 3 : demand.urgency === 'MEDIUM' ? 2 : 1
+    })) || []
 
-    // Calculate pagination info
-    const totalPages = Math.ceil(totalCount / limit)
+    const totalPages = Math.ceil((count || 0) / limit)
     const hasNextPage = page < totalPages
     const hasPreviousPage = page > 1
 
@@ -199,7 +111,7 @@ export async function GET(request: NextRequest) {
         pagination: {
           currentPage: page,
           totalPages,
-          totalCount,
+          totalCount: count || 0,
           hasNextPage,
           hasPreviousPage,
           limit
@@ -212,9 +124,6 @@ export async function GET(request: NextRequest) {
           budgetRange,
           urgency,
           status,
-          minBudget,
-          maxBudget,
-          hasProposals,
           sortBy,
           sortOrder
         }

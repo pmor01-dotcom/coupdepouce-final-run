@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY
@@ -10,6 +11,7 @@ function getStripe() {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
     const { userId } = await request.json()
 
     if (!userId) {
@@ -20,11 +22,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's subscription from database
-    const subscription = await prisma.subscription.findFirst({
-      where: { user_id: parseInt(userId) }
-    })
+    const { data: subscription, error: subError } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', parseInt(userId))
+      .single()
 
-    if (!subscription) {
+    if (subError || !subscription) {
       return NextResponse.json(
         { error: 'No subscription found' },
         { status: 404 }
@@ -38,24 +42,27 @@ export async function POST(request: NextRequest) {
         await stripe.subscriptions.cancel(subscription.stripe_subscription_id)
       } catch (stripeError) {
         console.error('Error cancelling Stripe subscription:', stripeError)
-        // Continue with database update even if Stripe cancellation fails
       }
     }
 
     // Update subscription in database
-    await prisma.subscription.update({
-      where: { id: subscription.id },
-      data: {
+    const { error: updateError } = await supabase
+      .from('subscriptions')
+      .update({
         status: 'CANCELLED',
         auto_renew: false
-      }
-    })
+      })
+      .eq('id', subscription.id)
+
+    if (updateError) throw updateError
 
     // Update user's paid status
-    await prisma.user.update({
-      where: { id: parseInt(userId) },
-      data: { is_paid: false }
-    })
+    const { error: userError } = await supabase
+      .from('users')
+      .update({ is_paid: false })
+      .eq('id', parseInt(userId))
+
+    if (userError) throw userError
 
     return NextResponse.json({
       success: true,
