@@ -78,11 +78,12 @@ export default function Home() {
 
             <div className="hero-actions flex flex-col sm:flex-row justify-center gap-6">
               <Link
-                href="/signup"
-                className="btn-primary px-6 py-3 bg-white text-green-700 font-semibold rounded-lg shadow hover:bg-gray-100"
-              >
-                {t('app.createAccount')}
-              </Link>
+  href="/signup-client"
+  className="btn-primary px-6 py-3 bg-white text-green-700 font-semibold rounded-lg shadow hover:bg-gray-100"
+>
+  {t('app.createAccount')}
+</Link>
+
 
               <Link
                 href="/login"
