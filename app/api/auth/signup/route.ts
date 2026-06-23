@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1️⃣ CREATE AUTH USER
+    // 1️⃣ Create Supabase Auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -39,19 +39,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
+    // 2️⃣ Ensure user exists
     if (!authData.user) {
-  return NextResponse.json(
-    { error: "User creation failed" },
-    { status: 500 }
-  );
-}
+      return NextResponse.json(
+        { error: "User creation failed" },
+        { status: 500 }
+      );
+    }
 
+    // 3️⃣ NOW we can safely use userId
+    const userId = authData.user.id;
 
-
-    // 2️⃣ HASH PASSWORD FOR YOUR OWN TABLE
+    // 4️⃣ Hash password for your own table
     const password_hash = await bcrypt.hash(password, 10);
 
-    // 3️⃣ PREPARE INSERT DATA
+    // 5️⃣ Prepare insert data
     let insertData: any = {
       id: userId,
       nom: name,
@@ -68,14 +70,14 @@ export async function POST(request: NextRequest) {
 
     const table = role === "artisan" ? "artisans" : "clients";
 
-    // 4️⃣ INSERT INTO YOUR OWN TABLE
+    // 6️⃣ Insert into your own table
     const { error } = await supabase.from(table).insert(insertData);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // 5️⃣ SUCCESS — USER IS NOW LOGGED IN
+    // 7️⃣ Success — user is logged in
     return NextResponse.json({
       success: true,
       message: "Signup successful"
