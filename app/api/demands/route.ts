@@ -1,89 +1,117 @@
 export const dynamic = "force-dynamic";
-import { NextRequest, NextResponse } from 'next/server';
 
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from "next/server";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
+// =========================
+// GET — Fetch all demands for logged-in user
+// =========================
 export async function GET() {
   try {
-    const supabase = createServerComponentClient({ cookies })
+    const supabase = createRouteHandlerClient({ cookies });
 
     const {
       data: { user },
-      error: userError
-    } = await supabase.auth.getUser()
+      error: userError,
+    } = await supabase.auth.getUser();
 
     if (userError) {
-      console.error('Error fetching user:', userError)
-      return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 })
+      console.error("Error fetching user:", userError);
+      return NextResponse.json(
+        { error: "Failed to fetch user" },
+        { status: 500 }
+      );
     }
 
     if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Get user from Prisma to get the correct ID
-    const prismaUser = await prisma.user.findUnique({
-      where: { email: user.email }
-    })
+    // Fetch demands belonging to this user
+    const { data: demands, error: demandsError } = await supabase
+      .from("demands")
+      .select("*")
+      .eq("client_id", user.id);
 
-    if (!prismaUser) {
-      return NextResponse.json({ error: 'User not found in database' }, { status: 404 })
+    if (demandsError) {
+      console.error("Error fetching demands:", demandsError);
+      return NextResponse.json(
+        { error: "Failed to fetch demands" },
+        { status: 500 }
+      );
     }
 
-    const demands = await prisma.demand.findMany({
-      where: { client_id: prismaUser.id },
-      orderBy: { created_at: 'desc' }
-    })
-
-    return NextResponse.json(demands)
+    return NextResponse.json(demands);
   } catch (error) {
-    console.error('Error fetching demands:', error)
-    return NextResponse.json({ error: 'Failed to fetch demands' }, { status: 500 })
+    console.error("Error fetching demands:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch demands" },
+      { status: 500 }
+    );
   }
 }
 
+// =========================
+// POST — Create a new demand
+// =========================
 export async function POST(req: Request) {
   try {
-    const supabase = createServerComponentClient({ cookies })
-    const body = await req.json()
+    const supabase = createRouteHandlerClient({ cookies });
+    const body = await req.json();
 
     const {
       data: { user },
-      error: userError
-    } = await supabase.auth.getUser()
+      error: userError,
+    } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Get user from Prisma to get the correct ID
-    const prismaUser = await prisma.user.findUnique({
-      where: { email: user.email }
-    })
+    const {
+      title,
+      description,
+      category,
+      location,
+      department,
+      budget_range,
+      urgency,
+    } = body;
 
-    if (!prismaUser) {
-      return NextResponse.json({ error: 'User not found in database' }, { status: 404 })
-    }
-
-    const { title, description, category, location, department, budget_range, urgency } = body
-
-    const demand = await prisma.demand.create({
-      data: {
+    // Insert demand into Supabase
+    const { data: demand, error: insertError } = await supabase
+      .from("demands")
+      .insert({
         title,
         description,
         category,
         location,
         department,
         budget_range,
-        urgency: urgency || 'NORMAL',
-        client_id: prismaUser.id
-      }
-    })
+        urgency: urgency || "NORMAL",
+        client_id: user.id,
+      })
+      .select()
+      .single();
 
-    return NextResponse.json({ demand, message: 'Demand created successfully' })
+    if (insertError) {
+      console.error("Insert error:", insertError);
+      return NextResponse.json(
+        { error: "Failed to create demand" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      demand,
+      message: "Demand created successfully",
+    });
   } catch (error) {
-    console.error('Error creating demand:', error)
-    return NextResponse.json({ error: 'Failed to create demand' }, { status: 500 })
+    console.error("Error creating demand:", error);
+    return NextResponse.json(
+      { error: "Failed to create demand" },
+      { status: 500 }
+    );
   }
 }
