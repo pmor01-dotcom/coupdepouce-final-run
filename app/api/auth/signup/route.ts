@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
     const password_hash = await bcrypt.hash(password, 10);
 
    let insertData: any = {
