@@ -9,17 +9,19 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      name,
+      prenom,
+      nom,
+      firstname,
+      lastname,
       email,
       password,
       role,
-      location,
-      department,
-      metier,
-      phone
+      ville,
+      metier // only for artisans
     } = body;
 
-    if (!name || !email || !password || !role) {
+    // Validate required fields
+    if (!prenom || !nom || !email || !password || !role) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -39,7 +41,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
-    // 2️⃣ Ensure user exists
     if (!authData.user) {
       return NextResponse.json(
         { error: "User creation failed" },
@@ -47,37 +48,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3️⃣ NOW we can safely use userId
     const userId = authData.user.id;
 
-    // 4️⃣ Hash password for your own table
+    // 2️⃣ Hash password for your own table
     const password_hash = await bcrypt.hash(password, 10);
 
-    // 5️⃣ Prepare insert data
+    // 3️⃣ Prepare insert data for clients or artisans
     let insertData: any = {
       id: userId,
-      nom: name,
       email,
-      password_hash,
-      city: location,
-      department,
-      telephone: phone
+      prenom,
+      nom,
+      firstname,
+      lastname,
+      ville: ville || null,
+      password_hash
     };
 
     if (role === "artisan") {
-      insertData.metier = metier;
+      insertData.metier = metier || null;
     }
 
     const table = role === "artisan" ? "artisans" : "clients";
 
-    // 6️⃣ Insert into your own table
+    // 4️⃣ Insert into the correct table
     const { error } = await supabase.from(table).insert(insertData);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // 7️⃣ Success — user is logged in
     return NextResponse.json({
       success: true,
       message: "Signup successful"
