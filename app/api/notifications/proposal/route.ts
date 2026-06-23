@@ -51,12 +51,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Handle client data (may be array or single object)
+    const client = Array.isArray(demand.client) ? demand.client[0] : demand.client
+
     // Send email notification to client
     const emailSent = await EmailService.sendNewProposalEmail(
-      demand.client.email,
+      client.email,
       artisan.name,
       demand.title,
-      demand.client.name
+      client.name
     )
 
     if (!emailSent) {
