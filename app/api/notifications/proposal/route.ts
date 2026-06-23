@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../../lib/prisma'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import EmailService from '../../../../lib/email'
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
     const { artisanId, demandId, proposalContent } = await request.json()
 
     if (!artisanId || !demandId || !proposalContent) {
@@ -13,20 +15,38 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get artisan, demand, and client information
-    const [artisan, demand] = await Promise.all([
-      prisma.user.findUnique({ where: { id: parseInt(artisanId) } }),
-      prisma.demand.findUnique({ 
-        where: { id: parseInt(demandId) },
-        include: {
-          client: true
-        }
-      })
-    ])
+    // Fetch artisan
+    const { data: artisan, error: artisanError } = await supabase
+      .from('users')
+      .select('id, name, email, role')
+      .eq('id', artisanId)
+      .single()
 
-    if (!artisan || !demand || !demand.client) {
+    if (artisanError || !artisan) {
       return NextResponse.json(
-        { error: 'Invalid artisan or demand' },
+        { error: 'Invalid artisan' },
+        { status: 400 }
+      )
+    }
+
+    // Fetch demand + client
+    const { data: demand, error: demandError } = await supabase
+      .from('demands')
+      .select(`
+        id,
+        title,
+        client:users!demands_client_id_fkey (
+          id,
+          name,
+          email
+        )
+      `)
+      .eq('id', demandId)
+      .single()
+
+    if (demandError || !demand || !demand.client) {
+      return NextResponse.json(
+        { error: 'Invalid demand' },
         { status: 400 }
       )
     }
@@ -39,17 +59,17 @@ export async function POST(request: NextRequest) {
       demand.client.name
     )
 
-    if (emailSent) {
-      return NextResponse.json({
-        success: true,
-        message: 'Proposal notification sent successfully'
-      })
-    } else {
+    if (!emailSent) {
       return NextResponse.json(
         { error: 'Failed to send proposal notification' },
         { status: 500 }
       )
     }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Proposal notification sent successfully'
+    })
 
   } catch (error) {
     console.error('Proposal notification error:', error)
