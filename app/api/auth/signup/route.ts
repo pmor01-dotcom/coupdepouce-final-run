@@ -29,14 +29,19 @@ export async function POST(request: NextRequest) {
 
     const password_hash = await bcrypt.hash(password, 10);
 
-    let insertData: any = {
-      name,
-      email,
-      password_hash,
-      location,
-      department,
-      phone
-    };
+   let insertData: any = {
+  nom: name,
+  email,
+  password_hash,
+  city: location,
+  department,
+  telephone: phone
+};
+
+if (role === "artisan") {
+  insertData.metier = metier;
+}
+
 
     // Add artisan-only fields
     if (role === "artisan") {
