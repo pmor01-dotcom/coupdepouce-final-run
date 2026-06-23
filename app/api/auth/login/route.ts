@@ -9,7 +9,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    if (!supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+
+    const { data: authData, error: authError } = await supabase!.auth.signInWithPassword({
       email,
       password,
     });
@@ -18,8 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Fetch from USERS table (correct)
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await supabase!
       .from('users')
       .select('*')
       .eq('email', email)
