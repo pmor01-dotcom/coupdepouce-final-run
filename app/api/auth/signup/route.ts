@@ -29,15 +29,14 @@ export async function POST(req: Request) {
 
   const user = authData.user
 
-  // 2. Insert into Supabase clients table
-  const { error: insertError } = await supabase.from('clients').insert({
+  // 2. Insert into Supabase users table
+  const { error: insertError } = await supabase.from('users').insert({
     id: user?.id,
-    prenom,
-    nom,
+    name: `${prenom} ${nom}`,
     email,
+    role,
     city,
     departement,
-    role,
   })
 
   if (insertError) {
