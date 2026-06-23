@@ -15,7 +15,7 @@ export default async function ArtisanDashboard() {
   }
 
   // If wrong role → redirect to client dashboard
-  if (user.user_metadata.role !== 'artisan') {
+  if (user.user_metadata?.role !== 'artisan') {
     redirect('/client-dashboard')
   }
 
