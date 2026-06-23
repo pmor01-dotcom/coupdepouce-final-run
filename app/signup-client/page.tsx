@@ -63,7 +63,7 @@ export default function ClientSignupPage() {
         return
       }
 
-     router.push('/dashboard-client')
+     router.push('/client-dashboard')
     } catch (err: any) {
       setError(err.message || 'Erreur inconnue')
     } finally {
