@@ -14,8 +14,7 @@ export default function ArtisanSignupPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    department: '',
-    location: '',
+    ville: '',
     metier: '',
     phone: '',
   })
@@ -55,8 +54,7 @@ export default function ArtisanSignupPage() {
           email: formData.email,
           password: formData.password,
           role: 'artisan',
-          location: formData.location,
-          department: formData.department,
+          ville: formData.ville,
           metier: formData.metier,
           phone: formData.phone,
         }),
@@ -72,7 +70,6 @@ export default function ArtisanSignupPage() {
         return
       }
 
-      // Success → redirect to check email page
       router.push('/artisan-dashboard')
     } catch (err: any) {
       console.error('Signup error:', err)
@@ -168,26 +165,12 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Département *
-            </label>
-            <input
-              type="text"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
               Ville *
             </label>
             <input
               type="text"
-              name="location"
-              value={formData.location}
+              name="ville"
+              value={formData.ville}
               onChange={handleChange}
               className="input-field"
               required
