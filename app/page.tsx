@@ -5,14 +5,22 @@ import { useLanguage } from './components/LanguageProvider'
 import Footer from './components/Footer'
 import { useState, useEffect } from 'react'
 
+// ⭐ Define the shape of an offer
+type Offer = {
+  id: string
+  title: string
+  location: string
+}
+
 export default function Home() {
-  const [offers, setOffers] = useState([]);
+  // ⭐ Tell TypeScript what the array contains
+  const [offers, setOffers] = useState<Offer[]>([])
 
   useEffect(() => {
     fetch("/api/public-offers")
       .then(res => res.json())
-      .then(data => setOffers(data));
-  }, []);
+      .then(data => setOffers(data))
+  }, [])
 
   const { t } = useLanguage()
 
