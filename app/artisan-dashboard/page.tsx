@@ -112,9 +112,11 @@ export default function ArtisanDashboard() {
           <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm">
             Messages
           </button>
-        </div>
-
-        {/* Header */}
+          <Link href="/artisan-dashboard-inscription-info" className="btn-secondary text-sm">
+    Mon Profil
+  </Link>
+</div>
+{/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
