@@ -36,6 +36,14 @@ interface Proposal {
   }
 }
 
+interface ArtisanProfile {
+  name: string
+  email: string
+  phone: string
+  ville: string
+  metier: string
+}
+
 export default function ArtisanDashboard() {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
@@ -45,6 +53,7 @@ export default function ArtisanDashboard() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [profile, setProfile] = useState<ArtisanProfile | null>(null)
 
   const getFirstName = (fullName?: string) => {
     if (!fullName) return ''
@@ -58,7 +67,20 @@ export default function ArtisanDashboard() {
 
   useEffect(() => {
     fetchJobs()
+    fetchProfile()
   }, [])
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('/api/artisan/get-profile')
+      if (response.ok) {
+        const data = await response.json()
+        setProfile(data)
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    }
+  }
 
   const fetchJobs = async () => {
     try {
@@ -112,7 +134,7 @@ export default function ArtisanDashboard() {
           <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm">
             Messages
           </button>
-          <Link href="/artisan-dashboard-inscription-info" className="btn-secondary text-sm">
+          <Link href="/artisan-profile" className="btn-secondary text-sm">
     Mon Profil
   </Link>
 </div>
@@ -128,6 +150,12 @@ export default function ArtisanDashboard() {
                   {getFirstName(user?.name)}
                 </span>
               </div>
+              {profile && (
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">{profile.metier}</span>
+                  {profile.ville && <span className="ml-2">• {profile.ville}</span>}
+                </div>
+              )}
             </div>
           </div>
         </header>

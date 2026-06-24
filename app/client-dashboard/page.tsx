@@ -42,6 +42,13 @@ interface Proposal {
   }
 }
 
+interface ClientProfile {
+  name: string
+  email: string
+  phone: string
+  ville: string
+}
+
 export default function ClientDashboard() {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
@@ -50,6 +57,7 @@ export default function ClientDashboard() {
   const [demands, setDemands] = useState<Demand[]>([])
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [profile, setProfile] = useState<ClientProfile | null>(null)
 
   const getFirstName = (fullName?: string) => {
     if (!fullName) return ''
@@ -63,7 +71,20 @@ export default function ClientDashboard() {
 
   useEffect(() => {
     fetchDemands()
+    fetchProfile()
   }, [])
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('/api/client/get-profile')
+      if (response.ok) {
+        const data = await response.json()
+        setProfile(data)
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    }
+  }
 
   const fetchDemands = async () => {
     try {
@@ -143,7 +164,7 @@ export default function ClientDashboard() {
     Messages
   </button>
 
-  <Link href="/profile/edit" className="btn-secondary text-sm w-40 text-left">
+  <Link href="/client-profile" className="btn-secondary text-sm w-40 text-left">
     Modifier mon profil
   </Link>
 
@@ -161,6 +182,11 @@ export default function ClientDashboard() {
                   {getFirstName(user?.name)}
                 </span>
               </div>
+              {profile && profile.ville && (
+                <div className="text-sm text-gray-600">
+                  <span>{profile.ville}</span>
+                </div>
+              )}
             </div>
           </div>
         </header>
