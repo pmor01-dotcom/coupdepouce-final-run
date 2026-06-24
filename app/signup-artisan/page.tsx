@@ -70,7 +70,12 @@ export default function ArtisanSignupPage() {
         return
       }
 
-      router.push('/artisan-dashboard')
+      // If email verification is needed, redirect to check-email page
+      if (data.needsEmailVerification) {
+        router.push('/check-email')
+      } else {
+        router.push('/artisan-dashboard')
+      }
     } catch (err: any) {
       console.error('Signup error:', err)
       setError(err.message || 'Erreur inconnue')

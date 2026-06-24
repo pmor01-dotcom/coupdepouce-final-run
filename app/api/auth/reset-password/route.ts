@@ -1,48 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
-import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const { token, newPassword } = await request.json()
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
+    const { newPassword } = await request.json()
 
-    if (!token || !newPassword) {
+    if (!newPassword) {
       return NextResponse.json(
-        { error: 'Token and new password are required' },
+        { error: 'New password is required' },
         { status: 400 }
       )
     }
 
-    const { data: user, error: userError } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('reset_token', token)
-      .gt('reset_token_expiry', new Date().toISOString())
-      .single()
+    // Get current session (user should be logged in via the reset link)
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-    if (userError || !user) {
+    if (sessionError || !session) {
       return NextResponse.json(
-        { error: 'Invalid or expired reset token' },
+        { error: 'Invalid or expired reset link. Please request a new password reset.' },
         { status: 400 }
       )
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 12)
-
-    const { error: updateError } = await supabase
-      .from('clients')
-      .update({
-        password_hash: hashedPassword,
-        reset_token: null,
-        reset_token_expiry: null,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', user.id)
+    // Update password in Supabase Auth
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword
+    })
 
     if (updateError) {
       return NextResponse.json(
@@ -51,12 +39,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Also update password hash in the appropriate table (clients or artisans)
+    const userId = session.user.id
+    const role = session.user.user_metadata.role
+    const table = role === 'artisan' ? 'artisans' : 'clients'
+    
+    const password_hash = await bcrypt.hash(newPassword, 10)
+
+    const { error: dbError } = await supabase
+      .from(table)
+      .update({ password_hash })
+      .eq('id', userId)
+
+    if (dbError) {
+      console.error('Error updating password in database:', dbError)
+      // Don't fail the request if DB update fails, auth password is updated
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Password reset successfully'
     })
 
   } catch (error) {
+    console.error('Reset password error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

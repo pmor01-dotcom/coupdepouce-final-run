@@ -44,10 +44,7 @@ export default function ClientSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prenom: formData.prenom,
-          nom: formData.nom,
-          firstname: formData.prenom,
-          lastname: formData.nom,
+          name: `${formData.prenom} ${formData.nom}`,
           email: formData.email,
           password: formData.password,
           role: 'client',
@@ -63,7 +60,12 @@ export default function ClientSignupPage() {
         return
       }
 
-      router.push('/client-dashboard')
+      // If email verification is needed, redirect to check-email page
+      if (data.needsEmailVerification) {
+        router.push('/check-email')
+      } else {
+        router.push('/client-dashboard')
+      }
     } catch (err: any) {
       setError(err.message || 'Erreur inconnue')
     } finally {

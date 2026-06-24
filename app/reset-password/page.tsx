@@ -1,27 +1,30 @@
 'use client'
 
 import { Suspense, useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 function ResetPasswordForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [token, setToken] = useState('')
+  const supabase = createClientComponentClient()
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [hasValidSession, setHasValidSession] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(true)
 
   useEffect(() => {
-    const tokenFromUrl = searchParams.get('token')
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl)
-    } else {
-      setError('Token de réinitialisation invalide')
+    // Check if user has a valid session from the reset link
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setHasValidSession(!!session)
+      setCheckingSession(false)
     }
-  }, [searchParams])
+    checkSession()
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,7 +50,6 @@ function ResetPasswordForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          token,
           newPassword
         })
       })
@@ -67,6 +69,34 @@ function ResetPasswordForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (checkingSession) {
+    return (
+      <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+        <div className="max-w-md w-full text-center">
+          <p>Vérification...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (!hasValidSession) {
+    return (
+      <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+        <div className="max-w-md w-full">
+          <div className="card text-center p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Lien invalide ou expiré</h2>
+            <p className="text-gray-600 mb-6">
+              Ce lien de réinitialisation n'est plus valide. Veuillez demander un nouveau lien.
+            </p>
+            <Link href="/forgot-password" className="btn-primary inline-block">
+              Demander un nouveau lien
+            </Link>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   if (success) {
@@ -149,7 +179,7 @@ function ResetPasswordForm() {
 
             <button
               type="submit"
-              disabled={isLoading || !token}
+              disabled={isLoading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Réinitialisation en cours...' : 'Réinitialiser le mot de passe'}

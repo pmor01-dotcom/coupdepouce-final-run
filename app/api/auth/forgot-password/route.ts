@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
-import EmailService from '../../../../lib/email'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
@@ -18,59 +16,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Look up user by email
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, name, email')
-      .eq('email', email)
-      .single()
+    // Use Supabase's built-in password reset
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password`
+    })
 
-    // Security: always return success even if user doesn't exist
-    if (userError || !user) {
+    if (error) {
+      console.error('Password reset error:', error)
+      // Security: still return success to prevent email enumeration
       return NextResponse.json({
         success: true,
-        message:
-          'If an account with this email exists, a password reset link has been sent.'
+        message: 'If an account with this email exists, a password reset link has been sent.'
       })
-    }
-
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex')
-    const resetTokenExpiry = new Date(Date.now() + 3600000).toISOString() // 1 hour
-
-    // Save token to database
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({
-        reset_token: resetToken,
-        reset_token_expiry: resetTokenExpiry
-      })
-      .eq('id', user.id)
-
-    if (updateError) {
-      return NextResponse.json(
-        { error: 'Failed to save reset token' },
-        { status: 500 }
-      )
-    }
-
-    // Send password reset email
-    const emailSent = await EmailService.sendPasswordResetEmail(
-      email,
-      user.name,
-      resetToken
-    )
-
-    if (!emailSent) {
-      return NextResponse.json(
-        { error: 'Failed to send password reset email' },
-        { status: 500 }
-      )
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Password reset email sent successfully'
+      message: 'If an account with this email exists, a password reset link has been sent.'
     })
   } catch (error) {
     console.error('Forgot password error:', error)

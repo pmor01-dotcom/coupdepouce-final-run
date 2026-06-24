@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
 
   // 1. If NOT logged in → redirect to login (except if already on login or signup pages)
-  const publicPaths = ['/login', '/signup', '/signup-client', '/signup-artisan', '/forgot-password', '/reset-password']
+  const publicPaths = ['/login', '/signup', '/signup-client', '/signup-artisan', '/forgot-password', '/reset-password', '/check-email', '/auth/callback']
   const isPublic = publicPaths.includes(pathname)
 
   if (!user && !isPublic) {
@@ -48,7 +48,8 @@ export const config = {
     '/reset-password',
     '/client-dashboard',
     '/artisan-dashboard',
-     '/check-email'
+    '/check-email',
+    '/auth/callback'
   ],
 }
 
