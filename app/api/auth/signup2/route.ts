@@ -9,19 +9,17 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      prenom,
-      nom,
-      firstname,
-      lastname,
+      name,
       email,
       password,
       role,
       ville,
-      metier // only for artisans
+      metier,
+      phone
     } = body;
 
     // Validate required fields
-    if (!prenom || !nom || !email || !password || !role) {
+    if (!name || !email || !password || !role) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -53,16 +51,15 @@ export async function POST(request: NextRequest) {
     // 2️⃣ Hash password for your own table
     const password_hash = await bcrypt.hash(password, 10);
 
-    // 3️⃣ Prepare insert data for clients or artisans
+    // 3️⃣ Prepare insert data
     let insertData: any = {
       id: userId,
+      name,
       email,
-      prenom,
-      nom,
-      firstname,
-      lastname,
       ville: ville || null,
-      password_hash
+      phone: phone || null,
+      password_hash,
+      role
     };
 
     if (role === "artisan") {
