@@ -404,3 +404,11 @@ body {
 .text-gray-700 {
   color: #374151;
 }
+@keyframes scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+/* Pause scrolling on hover */
+.animate-scroll:hover {
+  animation-play-state: paused;
+}

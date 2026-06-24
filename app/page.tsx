@@ -3,8 +3,17 @@
 import Link from 'next/link'
 import { useLanguage } from './components/LanguageProvider'
 import Footer from './components/Footer'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
+  const [offers, setOffers] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/public-offers")
+      .then(res => res.json())
+      .then(data => setOffers(data));
+  }, []);
+
   const { t } = useLanguage()
 
   return (
@@ -78,15 +87,33 @@ export default function Home() {
 
             <div className="hero-actions flex flex-col sm:flex-row justify-center gap-6">
 
-              {/* FIXED BUTTON — now goes to /signup */}
-             <Link
-  href="/signup"
-  className="btn-primary px-6 py-3 bg-white text-green-700 font-semibold rounded-lg shadow hover:bg-gray-100"
->
-  {t('app.createAccount')}
-</Link>
+              {/* Create Account */}
+              <Link
+                href="/signup"
+                className="btn-primary px-6 py-3 bg-white text-green-700 font-semibold rounded-lg shadow hover:bg-gray-100"
+              >
+                {t('app.createAccount')}
+              </Link>
 
+              {/* ⭐ Auto-scrolling client offers */}
+              <div className="mt-10 overflow-hidden whitespace-nowrap border-t border-b border-gray-300 py-3 bg-white/70 backdrop-blur-sm">
+                <div
+                  className="inline-block text-gray-800 text-sm animate-scroll"
+                  style={{ animation: "scroll 25s linear infinite" }}
+                >
+                  {offers.map((offer) => (
+                    <Link
+                      key={offer.id}
+                      href={`/demands/${offer.id}`}
+                      className="mx-8 hover:underline hover:text-green-700 transition"
+                    >
+                      🔧 {offer.title} — {offer.location}
+                    </Link>
+                  ))}
+                </div>
+              </div>
 
+              {/* Login */}
               <Link
                 href="/login"
                 className="btn-secondary px-6 py-3 bg-green-900 text-white font-semibold rounded-lg shadow hover:bg-green-800"
