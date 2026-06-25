@@ -23,7 +23,8 @@ export default function ClientDashboard() {
   const { t } = useLanguage()
   const router = useRouter()
 
-  const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
+  const [activeTab, setActiveTab] = useState<'demands' | 'proposals'>('demands')
+  const [showMessages, setShowMessages] = useState(false)
   const [demands, setDemands] = useState([])
   const [proposals, setProposals] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -104,46 +105,29 @@ export default function ClientDashboard() {
           <WelcomeUser />
         </div>
 
-        {/* FIXED RIGHT SIDEBAR */}
-        <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
-
-          <button onClick={handleLogout} className="btn-secondary text-sm w-full text-right">
-            Déconnexion
-          </button>
-
-          <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm w-full text-right">
-            Mes demandes
-          </button>
-
-          <Link href="/create-demand" className="btn-secondary text-sm w-full text-right">
-            Créer une demande
-          </Link>
-
-          <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm w-full text-right">
-            Propositions reçues
-          </button>
-
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm w-full text-right">
-            Messages
-          </button>
-
-          <Link href="/client-profile" className="btn-secondary text-sm w-full text-right">
-            Modifier mon profil
-          </Link>
-
-        </aside>
 
         {/* Page Header */}
         <header className="bg-white shadow-sm border-b mt-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="flex items-center">
-              <h1 className="text-3xl font-semibold text-gray-900">Espace Client</h1>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">Espace Client</h1>
               <span className="ml-2 text-sm text-gray-500">{getFirstName(user?.name)}</span>
             </div>
 
-            {profile?.ville && (
-              <div className="text-sm text-gray-600">{profile.ville}</div>
-            )}
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              {profile?.ville && (
+                <div className="text-sm text-gray-600">{profile.ville}</div>
+              )}
+              <Link href="/create-demand" className="bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 rounded-lg text-sm">
+                Créer une demande
+              </Link>
+              <Link href="/client-profile" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
+                Mon profil
+              </Link>
+              <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm">
+                Déconnexion
+              </button>
+            </div>
           </div>
         </header>
 
@@ -156,26 +140,19 @@ export default function ClientDashboard() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
           {/* TABS */}
-          <div className="flex gap-4 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
             <button
               onClick={() => setActiveTab('demands')}
-              className={`px-4 py-2 rounded-lg ${activeTab === 'demands' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
+              className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg text-sm sm:text-base ${activeTab === 'demands' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
             >
               Mes demandes
             </button>
 
             <button
               onClick={() => setActiveTab('proposals')}
-              className={`px-4 py-2 rounded-lg ${activeTab === 'proposals' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
+              className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg text-sm sm:text-base ${activeTab === 'proposals' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
             >
               Propositions
-            </button>
-
-            <button
-              onClick={() => setActiveTab('messages')}
-              className={`px-4 py-2 rounded-lg ${activeTab === 'messages' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
-            >
-              Messages
             </button>
           </div>
 
@@ -228,29 +205,41 @@ export default function ClientDashboard() {
               </div>
             )}
 
-            {activeTab === 'messages' && (
-              <div>
-                <MessagingInterface />
-              </div>
-            )}
 
           </div>
         </section>
 
-        {/* Unsubscribe Button */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            onClick={() => {
-              if (confirm(t('unsubscribe.confirm'))) {
-                logout()
-                router.push('/')
-              }
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2"
-          >
-            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
-          </button>
-        </div>
+        {/* Floating Messages Button */}
+        <button
+          onClick={() => setShowMessages(true)}
+          className="fixed bottom-6 right-6 z-50 bg-green-700 hover:bg-green-800 text-white p-4 rounded-full shadow-lg flex items-center justify-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+        </button>
+
+        {/* Messages Modal */}
+        {showMessages && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="flex justify-between items-center p-4 border-b">
+                <h2 className="text-xl font-semibold">Messages</h2>
+                <button
+                  onClick={() => setShowMessages(false)}
+                  className="text-gray-500 hover:text-gray-700 p-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-4">
+                <MessagingInterface />
+              </div>
+            </div>
+          </div>
+        )}
 
       </main>
 
