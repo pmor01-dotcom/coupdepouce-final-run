@@ -143,22 +143,22 @@ export default function ClientDashboard() {
 
         {/* Right-side vertical button bar */}
 <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
-  <button onClick={handleLogout} className="btn-secondary text-sm text-right">
+  <button onClick={handleLogout} className="btn-secondary text-sm text-right block">
     Déconnexion
   </button>
-  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm text-right">
+  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm text-right block">
     Mes demandes
   </button>
-  <Link href="/create-demand" className="btn-secondary text-sm text-right">
+  <Link href="/create-demand" className="btn-secondary text-sm text-right block">
     Créer une demande
   </Link>
-  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm text-right">
+  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm text-right block">
     Propositions reçues
   </button>
-  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right">
+  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right block">
     Messages
   </button>
-  <Link href="/client-profile" className="btn-secondary text-sm text-right">
+  <Link href="/client-profile" className="btn-secondary text-sm text-right block">
     Modifier mon profil
   </Link>
 </div>

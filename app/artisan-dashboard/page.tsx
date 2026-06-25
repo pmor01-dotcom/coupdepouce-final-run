@@ -122,19 +122,19 @@ export default function ArtisanDashboard() {
         
         {/* Floating Buttons */}
         <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
-          <button onClick={handleLogout} className="btn-secondary text-sm text-right">
+          <button onClick={handleLogout} className="btn-secondary text-sm text-right block">
             Déconnexion
           </button>
-          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm text-right">
+          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm text-right block">
             Travaux disponibles
           </button>
-          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm text-right">
+          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm text-right block">
             Mes propositions
           </button>
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right">
+          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right block">
             Messages
           </button>
-          <Link href="/artisan-profile" className="btn-secondary text-sm text-right">
+          <Link href="/artisan-profile" className="btn-secondary text-sm text-right block">
             Mon Profil
           </Link>
         </div>
