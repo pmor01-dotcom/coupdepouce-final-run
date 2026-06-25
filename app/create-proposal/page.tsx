@@ -57,7 +57,7 @@ export default function CreateProposal() {
     setError('')
 
     if (!formData.message || !formData.proposedPrice) {
-      setError('Veuillez remplir tous les champs obligatoires')
+      setError('Please fill in all required fields')
       return
     }
 
@@ -84,7 +84,7 @@ export default function CreateProposal() {
       // Redirect to artisan dashboard
       router.push('/artisan-dashboard')
     } catch (err) {
-      setError('Erreur lors de la création de la proposition')
+      setError('Error creating proposal')
     } finally {
       setIsLoading(false)
     }
@@ -98,7 +98,7 @@ export default function CreateProposal() {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p>Chargement de la demande...</p>
+          <p>Loading demand...</p>
         </div>
       </main>
     )
@@ -112,10 +112,10 @@ export default function CreateProposal() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link href="/artisan-dashboard" className="text-gray-600 hover:text-gray-900 mr-4">
-                &larr; Retour
+                &larr; Back
               </Link>
               <h1 className="text-xl font-semibold text-gray-900">
-                Proposer mes services
+                Offer my services
               </h1>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function CreateProposal() {
         {/* Demand Details */}
         <div className="card mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Détails de la demande
+            Demand details
           </h2>
           
           <div className="space-y-3">
@@ -167,13 +167,13 @@ export default function CreateProposal() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="card">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Votre proposition
+              Your proposal
             </h2>
             
             <div className="space-y-4">
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                  Message au client *
+                  Message to client *
                 </label>
                 <textarea
                   id="message"
@@ -182,13 +182,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.message}
                   onChange={(e) => handleInputChange('message', e.target.value)}
-                  placeholder="Décrivez votre solution, votre expérience, et comment vous pouvez aider ce client..."
+                  placeholder="Describe your solution, your experience, and how you can help this client..."
                 />
               </div>
 
               <div>
                 <label htmlFor="proposedPrice" className="block text-sm font-medium text-gray-700">
-                  Prix proposé *
+                  Proposed price *
                 </label>
                 <input
                   type="text"
@@ -197,13 +197,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.proposedPrice}
                   onChange={(e) => handleInputChange('proposedPrice', e.target.value)}
-                  placeholder="Ex: 650, 700-800, devis sur place..."
+                  placeholder="Ex: 650, 700-800, on-site quote..."
                 />
               </div>
 
               <div>
                 <label htmlFor="estimatedDuration" className="block text-sm font-medium text-gray-700">
-                  Durée estimée
+                  Estimated duration
                 </label>
                 <input
                   type="text"
@@ -211,13 +211,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.estimatedDuration}
                   onChange={(e) => handleInputChange('estimatedDuration', e.target.value)}
-                  placeholder="Ex: 2 jours, 1 semaine, selon devis..."
+                  placeholder="Ex: 2 days, 1 week, depending on quote..."
                 />
               </div>
 
               <div>
                 <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
-                  Disponibilité
+                  Availability
                 </label>
                 <textarea
                   id="availability"
@@ -225,7 +225,7 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.availability}
                   onChange={(e) => handleInputChange('availability', e.target.value)}
-                  placeholder="Quand êtes-vous disponible pour ce travail ?"
+                  placeholder="When are you available for this work?"
                 />
               </div>
             </div>
@@ -234,22 +234,22 @@ export default function CreateProposal() {
           <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
             <p className="font-medium mb-2">Important:</p>
             <ul className="text-sm space-y-1">
-              <li>Le client pourra voir votre proposition et vous contacter directement</li>
-              <li>Vous ne pouvez pas contacter le client directement avant qu'il ne vous contacte</li>
-              <li>Soyez clair et précis dans votre proposition pour augmenter vos chances</li>
+              <li>The client will be able to see your proposal and contact you directly</li>
+              <li>You cannot contact the client directly before they contact you</li>
+              <li>Be clear and precise in your proposal to increase your chances</li>
             </ul>
           </div>
 
           <div className="flex justify-end space-x-4">
             <Link href="/artisan-dashboard" className="btn-secondary">
-              Annuler
+              Cancel
             </Link>
             <button
               type="submit"
               disabled={isLoading}
               className="btn-success disabled:opacity-50"
             >
-              {isLoading ? 'Envoi en cours...' : 'Envoyer la proposition'}
+              {isLoading ? 'Sending...' : 'Send proposal'}
             </button>
           </div>
         </form>

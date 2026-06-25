@@ -54,13 +54,13 @@ export default function ContactPage() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Message envoyé avec succès !
+              Message sent successfully!
             </h2>
             <p className="text-gray-600 mb-8">
-              Nous vous répondrons dans les plus brefs délais.
+              We will respond to you as soon as possible.
             </p>
             <Link href="/" className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-              Retour à l'accueil
+              Back to home
             </Link>
           </div>
         </div>
@@ -68,10 +68,10 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Contactez-nous
+              Contact us
             </h1>
             <p className="text-xl text-gray-600">
-              Notre équipe est là pour vous aider et répondre à toutes vos questions
+              Our team is here to help and answer all your questions
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export default function ContactPage() {
             <div>
               <div className="bg-white shadow-lg rounded-lg p-8 mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  Informations de contact
+                  Contact information
                 </h2>
                 
                 <div className="space-y-6">
@@ -114,14 +114,14 @@ export default function ContactPage() {
             <div>
               <div className="bg-white shadow-lg rounded-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  Formulaire de contact
+                  Contact form
                 </h2>
                 
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-6">
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="name">
-                        Nom
+                        Name
                       </label>
                       <input
                         id="name"
@@ -149,7 +149,7 @@ export default function ContactPage() {
 
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="subject">
-                        Sujet
+                        Subject
                       </label>
                       <input
                         id="subject"
@@ -176,7 +176,7 @@ export default function ContactPage() {
 
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="userType">
-                        Type d'utilisateur
+                        User type
                       </label>
                       <select
                         id="userType"
@@ -186,7 +186,7 @@ export default function ContactPage() {
                         className="block w-full p-4 text-gray-900 border border-gray-200 rounded-lg"
                       >
                         <option value="client">Client</option>
-                        <option value="entreprise">Entreprise</option>
+                        <option value="entreprise">Company</option>
                       </select>
                     </div>
 
@@ -195,7 +195,7 @@ export default function ContactPage() {
                       disabled={isSubmitting}
                       className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
                     >
-                      Envoyer
+                      Send
                     </button>
                   </div>
                 </form>

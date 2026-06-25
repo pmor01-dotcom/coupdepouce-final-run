@@ -30,10 +30,10 @@ export default function ForgotPasswordPage() {
       if (response.ok) {
         setSuccess(true)
       } else {
-        setError(data.error || 'Erreur lors de l\'envoi de l\'email de réinitialisation')
+        setError(data.error || 'Error sending password reset email')
       }
     } catch (err) {
-      setError('Erreur de connexion. Veuillez réessayer.')
+      setError('Connection error. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -50,15 +50,15 @@ export default function ForgotPasswordPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Email envoyé!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Email sent!</h2>
               <p className="text-gray-600 mb-4">
-                Si un compte existe avec cet email, vous recevrez un lien de réinitialisation de mot de passe.
+                If an account exists with this email, you will receive a password reset link.
               </p>
               <p className="text-sm text-gray-500 mb-6">
-                Vérifiez votre boîte de réception et vos spams.
+                Check your inbox and spam folder.
               </p>
               <Link href="/login" className="btn-primary inline-block">
-                Retour à la connexion
+                Back to login
               </Link>
             </div>
           </div>
@@ -73,10 +73,10 @@ export default function ForgotPasswordPage() {
         <div className="card">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Mot de passe oublié ?
+              Forgot password?
             </h2>
             <p className="text-gray-600">
-              Entrez votre email pour recevoir un lien de réinitialisation
+              Enter your email to receive a reset link
             </p>
           </div>
 
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
-                placeholder="votre@email.com"
+                placeholder="your@email.com"
               />
             </div>
 
@@ -107,13 +107,13 @@ export default function ForgotPasswordPage() {
               disabled={isLoading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Envoi en cours...' : 'Envoyer le lien de réinitialisation'}
+              {isLoading ? 'Sending...' : 'Send reset link'}
             </button>
           </form>
 
           <div className="text-center mt-6">
             <Link href="/login" className="text-gray-600 hover:text-gray-900">
-              Retour à la connexion
+              Back to login
             </Link>
           </div>
         </div>

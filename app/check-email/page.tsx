@@ -78,16 +78,16 @@ export default function CheckEmailPage() {
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Vérifiez votre email
+          Check your email
         </h1>
 
         <p className="text-gray-600 mb-6">
-          Nous avons envoyé un lien de confirmation à votre adresse email. 
-          Cliquez sur le lien pour activer votre compte.
+          We have sent a confirmation link to your email address. 
+          Click the link to activate your account.
         </p>
 
         <p className="text-sm text-gray-500 mb-6">
-          Après avoir vérifié votre email, vous serez redirigé automatiquement vers votre tableau de bord.
+          After verifying your email, you will be automatically redirected to your dashboard.
         </p>
 
         {checking && (
@@ -98,12 +98,12 @@ export default function CheckEmailPage() {
 
         <div className="mt-8 pt-6 border-t border-gray-200">
           <p className="text-sm text-gray-500">
-            Pas reçu d'email ? Vérifiez vos spams ou{' '}
+            Didn't receive an email? Check your spam folder or{' '}
             <button
               onClick={() => router.back()}
               className="text-green-600 hover:text-green-700 font-medium"
             >
-              réessayez
+              try again
             </button>
           </p>
         </div>

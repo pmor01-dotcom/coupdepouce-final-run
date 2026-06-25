@@ -57,7 +57,7 @@ function PaymentForm({ billingCycle, amount }: { billingCycle: 'monthly' | 'year
     setError('')
 
     if (!stripe || !elements) {
-      setError('Stripe n\'est pas encore chargé')
+      setError('Stripe is not yet loaded')
       setIsLoading(false)
       return
     }
@@ -68,7 +68,7 @@ function PaymentForm({ billingCycle, amount }: { billingCycle: 'monthly' | 'year
       const userId = userData.id
 
       if (!userId) {
-        throw new Error('Utilisateur non connecté')
+        throw new Error('User not logged in')
       }
 
       // Create payment intent
@@ -86,7 +86,7 @@ function PaymentForm({ billingCycle, amount }: { billingCycle: 'monthly' | 'year
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la création du paiement')
+        throw new Error('Error creating payment')
       }
 
       const { clientSecret, paymentIntentId } = await response.json()
@@ -111,7 +111,7 @@ function PaymentForm({ billingCycle, amount }: { billingCycle: 'monthly' | 'year
       })
 
       if (stripeError) {
-        throw new Error(stripeError.message || 'Erreur lors du paiement')
+        throw new Error(stripeError.message || 'Error during payment')
       }
 
       // Payment successful
@@ -121,7 +121,7 @@ function PaymentForm({ billingCycle, amount }: { billingCycle: 'monthly' | 'year
       }, 3000)
 
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue lors du paiement')
+      setError(err.message || 'An error occurred during payment')
     } finally {
       setIsLoading(false)
     }
@@ -138,12 +138,12 @@ function PaymentForm({ billingCycle, amount }: { billingCycle: 'monthly' | 'year
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Paiement réussi!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment successful!</h2>
               <p className="text-gray-600 mb-4">
-                Votre abonnement a été activé avec succès.
+                Your subscription has been activated successfully.
               </p>
               <p className="text-sm text-gray-500">
-                Vous allez être redirigé vers votre tableau de bord...
+                You will be redirected to your dashboard...
               </p>
             </div>
           </div>
@@ -187,7 +187,7 @@ function PaymentForm({ billingCycle, amount }: { billingCycle: 'monthly' | 'year
         {/* Stripe Card Element */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Informations de carte
+            Card information
           </label>
           <div className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
             <CardElement

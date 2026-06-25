@@ -90,7 +90,7 @@ export default function CreateDemandPage() {
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Titre *
+              Title *
             </label>
             <input
               type="text"
@@ -153,7 +153,7 @@ export default function CreateDemandPage() {
             disabled={loading}
             className="btn-primary w-full"
           >
-            {loading ? t('common.loading') : 'Créer la demande'}
+            {loading ? t('common.loading') : 'Create demand'}
           </button>
         </form>
 

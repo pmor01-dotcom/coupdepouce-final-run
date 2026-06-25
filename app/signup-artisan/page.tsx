@@ -37,7 +37,7 @@ export default function ArtisanSignupPage() {
     console.log('Form submitted with data:', formData)
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+      setError('Passwords do not match')
       setLoading(false)
       return
     }
@@ -65,7 +65,7 @@ export default function ArtisanSignupPage() {
       console.log('Response data:', data)
 
       if (!response.ok) {
-        setError(data.error || 'Erreur lors de l\'inscription')
+        setError(data.error || 'Error during registration')
         setLoading(false)
         return
       }
@@ -78,7 +78,7 @@ export default function ArtisanSignupPage() {
       }
     } catch (err: any) {
       console.error('Signup error:', err)
-      setError(err.message || 'Erreur inconnue')
+      setError(err.message || 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -89,18 +89,18 @@ export default function ArtisanSignupPage() {
       <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
 
         <h2 className="text-3xl font-bold text-center text-gray-900">
-          Créer un compte artisan
+          Create artisan account
         </h2>
 
         <p className="text-center text-gray-600">
-          Proposez vos services aux clients
+          Offer your services to clients
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nom complet *
+              Full name *
             </label>
             <input
               type="text"
@@ -128,7 +128,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mot de passe *
+              Password *
             </label>
             <input
               type="password"
@@ -142,7 +142,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmer le mot de passe *
+              Confirm password *
             </label>
             <input
               type="password"
@@ -156,7 +156,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Métier *
+              Trade/Profession *
             </label>
             <input
               type="text"
@@ -170,7 +170,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ville *
+              City *
             </label>
             <input
               type="text"
@@ -184,7 +184,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Téléphone
+              Phone
             </label>
             <input
               type="text"
@@ -202,13 +202,13 @@ export default function ArtisanSignupPage() {
             disabled={loading}
             className="btn-primary w-full"
           >
-            {loading ? 'Création...' : 'Créer mon compte'}
+            {loading ? 'Creating...' : 'Create my account'}
           </button>
         </form>
 
         <div className="text-center text-sm text-gray-600">
           <Link href="/signup" className="hover:text-gray-900">
-            Retour
+            Back
           </Link>
         </div>
       </div>

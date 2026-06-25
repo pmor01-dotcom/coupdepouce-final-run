@@ -35,10 +35,10 @@ export default function Login() {
           window.location.href = '/artisan-dashboard'
         }
       } else {
-        setError('Email ou mot de passe incorrect')
+        setError('Incorrect email or password')
       }
     } catch (err) {
-      setError('Erreur lors de la connexion')
+      setError('Error during login')
     } finally {
       setIsLoading(false)
     }
@@ -165,7 +165,7 @@ export default function Login() {
 
           <div className="text-center">
             <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
-              Mot de passe oublié ?
+              Forgot password?
             </Link>
           </div>
         </form>

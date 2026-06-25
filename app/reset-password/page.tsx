@@ -32,13 +32,13 @@ function ResetPasswordForm() {
     setError('')
 
     if (newPassword !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+      setError('Passwords do not match')
       setIsLoading(false)
       return
     }
 
     if (newPassword.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères')
+      setError('Password must be at least 8 characters')
       setIsLoading(false)
       return
     }
@@ -62,10 +62,10 @@ function ResetPasswordForm() {
           router.push('/login')
         }, 3000)
       } else {
-        setError(data.error || 'Erreur lors de la réinitialisation du mot de passe')
+        setError(data.error || 'Error resetting password')
       }
     } catch (err) {
-      setError('Erreur de connexion. Veuillez réessayer.')
+      setError('Connection error. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -75,7 +75,7 @@ function ResetPasswordForm() {
     return (
       <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         <div className="max-w-md w-full text-center">
-          <p>Vérification...</p>
+          <p>Verifying...</p>
         </div>
       </main>
     )
@@ -86,12 +86,12 @@ function ResetPasswordForm() {
       <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         <div className="max-w-md w-full">
           <div className="card text-center p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Lien invalide ou expiré</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Invalid or expired link</h2>
             <p className="text-gray-600 mb-6">
-              Ce lien de réinitialisation n'est plus valide. Veuillez demander un nouveau lien.
+              This reset link is no longer valid. Please request a new link.
             </p>
             <Link href="/forgot-password" className="btn-primary inline-block">
-              Demander un nouveau lien
+              Request new link
             </Link>
           </div>
         </div>
@@ -110,12 +110,12 @@ function ResetPasswordForm() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe réinitialisé!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Password reset!</h2>
               <p className="text-gray-600 mb-4">
-                Votre mot de passe a été mis à jour avec succès.
+                Your password has been successfully updated.
               </p>
               <p className="text-sm text-gray-500">
-                Vous allez être redirigé vers la page de connexion...
+                You will be redirected to the login page...
               </p>
             </div>
           </div>
@@ -130,10 +130,10 @@ function ResetPasswordForm() {
         <div className="card">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Réinitialiser le mot de passe
+              Reset password
             </h2>
             <p className="text-gray-600">
-              Entrez votre nouveau mot de passe
+              Enter your new password
             </p>
           </div>
 
@@ -146,7 +146,7 @@ function ResetPasswordForm() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Nouveau mot de passe
+                New password
               </label>
               <input
                 id="newPassword"
@@ -158,13 +158,13 @@ function ResetPasswordForm() {
                 minLength={8}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Au moins 8 caractères
+                At least 8 characters
               </p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirmer le mot de passe
+                Confirm password
               </label>
               <input
                 id="confirmPassword"
@@ -182,13 +182,13 @@ function ResetPasswordForm() {
               disabled={isLoading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Réinitialisation en cours...' : 'Réinitialiser le mot de passe'}
+              {isLoading ? 'Resetting...' : 'Reset password'}
             </button>
           </form>
 
           <div className="text-center mt-6">
             <Link href="/login" className="text-gray-600 hover:text-gray-900">
-              Retour à la connexion
+              Back to login
             </Link>
           </div>
         </div>
@@ -199,7 +199,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Chargement...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <ResetPasswordForm />
     </Suspense>
   )

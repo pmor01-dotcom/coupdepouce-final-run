@@ -27,10 +27,10 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-          Créer un compte
+          Create an account
         </h1>
         <p className="text-gray-600 text-center mb-8">
-          Choisissez votre type de compte pour commencer
+          Choose your account type to get started
         </p>
 
         <div className="space-y-4">
@@ -46,7 +46,7 @@ export default function SignupPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Client</h3>
-                <p className="text-sm text-gray-600">Trouvez des artisans pour vos projets</p>
+                <p className="text-sm text-gray-600">Find artisans for your projects</p>
               </div>
             </div>
           </Link>
@@ -63,16 +63,16 @@ export default function SignupPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Artisan</h3>
-                <p className="text-sm text-gray-600">Proposez vos services aux clients</p>
+                <p className="text-sm text-gray-600">Offer your services to clients</p>
               </div>
             </div>
           </Link>
         </div>
 
         <p className="text-center text-gray-600 mt-8">
-          Vous avez déjà un compte?{' '}
+          Already have an account?{' '}
           <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">
-            Connectez-vous
+            Sign in
           </Link>
         </p>
       </div>

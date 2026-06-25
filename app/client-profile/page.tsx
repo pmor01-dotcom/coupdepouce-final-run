@@ -48,7 +48,7 @@ export default function ClientProfilePage() {
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
-      setError('Erreur lors du chargement du profil')
+      setError('Error loading profile')
     } finally {
       setIsLoading(false)
     }
@@ -80,10 +80,10 @@ export default function ClientProfilePage() {
         // Update local profile data
         fetchProfile()
       } else {
-        setError(data.error || 'Erreur lors de la mise à jour')
+        setError(data.error || 'Error updating profile')
       }
     } catch (error) {
-      setError('Erreur de connexion')
+      setError('Connection error')
     } finally {
       setIsSaving(false)
     }
@@ -96,7 +96,7 @@ export default function ClientProfilePage() {
   if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p>Chargement...</p>
+        <p>Loading...</p>
       </main>
     )
   }
@@ -106,17 +106,17 @@ export default function ClientProfilePage() {
       {/* Fixed Right Sidebar Buttons */}
       <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
         <Link href="/client-dashboard" className="btn-secondary text-sm w-full text-right">
-          Retour au tableau de bord
+          Back to dashboard
         </Link>
       </aside>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Mon Profil Client</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">My Client Profile</h1>
 
           {success && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-              Profil mis à jour avec succès!
+              Profile updated successfully!
             </div>
           )}
 
@@ -130,7 +130,7 @@ export default function ClientProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom complet
+                  Full name
                 </label>
                 <input
                   type="text"
@@ -156,7 +156,7 @@ export default function ClientProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Téléphone
+                  Phone
                 </label>
                 <input
                   type="tel"
@@ -168,7 +168,7 @@ export default function ClientProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ville
+                  City
                 </label>
                 <input
                   type="text"
@@ -184,7 +184,7 @@ export default function ClientProfilePage() {
               disabled={isSaving}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+              {isSaving ? 'Saving...' : 'Save changes'}
             </button>
           </form>
         </div>
