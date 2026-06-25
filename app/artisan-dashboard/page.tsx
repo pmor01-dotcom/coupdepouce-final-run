@@ -121,7 +121,7 @@ export default function ArtisanDashboard() {
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         
         {/* Floating Buttons */}
-        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 sm:hidden">
+        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 sm:hidden items-end">
           <button onClick={handleLogout} className="btn-secondary text-xs px-2 py-1">
             Déconnexion
           </button>
