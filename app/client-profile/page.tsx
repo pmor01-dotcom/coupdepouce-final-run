@@ -103,14 +103,16 @@ export default function ClientProfilePage() {
 
   return (
     <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+      {/* Fixed Right Sidebar Buttons */}
+      <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
+        <Link href="/client-dashboard" className="btn-secondary text-sm w-full text-right">
+          Retour au tableau de bord
+        </Link>
+      </aside>
+
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Mon Profil Client</h1>
-            <Link href="/client-dashboard" className="btn-secondary">
-              Retour au tableau de bord
-            </Link>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">Mon Profil Client</h1>
 
           {success && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">

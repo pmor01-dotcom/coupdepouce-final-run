@@ -120,24 +120,24 @@ export default function ArtisanDashboard() {
     <MessagingProvider>
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         
-        {/* Floating Buttons */}
-        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
-          <button onClick={handleLogout} className="btn-secondary text-sm text-right block">
+        {/* Fixed Right Sidebar Buttons */}
+        <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
+          <button onClick={handleLogout} className="btn-secondary text-sm w-full text-right">
             Déconnexion
           </button>
-          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm text-right block">
+          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm w-full text-right">
             Travaux disponibles
           </button>
-          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm text-right block">
+          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm w-full text-right">
             Mes propositions
           </button>
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right block">
+          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm w-full text-right">
             Messages
           </button>
-          <Link href="/artisan-profile" className="btn-secondary text-sm text-right block">
+          <Link href="/artisan-profile" className="btn-secondary text-sm w-full text-right">
             Mon Profil
           </Link>
-        </div>
+        </aside>
 {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
