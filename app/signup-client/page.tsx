@@ -45,12 +45,12 @@ export default function ClientSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: `${formData.prenom} ${formData.nom}`,
+          name: `${formData.prenom} ${formData.nom}`,   // ✔ backend expects "name"
           email: formData.email,
           password: formData.password,
-          role: 'client',
-          ville: formData.ville,
-          phone: formData.phone || null
+          role: 'client',                               // ✔ backend expects "role"
+          ville: formData.ville,                        // ✔ backend expects "ville"
+          phone: formData.phone || null                 // ✔ optional
         }),
       })
 
