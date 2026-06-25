@@ -135,7 +135,7 @@ export default function ArtisanDashboard() {
               <span className="ml-3 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{getFirstName(user?.name)}</span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-col items-start gap-2 w-full sm:w-auto">
               {profile && (
                 <>
                   <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">🔧 {profile.metier}</div>
@@ -144,10 +144,10 @@ export default function ArtisanDashboard() {
                   )}
                 </>
               )}
-              <Link href="/artisan-profile" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <Link href="/artisan-profile" className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white">
                 👤 Mon profil
               </Link>
-              <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors">
+              <button onClick={handleLogout} className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white">
                 🚪 Déconnexion
               </button>
             </div>
@@ -211,7 +211,7 @@ export default function ArtisanDashboard() {
                           📅 Publié le {new Date(job.created_at).toLocaleDateString('fr-FR')}
                         </p>
 
-                        <Link href={`/artisan/propose/${job.id}`} className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-block">
+                        <Link href={`/artisan/propose/${job.id}`} className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white inline-block">
                           ✉️ Faire une proposition
                         </Link>
                       </div>
@@ -261,9 +261,9 @@ export default function ArtisanDashboard() {
                             : '📤 Retirée'}
                         </span>
 
-                        <div className="flex justify-between items-center mt-4">
+                        <div className="flex justify-start items-center mt-4">
                           {proposal.client?.phone && (
-                            <a href={`tel:${proposal.client.phone}`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                            <a href={`tel:${proposal.client.phone}`} className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white">
                               📞 Contacter
                             </a>
                           )}

@@ -115,17 +115,17 @@ export default function ClientDashboard() {
               <span className="ml-3 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{getFirstName(user?.name)}</span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-col items-start gap-2 w-full sm:w-auto">
               {profile?.ville && (
                 <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">📍 {profile.ville}</div>
               )}
-              <Link href="/create-demand" className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors">
+              <Link href="/create-demand" className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white">
                 ➕ Créer une demande
               </Link>
-              <Link href="/client-profile" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <Link href="/client-profile" className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white">
                 👤 Mon profil
               </Link>
-              <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors">
+              <button onClick={handleLogout} className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white">
                 🚪 Déconnexion
               </button>
             </div>
@@ -167,7 +167,7 @@ export default function ClientDashboard() {
                 {demands.length === 0 && (
                   <div className="text-center py-12 bg-gray-50 rounded-xl">
                     <p className="text-gray-500 text-lg">Aucune demande pour le moment.</p>
-                    <Link href="/create-demand" className="inline-block mt-4 text-green-700 hover:text-green-800 font-medium">
+                    <Link href="/create-demand" className="inline-block mt-4 flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white">
                       Créer votre première demande →
                     </Link>
                   </div>
@@ -181,7 +181,7 @@ export default function ClientDashboard() {
 
                       <button
                         onClick={() => handleViewProposals(demand.id)}
-                        className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        className="flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-white/70 text-gray-700 hover:bg-white"
                       >
                         👁️ Voir les propositions
                       </button>
