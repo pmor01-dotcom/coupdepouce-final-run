@@ -101,45 +101,45 @@ export default function ArtisanDashboard() {
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
       >
 
-        {/* Floating Buttons */}
-        <div className="fixed top-24 right-4 flex flex-col gap-3 z-50 max-w-[90vw] overflow-hidden">
+       <div className="fixed top-40 right-4 z-50 grid grid-cols-1 sm:grid-cols-1 gap-3 max-w-[90vw]">
 
-          <button
-            onClick={handleLogout}
-            className="btn-secondary text-sm w-full max-w-[160px] text-left"
-          >
-            Déconnexion
-          </button>
+  <button
+    onClick={handleLogout}
+    className="btn-secondary text-sm w-full max-w-[160px] text-left"
+  >
+    Déconnexion
+  </button>
 
-          <button
-            onClick={() => setActiveTab('jobs')}
-            className="btn-secondary text-sm w-full max-w-[160px] text-left"
-          >
-            Travaux disponibles
-          </button>
+  <button
+    onClick={() => setActiveTab('jobs')}
+    className="btn-secondary text-sm w-full max-w-[160px] text-left"
+  >
+    Travaux disponibles
+  </button>
 
-          <button
-            onClick={() => { fetchProposals(); setActiveTab('proposals') }}
-            className="btn-secondary text-sm w-full max-w-[160px] text-left"
-          >
-            Mes propositions
-          </button>
+  <button
+    onClick={() => { fetchProposals(); setActiveTab('proposals') }}
+    className="btn-secondary text-sm w-full max-w-[160px] text-left"
+  >
+    Mes propositions
+  </button>
 
-          <button
-            onClick={() => setActiveTab('messages')}
-            className="btn-secondary text-sm w-full max-w-[160px] text-left"
-          >
-            Messages
-          </button>
+  <button
+    onClick={() => setActiveTab('messages')}
+    className="btn-secondary text-sm w-full max-w-[160px] text-left"
+  >
+    Messages
+  </button>
 
-          <Link
-            href="/artisan-dashboard-inscription-info"
-            className="btn-secondary text-sm w-full max-w-[160px] text-left"
-          >
-            Mon Profil
-          </Link>
+  <Link
+    href="/artisan-dashboard-inscription-info"
+    className="btn-secondary text-sm w-full max-w-[160px] text-left"
+  >
+    Mon Profil
+  </Link>
 
-        </div>
+</div>
+
 
         {/* Header */}
         <header className="bg-white shadow-sm border-b">
