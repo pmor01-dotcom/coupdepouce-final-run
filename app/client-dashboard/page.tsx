@@ -11,6 +11,13 @@ import { useRouter } from 'next/navigation'
 import PaymentStatus from '../components/PaymentStatus'
 import WelcomeUser from '../components/WelcomeUser'
 
+interface ClientProfile {
+  name: string
+  email: string
+  phone: string
+  ville?: string
+}
+
 export default function ClientDashboard() {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
@@ -20,7 +27,7 @@ export default function ClientDashboard() {
   const [demands, setDemands] = useState([])
   const [proposals, setProposals] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [profile, setProfile] = useState(null)
+  const [profile, setProfile] = useState<ClientProfile | null>(null)
 
   const getFirstName = (fullName?: string) => {
     if (!fullName) return ''
