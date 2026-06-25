@@ -101,7 +101,7 @@ export default function ArtisanDashboard() {
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
       >
 
-        {/* Floating Buttons (fixed + mobile safe) */}
+        {/* Floating Buttons */}
         <div className="fixed top-24 right-4 flex flex-col gap-3 z-50 max-w-[90vw] overflow-hidden">
 
           <button
@@ -221,3 +221,76 @@ export default function ArtisanDashboard() {
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
                         {proposal.client?.name || 'Client'}
                       </h3>
+                      <p className="text-gray-600 mb-2">{proposal.message}</p>
+
+                      <p className="text-sm text-gray-500 mb-2">
+                        Prix proposé: {proposal.proposed_price}€
+                      </p>
+
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        proposal.status === 'PENDING'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : proposal.status === 'ACCEPTED'
+                          ? 'bg-green-100 text-green-800'
+                          : proposal.status === 'REJECTED'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {proposal.status === 'PENDING'
+                          ? 'En attente'
+                          : proposal.status === 'ACCEPTED'
+                          ? 'Acceptée'
+                          : proposal.status === 'REJECTED'
+                          ? 'Refusée'
+                          : 'Retirée'}
+                      </span>
+
+                      <div className="flex justify-between items-center mt-4">
+                        {proposal.client?.phone && (
+                          <a href={`tel:${proposal.client.phone}`} className="btn-secondary text-xs">
+                            Contacter
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MESSAGES TAB */}
+          {activeTab === 'messages' && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Messages
+              </h2>
+              <MessagingInterface />
+            </div>
+          )}
+        </div>
+
+        {/* Unsubscribe Button */}
+        <div className="fixed bottom-6 right-4 z-50 max-w-[90vw] overflow-hidden">
+          <button
+            onClick={() => {
+              if (confirm('Voulez-vous vraiment vous désinscrire ?')) {
+                logout()
+                router.push('/')
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200 w-full max-w-[200px]"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="text-sm font-medium">Se désinscrire</span>
+          </button>
+        </div>
+
+      </main>
+
+      <MessageNotifications />
+    </MessagingProvider>
+  )
+}
