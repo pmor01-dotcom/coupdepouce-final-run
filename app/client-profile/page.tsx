@@ -10,7 +10,7 @@ interface ClientProfile {
   name: string
   email: string
   phone: string
-  ville: string
+  ville?: string
 }
 
 export default function ClientProfilePage() {
