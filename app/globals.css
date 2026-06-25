@@ -26,6 +26,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Custom utility classes */
@@ -411,4 +413,24 @@ body {
 /* Pause scrolling on hover */
 .animate-scroll:hover {
   animation-play-state: paused;
+}
+
+/* Mobile viewport fixes */
+html {
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  .fixed {
+    max-width: calc(100vw - 32px);
+  }
 }
