@@ -96,27 +96,52 @@ export default function ArtisanDashboard() {
 
   return (
     <MessagingProvider>
-      <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-        
-        {/* Floating Buttons */}
-        <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 50, display: 'flex', gap: '8px' }}>
-          <button onClick={handleLogout} className="btn-secondary text-sm">
+      <main
+        className="min-h-screen overflow-x-hidden"
+        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+      >
+
+        {/* Floating Buttons (fixed + mobile safe) */}
+        <div className="fixed top-24 right-4 flex flex-col gap-3 z-50 max-w-[90vw] overflow-hidden">
+
+          <button
+            onClick={handleLogout}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
             Déconnexion
           </button>
-          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm">
+
+          <button
+            onClick={() => setActiveTab('jobs')}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
             Travaux disponibles
           </button>
-          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm">
+
+          <button
+            onClick={() => { fetchProposals(); setActiveTab('proposals') }}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
             Mes propositions
           </button>
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm">
+
+          <button
+            onClick={() => setActiveTab('messages')}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
             Messages
           </button>
-          <Link href="/artisan-dashboard-inscription-info" className="btn-secondary text-sm">
-    Mon Profil
-  </Link>
-</div>
-{/* Header */}
+
+          <Link
+            href="/artisan-dashboard-inscription-info"
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
+            Mon Profil
+          </Link>
+
+        </div>
+
+        {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
@@ -151,11 +176,11 @@ export default function ArtisanDashboard() {
               ) : (
                 <div className="space-y-4">
                   {jobs.map((job) => (
-                    <div key={job.id} className="card" style={{ maxWidth: '50%', margin: '0 auto' }}>
+                    <div key={job.id} className="card w-full max-w-md mx-auto">
                       <h3 className="text-sm font-semibold text-gray-900">{job.title}</h3>
                       <p className="text-xs text-gray-600 mt-1">{job.description}</p>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600 my-2">
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 my-2">
                         <div><span className="font-medium">Localisation:</span> {job.location}</div>
                         <div><span className="font-medium">Département:</span> {job.department}</div>
                         <div><span className="font-medium">Budget:</span> {job.budget_range}</div>
@@ -196,75 +221,3 @@ export default function ArtisanDashboard() {
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
                         {proposal.client?.name || 'Client'}
                       </h3>
-                      <p className="text-gray-600 mb-2">{proposal.message}</p>
-
-                      <p className="text-sm text-gray-500 mb-2">
-                        Prix proposé: {proposal.proposed_price}€
-                      </p>
-
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        proposal.status === 'PENDING'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : proposal.status === 'ACCEPTED'
-                          ? 'bg-green-100 text-green-800'
-                          : proposal.status === 'REJECTED'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {proposal.status === 'PENDING'
-                          ? 'En attente'
-                          : proposal.status === 'ACCEPTED'
-                          ? 'Acceptée'
-                          : proposal.status === 'REJECTED'
-                          ? 'Refusée'
-                          : 'Retirée'}
-                      </span>
-
-                      <div className="flex justify-between items-center mt-4">
-                        {proposal.client?.phone && (
-                          <a href={`tel:${proposal.client.phone}`} className="btn-secondary text-xs">
-                            Contacter
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* MESSAGES TAB */}
-          {activeTab === 'messages' && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Messages
-              </h2>
-              <MessagingInterface />
-            </div>
-          )}
-        </div>
-
-        {/* Floating Unsubscribe Button */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            onClick={() => {
-              if (confirm('Voulez-vous vraiment vous désinscrire ?')) {
-                logout()
-                router.push('/')
-              }
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span className="text-sm font-medium">Se désinscrire</span>
-          </button>
-        </div>
-      </main>
-
-      <MessageNotifications />
-    </MessagingProvider>
-  )
-}
