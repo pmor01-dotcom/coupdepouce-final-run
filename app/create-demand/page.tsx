@@ -79,16 +79,6 @@ export default function CreateDemandPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-200 px-4 py-12">
-      {/* Fixed Right Sidebar Buttons */}
-      <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
-        <button
-          onClick={() => router.push('/client-dashboard')}
-          className="btn-secondary text-sm w-full text-right"
-        >
-          Retour au tableau de bord
-        </button>
-      </aside>
-
       <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
 
         <h2 className="text-3xl font-bold text-center text-gray-900">
@@ -166,6 +156,15 @@ export default function CreateDemandPage() {
             {loading ? t('common.loading') : 'Créer la demande'}
           </button>
         </form>
+
+        <div className="text-center text-sm text-gray-600">
+          <button
+            onClick={() => router.push('/client-dashboard')}
+            className="hover:text-gray-900"
+          >
+            {t('app.back')}
+          </button>
+        </div>
       </div>
     </main>
   )

@@ -26,20 +26,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Split name into nom + prenom
-    const [nom, prenom] = name.split(" ");
-
-    // 1️⃣ Create Supabase Auth user
+    // 1️⃣ Create Supabase Auth user with email verification
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: {
+        data: { 
           role,
-          nom,
-          prenom
+          name
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/callback`
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`
       }
     });
 
@@ -54,15 +50,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const userId = authData.user.id;
+
+    // Check if email confirmation is required
     const needsEmailVerification = !authData.session;
 
     // 2️⃣ Hash password for your own table
     const password_hash = await bcrypt.hash(password, 10);
 
-    // 3️⃣ Prepare insert data (NO id — Supabase sets it automatically)
+    // 3️⃣ Prepare insert data
     let insertData: any = {
-      nom,
-      prenom,
+      id: userId,
+      name,
       email,
       ville: ville || null,
       phone: phone || null,
@@ -85,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: needsEmailVerification
+      message: needsEmailVerification 
         ? "Signup successful. Please check your email to verify your account."
         : "Signup successful",
       needsEmailVerification

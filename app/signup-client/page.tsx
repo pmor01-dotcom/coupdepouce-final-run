@@ -14,7 +14,6 @@ export default function ClientSignupPage() {
     password: '',
     confirmPassword: '',
     ville: '',
-    phone: ''
   })
 
   const [loading, setLoading] = useState(false)
@@ -45,12 +44,11 @@ export default function ClientSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: `${formData.prenom} ${formData.nom}`,   // ✔ backend expects "name"
+          name: `${formData.prenom} ${formData.nom}`,
           email: formData.email,
           password: formData.password,
-          role: 'client',                               // ✔ backend expects "role"
-          ville: formData.ville,                        // ✔ backend expects "ville"
-          phone: formData.phone || null                 // ✔ optional
+          role: 'client',
+          ville: formData.ville || null,
         }),
       })
 
@@ -62,6 +60,7 @@ export default function ClientSignupPage() {
         return
       }
 
+      // If email verification is needed, redirect to check-email page
       if (data.needsEmailVerification) {
         router.push('/check-email')
       } else {
@@ -165,19 +164,6 @@ export default function ClientSignupPage() {
               onChange={handleChange}
               className="input-field"
               required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Téléphone (optionnel)
-            </label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="input-field"
             />
           </div>
 

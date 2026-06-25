@@ -13,7 +13,7 @@ export default function Login() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { login, user } = useAuth()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,26 +21,25 @@ export default function Login() {
     setIsLoading(true)
 
     try {
+      // For demo purposes, we'll determine the role based on email
+      const role = formData.email.includes('artisan') ? 'artisan' : 'client'
+      
       const success = await login(formData.email, formData.password)
 
+      
       if (success) {
-        // Wait for auth state to update, then redirect based on actual user role
-        setTimeout(() => {
-          if (user?.role === 'client') {
-            window.location.href = '/client-dashboard'
-          } else if (user?.role === 'artisan') {
-            window.location.href = '/artisan-dashboard'
-          } else {
-            // Fallback to client dashboard if role is not set
-            window.location.href = '/client-dashboard'
-          }
-        }, 200)
+        // Redirect based on role
+        if (role === 'client') {
+          window.location.href = '/client-dashboard'
+        } else {
+          window.location.href = '/artisan-dashboard'
+        }
       } else {
         setError('Email ou mot de passe incorrect')
-        setIsLoading(false)
       }
     } catch (err) {
       setError('Erreur lors de la connexion')
+    } finally {
       setIsLoading(false)
     }
   }

@@ -157,12 +157,12 @@ export default function ArtisanContacts() {
 
   return (
     <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-      {/* Fixed Right Sidebar Buttons */}
-      <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
-        <Link href="/artisan-dashboard" className="btn-secondary text-sm w-full text-right">
+      {/* Floating Top Right Buttons */}
+      <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 50, display: 'flex', gap: '8px' }}>
+        <Link href="/artisan-dashboard" className="btn-secondary text-sm">
           Retour au tableau de bord
         </Link>
-      </aside>
+      </div>
 
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">

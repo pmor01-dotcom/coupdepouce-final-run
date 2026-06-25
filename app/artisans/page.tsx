@@ -44,22 +44,21 @@ export default function ArtisanListPage() {
 
   return (
     <main className="min-h-screen bg-gray-100 p-6">
-      {/* Fixed Right Sidebar Buttons */}
-      <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
-        <button
-          onClick={() => router.push('/client-dashboard')}
-          className="btn-secondary text-sm w-full text-right"
-        >
-          Retour au tableau de bord
-        </button>
-      </aside>
-
       <div className="max-w-4xl mx-auto space-y-6">
 
         {/* Header */}
-        <h1 className="text-3xl font-bold text-gray-900">
-          {t('dashboard.artisans.title')}
-        </h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t('dashboard.artisans.title')}
+          </h1>
+
+          <button
+            onClick={() => router.push('/client-dashboard')}
+            className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900"
+          >
+            {t('app.back')}
+          </button>
+        </div>
 
         {/* No artisans */}
         {artisans.length === 0 && (

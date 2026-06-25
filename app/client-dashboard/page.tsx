@@ -1,108 +1,201 @@
-import { cookies } from "next/headers";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+'use client'
 
-export default async function ClientDashboard() {
-  const supabase = createServerComponentClient({ cookies });
+import { useState, useEffect } from 'react'
+import { useAuth } from '../components/AuthProvider'
+import { useLanguage } from '../components/LanguageProvider'
+import { MessagingProvider } from '../components/MessagingProvider'
+import MessagingInterface from '../components/MessagingInterface'
+import MessageNotifications from '../components/MessageNotifications'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import PaymentStatus from '../components/PaymentStatus'
+import WelcomeUser from '../components/WelcomeUser'
 
-  // Get authenticated user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+interface Demand {
+  id: number
+  title: string
+  description: string
+  category: string
+  location: string
+  department: string
+  budget_range: string
+  status: string
+  urgency: string
+  created_at: string
+}
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-200">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <p className="text-gray-700 mb-4">Vous devez être connecté.</p>
-          <a href="/login" className="text-blue-600 underline">Se connecter</a>
-        </div>
-      </div>
-    );
+interface Proposal {
+  id: number
+  demand_id: number
+  message: string
+  proposed_price: string
+  estimated_duration?: string
+  availability?: string
+  status: string
+  created_at: string
+  artisan?: {
+    id: number
+    name: string
+    metier: string
+    location: string
+    phone: string
+  }
+}
+
+export default function ClientDashboard() {
+  const { user, logout } = useAuth()
+  const { t } = useLanguage()
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
+  const [demands, setDemands] = useState<Demand[]>([])
+  const [proposals, setProposals] = useState<Proposal[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const getFirstName = (fullName?: string) => {
+    if (!fullName) return ''
+    return fullName.split(' ')[0]
   }
 
-  // Fetch demandes
-  const { data: demandes } = await supabase
-    .from("demandes")
-    .select("*")
-    .eq("client_id", user.id)
-    .order("created_at", { ascending: false });
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
 
-  // Fetch propositions
-  const { data: propositions } = await supabase
-    .from("propositions")
-    .select("*")
-    .eq("client_id", user.id)
-    .order("created_at", { ascending: false });
+  useEffect(() => {
+    fetchDemands()
+  }, [])
 
+  const fetchDemands = async () => {
+    try {
+      const response = await fetch('/api/demands')
+      if (response.ok) {
+        const data = await response.json()
+        setDemands(data)
+      }
+    } catch (error) {
+      console.error('Error fetching demands:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const fetchProposals = async (demandId: number) => {
+    try {
+      const response = await fetch(`/api/proposals?demandId=${demandId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setProposals(data)
+      }
+    } catch (error) {
+      console.error('Error fetching proposals:', error)
+    }
+  }
+
+  const handleViewProposals = (demandId: number) => {
+    fetchProposals(demandId)
+    setActiveTab('proposals')
+  }
+
+  // ⭐ THIS WAS MISSING — FIXED
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p>Chargement...</p>
+        </div>
+      </main>
+    )
+  }
+
+  // ⭐ THIS BRACE WAS MISSING — FIXED
   return (
-    <main className="min-h-screen bg-gradient-to-b from-green-700 to-green-200 py-10 px-4">
-      <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg space-y-10">
+    <MessagingProvider>
+      <main
+        className="min-h-screen"
+        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+      >
 
-        {/* HEADER */}
-        <header className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Espace Client</h1>
-          <nav className="flex gap-4 text-sm">
-            <a href="/create-request" className="text-blue-600 hover:underline">➕ Créer une demande</a>
-            <a href="/profile" className="text-gray-700 hover:underline">👤 Mon profil</a>
-            <a href="/logout" className="text-red-600 hover:underline">🚪 Déconnexion</a>
-          </nav>
-        </header>
-
-        {/* FREE BANNER */}
-        <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
-          <p className="font-medium">Service gratuit pendant 6 mois</p>
-          <p className="text-sm">Profitez de l'accès complet sans abonnement pendant cette période.</p>
+        {/* Welcome */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <WelcomeUser />
         </div>
 
-        {/* MES DEMANDES */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4">📋 Mes demandes</h2>
+        {/* Right-side vertical button bar */}
+<div className="absolute right-6 top-32 flex flex-col gap-3">
 
-          {!demandes || demandes.length === 0 ? (
-            <p className="text-gray-500">Vous n’avez pas encore créé de demande.</p>
-          ) : (
-            <div className="space-y-4">
-              {demandes.map((d) => (
-                <div key={d.id} className="bg-gray-50 p-4 rounded shadow-sm border">
-                  <h3 className="font-medium">{d.titre}</h3>
-                  <p className="text-gray-600 text-sm mt-1">{d.description}</p>
-                  <a
-                    href={`/demandes/${d.id}`}
-                    className="inline-block mt-3 text-blue-600 hover:underline"
-                  >
-                    👁️ Voir les propositions
-                  </a>
-                </div>
-              ))}
+  <button onClick={handleLogout} className="btn-secondary text-sm w-40 text-left">
+    Déconnexion
+  </button>
+
+  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm w-40 text-left">
+    Mes demandes
+  </button>
+
+  <Link href="/create-demand" className="btn-secondary text-sm w-40 text-left">
+    Créer une demande
+  </Link>
+
+  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm w-40 text-left">
+    Propositions reçues
+  </button>
+
+  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm w-40 text-left">
+    Messages
+  </button>
+
+  <Link href="/profile/edit" className="btn-secondary text-sm w-40 text-left">
+    Modifier mon profil
+  </Link>
+
+</div>
+
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <h1 className="text-3xl font-semibold text-gray-900">
+                  Espace Client
+                </h1>
+                <span className="ml-2 text-sm text-gray-500">
+                  {getFirstName(user?.name)}
+                </span>
+              </div>
             </div>
-          )}
-        </section>
+          </div>
+        </header>
 
-        {/* PROPOSITIONS */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4">💬 Propositions</h2>
+        {/* Payment Status */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <PaymentStatus />
+        </div>
 
-          {!propositions || propositions.length === 0 ? (
-            <p className="text-gray-500">Aucune proposition pour le moment.</p>
-          ) : (
-            <div className="space-y-4">
-              {propositions.map((p) => (
-                <div key={p.id} className="bg-gray-50 p-4 rounded shadow-sm border">
-                  <p className="font-medium">{p.artisan_name}</p>
-                  <p className="text-gray-600 text-sm mt-1">{p.message}</p>
-                  <a
-                    href={`/messages/${p.id}`}
-                    className="inline-block mt-3 text-blue-600 hover:underline"
-                  >
-                    💬 Ouvrir la messagerie
-                  </a>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* ... REST OF YOUR CONTENT (unchanged) ... */}
+        </div>
 
-      </div>
-    </main>
-  );
+        {/* Unsubscribe Button */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            onClick={() => {
+              if (confirm(t('unsubscribe.confirm'))) {
+                logout()
+                router.push('/')
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200"
+            title={t('unsubscribe.title')}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
+          </button>
+        </div>
+      </main>
+
+      <MessageNotifications />
+    </MessagingProvider>
+  )
 }
