@@ -121,20 +121,20 @@ export default function ArtisanDashboard() {
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         
         {/* Floating Buttons */}
-        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 sm:hidden items-end">
-          <button onClick={handleLogout} className="btn-secondary text-xs px-2 py-1">
+        <div className="fixed top-2 right-2 z-50 flex flex-col gap-1 sm:hidden items-end">
+          <button onClick={handleLogout} className="btn-secondary text-xs px-1 py-1 text-right">
             Déconnexion
           </button>
-          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-xs px-2 py-1">
+          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-xs px-1 py-1 text-right">
             Travaux
           </button>
-          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-xs px-2 py-1">
+          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-xs px-1 py-1 text-right">
             Propositions
           </button>
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-xs px-2 py-1">
+          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-xs px-1 py-1 text-right">
             Messages
           </button>
-          <Link href="/artisan-profile" className="btn-secondary text-xs px-2 py-1">
+          <Link href="/artisan-profile" className="btn-secondary text-xs px-1 py-1 text-right">
             Profil
           </Link>
         </div>
