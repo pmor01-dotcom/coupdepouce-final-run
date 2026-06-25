@@ -98,86 +98,92 @@ export default function ClientDashboard() {
 
   return (
     <MessagingProvider>
-      <main className="min-h-screen overflow-x-hidden bg-gradient-to-b from-[#6B8E23] to-[#D4E4BC]">
+      <main className="min-h-screen overflow-x-hidden" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
 
-        {/* Header + Welcome */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <WelcomeUser />
+        {/* Site Title */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="site-title text-center mb-6">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Coupdepouce</h2>
+          </div>
         </div>
 
-
         {/* Page Header */}
-        <header className="bg-white shadow-sm border-b mt-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <header className="bg-white rounded-xl shadow-lg mx-4 sm:mx-6 lg:mx-auto max-w-7xl mb-6">
+          <div className="px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center">
               <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">Espace Client</h1>
-              <span className="ml-2 text-sm text-gray-500">{getFirstName(user?.name)}</span>
+              <span className="ml-3 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{getFirstName(user?.name)}</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               {profile?.ville && (
-                <div className="text-sm text-gray-600">{profile.ville}</div>
+                <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">📍 {profile.ville}</div>
               )}
-              <Link href="/create-demand" className="bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 rounded-lg text-sm">
-                Créer une demande
+              <Link href="/create-demand" className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors">
+                ➕ Créer une demande
               </Link>
-              <Link href="/client-profile" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
-                Mon profil
+              <Link href="/client-profile" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                👤 Mon profil
               </Link>
-              <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm">
-                Déconnexion
+              <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors">
+                🚪 Déconnexion
               </button>
             </div>
           </div>
         </header>
 
         {/* Payment Status */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
           <PaymentStatus />
         </div>
 
         {/* MAIN CONTENT AREA */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
 
           {/* TABS */}
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-3 mb-6">
             <button
               onClick={() => setActiveTab('demands')}
-              className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg text-sm sm:text-base ${activeTab === 'demands' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
+              className={`flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all ${activeTab === 'demands' ? 'bg-white text-green-700 shadow-lg' : 'bg-white/70 text-gray-700 hover:bg-white'}`}
             >
-              Mes demandes
+              📋 Mes demandes
             </button>
 
             <button
               onClick={() => setActiveTab('proposals')}
-              className={`flex-1 min-w-[120px] px-3 py-2 rounded-lg text-sm sm:text-base ${activeTab === 'proposals' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
+              className={`flex-1 min-w-[140px] px-5 py-3 rounded-xl text-sm sm:text-base font-medium transition-all ${activeTab === 'proposals' ? 'bg-white text-green-700 shadow-lg' : 'bg-white/70 text-gray-700 hover:bg-white'}`}
             >
-              Propositions
+              💬 Propositions
             </button>
           </div>
 
           {/* TAB CONTENT */}
-          <div className="bg-white rounded-xl shadow p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
 
             {activeTab === 'demands' && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Vos demandes</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Vos demandes</h2>
 
                 {demands.length === 0 && (
-                  <p className="text-gray-600">Aucune demande pour le moment.</p>
+                  <div className="text-center py-12 bg-gray-50 rounded-xl">
+                    <p className="text-gray-500 text-lg">Aucune demande pour le moment.</p>
+                    <Link href="/create-demand" className="inline-block mt-4 text-green-700 hover:text-green-800 font-medium">
+                      Créer votre première demande →
+                    </Link>
+                  </div>
                 )}
 
                 <div className="grid gap-4">
                   {demands.map((demand: any) => (
-                    <div key={demand.id} className="border rounded-lg p-4 bg-gray-50">
-                      <h3 className="text-lg font-semibold">{demand.title}</h3>
-                      <p className="text-sm text-gray-600">{demand.description}</p>
+                    <div key={demand.id} className="border border-gray-200 rounded-xl p-5 bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{demand.title}</h3>
+                      <p className="text-sm text-gray-600 mb-4">{demand.description}</p>
 
                       <button
                         onClick={() => handleViewProposals(demand.id)}
-                        className="mt-3 bg-green-700 text-white px-3 py-2 rounded"
+                        className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                       >
-                        Voir les propositions
+                        👁️ Voir les propositions
                       </button>
                     </div>
                   ))}
@@ -187,18 +193,23 @@ export default function ClientDashboard() {
 
             {activeTab === 'proposals' && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Propositions reçues</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Propositions reçues</h2>
 
                 {proposals.length === 0 && (
-                  <p className="text-gray-600">Aucune proposition pour le moment.</p>
+                  <div className="text-center py-12 bg-gray-50 rounded-xl">
+                    <p className="text-gray-500 text-lg">Aucune proposition pour le moment.</p>
+                  </div>
                 )}
 
                 <div className="grid gap-4">
                   {proposals.map((proposal: any) => (
-                    <div key={proposal.id} className="border rounded-lg p-4 bg-gray-50">
-                      <h3 className="text-lg font-semibold">{proposal.artisan?.name}</h3>
-                      <p className="text-sm text-gray-600">{proposal.message}</p>
-                      <p className="text-sm mt-2 font-medium">Prix proposé: {proposal.proposed_price}€</p>
+                    <div key={proposal.id} className="border border-gray-200 rounded-xl p-5 bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900">{proposal.artisan?.name}</h3>
+                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Artisan</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{proposal.message}</p>
+                      <p className="text-sm font-semibold text-green-700">💰 Prix proposé: {proposal.proposed_price}€</p>
                     </div>
                   ))}
                 </div>
@@ -212,7 +223,7 @@ export default function ClientDashboard() {
         {/* Floating Messages Button */}
         <button
           onClick={() => setShowMessages(true)}
-          className="fixed bottom-6 right-6 z-50 bg-green-700 hover:bg-green-800 text-white p-4 rounded-full shadow-lg flex items-center justify-center"
+          className="fixed bottom-6 right-6 z-50 bg-green-700 hover:bg-green-800 text-white p-4 rounded-full shadow-lg flex items-center justify-center transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
