@@ -121,37 +121,20 @@ export default function ArtisanDashboard() {
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         
         {/* Floating Buttons */}
-        <div className="fixed top-2 right-2 z-50 flex flex-col gap-1 sm:hidden items-end">
-          <button onClick={handleLogout} className="btn-secondary text-xs px-1 py-1 text-right">
+        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+          <button onClick={handleLogout} className="btn-secondary text-sm text-right">
             Déconnexion
           </button>
-          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-xs px-1 py-1 text-right">
-            Travaux
-          </button>
-          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-xs px-1 py-1 text-right">
-            Propositions
-          </button>
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-xs px-1 py-1 text-right">
-            Messages
-          </button>
-          <Link href="/artisan-profile" className="btn-secondary text-xs px-1 py-1 text-right">
-            Profil
-          </Link>
-        </div>
-        <div className="fixed top-4 right-4 z-50 hidden sm:flex flex-row gap-2">
-          <button onClick={handleLogout} className="btn-secondary text-sm whitespace-nowrap">
-            Déconnexion
-          </button>
-          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm whitespace-nowrap">
+          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm text-right">
             Travaux disponibles
           </button>
-          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm whitespace-nowrap">
+          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm text-right">
             Mes propositions
           </button>
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm whitespace-nowrap">
+          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right">
             Messages
           </button>
-          <Link href="/artisan-profile" className="btn-secondary text-sm whitespace-nowrap">
+          <Link href="/artisan-profile" className="btn-secondary text-sm text-right">
             Mon Profil
           </Link>
         </div>

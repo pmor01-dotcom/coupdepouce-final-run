@@ -142,43 +142,23 @@ export default function ClientDashboard() {
         </div>
 
         {/* Right-side vertical button bar */}
-<div className="fixed top-2 right-2 z-50 flex flex-col gap-1 sm:hidden items-end">
-  <button onClick={handleLogout} className="btn-secondary text-xs px-1 py-1 text-right">
+<div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+  <button onClick={handleLogout} className="btn-secondary text-sm text-right">
     Déconnexion
   </button>
-  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-xs px-1 py-1 text-right">
-    Demandes
-  </button>
-  <Link href="/create-demand" className="btn-secondary text-xs px-1 py-1 text-right">
-    Créer
-  </Link>
-  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-xs px-1 py-1 text-right">
-    Propositions
-  </button>
-  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-xs px-1 py-1 text-right">
-    Messages
-  </button>
-  <Link href="/client-profile" className="btn-secondary text-xs px-1 py-1 text-right">
-    Profil
-  </Link>
-</div>
-<div className="fixed top-4 right-4 z-50 hidden sm:flex flex-row gap-2">
-  <button onClick={handleLogout} className="btn-secondary text-sm whitespace-nowrap">
-    Déconnexion
-  </button>
-  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm whitespace-nowrap">
+  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm text-right">
     Mes demandes
   </button>
-  <Link href="/create-demand" className="btn-secondary text-sm whitespace-nowrap">
+  <Link href="/create-demand" className="btn-secondary text-sm text-right">
     Créer une demande
   </Link>
-  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm whitespace-nowrap">
+  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm text-right">
     Propositions reçues
   </button>
-  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm whitespace-nowrap">
+  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right">
     Messages
   </button>
-  <Link href="/client-profile" className="btn-secondary text-sm whitespace-nowrap">
+  <Link href="/client-profile" className="btn-secondary text-sm text-right">
     Modifier mon profil
   </Link>
 </div>
