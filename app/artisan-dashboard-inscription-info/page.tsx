@@ -80,13 +80,16 @@ export default function ArtisanProfileEditor() {
   }
 
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-      
-      <div className="fixed top-6 right-6 flex gap-3">
-        <Link href="/artisan-dashboard" className="btn-secondary text-sm">
+    <main
+      className="min-h-screen overflow-x-hidden"
+      style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+    >
+      {/* Fixed right sidebar-style actions */}
+      <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
+        <Link href="/artisan-dashboard" className="btn-secondary text-sm w-full text-right">
           Retour au tableau de bord
         </Link>
-      </div>
+      </aside>
 
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center">
@@ -97,7 +100,6 @@ export default function ArtisanProfileEditor() {
       </header>
 
       <div className="max-w-4xl mx-auto px-6 py-10">
-
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-6">
             {success}
@@ -105,7 +107,6 @@ export default function ArtisanProfileEditor() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-lg font-semibold mb-4">Description</h2>
             <textarea
@@ -166,7 +167,6 @@ export default function ArtisanProfileEditor() {
               {saving ? 'Enregistrement...' : 'Enregistrer'}
             </button>
           </div>
-
         </form>
       </div>
     </main>

@@ -11,53 +11,16 @@ import { useRouter } from 'next/navigation'
 import PaymentStatus from '../components/PaymentStatus'
 import WelcomeUser from '../components/WelcomeUser'
 
-interface Demand {
-  id: number
-  title: string
-  description: string
-  category: string
-  location: string
-  department: string
-  budget_range: string
-  status: string
-  urgency: string
-  created_at: string
-}
-
-interface Proposal {
-  id: number
-  demand_id: number
-  message: string
-  proposed_price: string
-  estimated_duration?: string
-  availability?: string
-  status: string
-  created_at: string
-  artisan?: {
-    id: number
-    name: string
-    metier: string
-    location: string
-    phone: string
-  }
-}
-
-interface ClientProfile {
-  name: string
-  email: string
-  phone: string
-  ville: string
-}
-
 export default function ClientDashboard() {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
   const router = useRouter()
+
   const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
-  const [demands, setDemands] = useState<Demand[]>([])
-  const [proposals, setProposals] = useState<Proposal[]>([])
+  const [demands, setDemands] = useState([])
+  const [proposals, setProposals] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [profile, setProfile] = useState<ClientProfile | null>(null)
+  const [profile, setProfile] = useState(null)
 
   const getFirstName = (fullName?: string) => {
     if (!fullName) return ''
@@ -117,70 +80,63 @@ export default function ClientDashboard() {
     setActiveTab('proposals')
   }
 
-  // ⭐ THIS WAS MISSING — FIXED
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p>Chargement...</p>
-        </div>
+        <p>Chargement...</p>
       </main>
     )
   }
 
-  // ⭐ THIS BRACE WAS MISSING — FIXED
   return (
     <MessagingProvider>
-      <main
-        className="min-h-screen"
-        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
-      >
+      <main className="min-h-screen overflow-x-hidden bg-gradient-to-b from-[#6B8E23] to-[#D4E4BC]">
 
-        {/* Welcome */}
+        {/* Header + Welcome */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <WelcomeUser />
         </div>
 
-        {/* Right-side vertical button bar */}
-<div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
-  <button onClick={handleLogout} className="btn-secondary text-sm text-right block">
-    Déconnexion
-  </button>
-  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm text-right block">
-    Mes demandes
-  </button>
-  <Link href="/create-demand" className="btn-secondary text-sm text-right block">
-    Créer une demande
-  </Link>
-  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm text-right block">
-    Propositions reçues
-  </button>
-  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm text-right block">
-    Messages
-  </button>
-  <Link href="/client-profile" className="btn-secondary text-sm text-right block">
-    Modifier mon profil
-  </Link>
-</div>
+        {/* FIXED RIGHT SIDEBAR */}
+        <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
 
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <h1 className="text-3xl font-semibold text-gray-900">
-                  Espace Client
-                </h1>
-                <span className="ml-2 text-sm text-gray-500">
-                  {getFirstName(user?.name)}
-                </span>
-              </div>
-              {profile && profile.ville && (
-                <div className="text-sm text-gray-600">
-                  <span>{profile.ville}</span>
-                </div>
-              )}
+          <button onClick={handleLogout} className="btn-secondary text-sm w-full text-right">
+            Déconnexion
+          </button>
+
+          <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm w-full text-right">
+            Mes demandes
+          </button>
+
+          <Link href="/create-demand" className="btn-secondary text-sm w-full text-right">
+            Créer une demande
+          </Link>
+
+          <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm w-full text-right">
+            Propositions reçues
+          </button>
+
+          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm w-full text-right">
+            Messages
+          </button>
+
+          <Link href="/client-profile" className="btn-secondary text-sm w-full text-right">
+            Modifier mon profil
+          </Link>
+
+        </aside>
+
+        {/* Page Header */}
+        <header className="bg-white shadow-sm border-b mt-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <div className="flex items-center">
+              <h1 className="text-3xl font-semibold text-gray-900">Espace Client</h1>
+              <span className="ml-2 text-sm text-gray-500">{getFirstName(user?.name)}</span>
             </div>
+
+            {profile?.ville && (
+              <div className="text-sm text-gray-600">{profile.ville}</div>
+            )}
           </div>
         </header>
 
@@ -189,10 +145,90 @@ export default function ClientDashboard() {
           <PaymentStatus />
         </div>
 
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* ... REST OF YOUR CONTENT (unchanged) ... */}
-        </div>
+        {/* MAIN CONTENT AREA */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+          {/* TABS */}
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => setActiveTab('demands')}
+              className={`px-4 py-2 rounded-lg ${activeTab === 'demands' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
+            >
+              Mes demandes
+            </button>
+
+            <button
+              onClick={() => setActiveTab('proposals')}
+              className={`px-4 py-2 rounded-lg ${activeTab === 'proposals' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
+            >
+              Propositions
+            </button>
+
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`px-4 py-2 rounded-lg ${activeTab === 'messages' ? 'bg-green-700 text-white' : 'bg-white shadow'}`}
+            >
+              Messages
+            </button>
+          </div>
+
+          {/* TAB CONTENT */}
+          <div className="bg-white rounded-xl shadow p-6">
+
+            {activeTab === 'demands' && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Vos demandes</h2>
+
+                {demands.length === 0 && (
+                  <p className="text-gray-600">Aucune demande pour le moment.</p>
+                )}
+
+                <div className="grid gap-4">
+                  {demands.map((demand: any) => (
+                    <div key={demand.id} className="border rounded-lg p-4 bg-gray-50">
+                      <h3 className="text-lg font-semibold">{demand.title}</h3>
+                      <p className="text-sm text-gray-600">{demand.description}</p>
+
+                      <button
+                        onClick={() => handleViewProposals(demand.id)}
+                        className="mt-3 bg-green-700 text-white px-3 py-2 rounded"
+                      >
+                        Voir les propositions
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'proposals' && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Propositions reçues</h2>
+
+                {proposals.length === 0 && (
+                  <p className="text-gray-600">Aucune proposition pour le moment.</p>
+                )}
+
+                <div className="grid gap-4">
+                  {proposals.map((proposal: any) => (
+                    <div key={proposal.id} className="border rounded-lg p-4 bg-gray-50">
+                      <h3 className="text-lg font-semibold">{proposal.artisan?.name}</h3>
+                      <p className="text-sm text-gray-600">{proposal.message}</p>
+                      <p className="text-sm mt-2 font-medium">Prix proposé: {proposal.proposed_price}€</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'messages' && (
+              <div>
+                <MessagingInterface />
+              </div>
+            )}
+
+          </div>
+        </section>
 
         {/* Unsubscribe Button */}
         <div className="fixed bottom-6 right-6 z-50">
@@ -203,15 +239,12 @@ export default function ClientDashboard() {
                 router.push('/')
               }
             }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200"
-            title={t('unsubscribe.title')}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
             <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
           </button>
         </div>
+
       </main>
 
       <MessageNotifications />
