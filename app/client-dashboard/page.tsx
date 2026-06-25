@@ -96,7 +96,6 @@ export default function ClientDashboard() {
     setActiveTab('proposals')
   }
 
-  // ⭐ THIS WAS MISSING — FIXED
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -107,95 +106,8 @@ export default function ClientDashboard() {
     )
   }
 
-  // ⭐ THIS BRACE WAS MISSING — FIXED
   return (
     <MessagingProvider>
       <main
-        className="min-h-screen"
+        className="min-h-screen overflow-x-hidden"
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
-      >
-
-        {/* Welcome */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <WelcomeUser />
-        </div>
-
-        {/* Right-side vertical button bar */}
-<div className="absolute right-6 top-32 flex flex-col gap-3">
-
-  <button onClick={handleLogout} className="btn-secondary text-sm w-40 text-left">
-    Déconnexion
-  </button>
-
-  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm w-40 text-left">
-    Mes demandes
-  </button>
-
-  <Link href="/create-demand" className="btn-secondary text-sm w-40 text-left">
-    Créer une demande
-  </Link>
-
-  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm w-40 text-left">
-    Propositions reçues
-  </button>
-
-  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm w-40 text-left">
-    Messages
-  </button>
-
-  <Link href="/profile/edit" className="btn-secondary text-sm w-40 text-left">
-    Modifier mon profil
-  </Link>
-
-</div>
-
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <h1 className="text-3xl font-semibold text-gray-900">
-                  Espace Client
-                </h1>
-                <span className="ml-2 text-sm text-gray-500">
-                  {getFirstName(user?.name)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Payment Status */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <PaymentStatus />
-        </div>
-
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* ... REST OF YOUR CONTENT (unchanged) ... */}
-        </div>
-
-        {/* Unsubscribe Button */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            onClick={() => {
-              if (confirm(t('unsubscribe.confirm'))) {
-                logout()
-                router.push('/')
-              }
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200"
-            title={t('unsubscribe.title')}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
-          </button>
-        </div>
-      </main>
-
-      <MessageNotifications />
-    </MessagingProvider>
-  )
-}
