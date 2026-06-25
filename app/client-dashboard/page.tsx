@@ -1,4 +1,37 @@
-export default function ClientDashboard({ user, demandes, propositions }) {
+import { cookies } from "next/headers";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+
+export default async function ClientDashboard() {
+  const supabase = createServerComponentClient({ cookies });
+
+  // 1️⃣ Get authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return (
+      <div className="p-10 text-center">
+        <p>Vous devez être connecté.</p>
+        <a href="/login" className="text-blue-600 underline">Se connecter</a>
+      </div>
+    );
+  }
+
+  // 2️⃣ Fetch demandes for this user
+  const { data: demandes } = await supabase
+    .from("demandes")
+    .select("*")
+    .eq("client_id", user.id)
+    .order("created_at", { ascending: false });
+
+  // 3️⃣ Fetch propositions for this user
+  const { data: propositions } = await supabase
+    .from("propositions")
+    .select("*")
+    .eq("client_id", user.id)
+    .order("created_at", { ascending: false });
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* HEADER */}
@@ -25,7 +58,7 @@ export default function ClientDashboard({ user, demandes, propositions }) {
         <section>
           <h2 className="text-xl font-semibold mb-4">📋 Mes demandes</h2>
 
-          {demandes.length === 0 ? (
+          {!demandes || demandes.length === 0 ? (
             <p className="text-gray-500">Vous n’avez pas encore créé de demande.</p>
           ) : (
             <div className="space-y-4">
@@ -49,7 +82,7 @@ export default function ClientDashboard({ user, demandes, propositions }) {
         <section>
           <h2 className="text-xl font-semibold mb-4">💬 Propositions</h2>
 
-          {propositions.length === 0 ? (
+          {!propositions || propositions.length === 0 ? (
             <p className="text-gray-500">Aucune proposition pour le moment.</p>
           ) : (
             <div className="space-y-4">
