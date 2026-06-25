@@ -4,28 +4,30 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 export default async function ClientDashboard() {
   const supabase = createServerComponentClient({ cookies });
 
-  // 1️⃣ Get authenticated user
+  // Get authenticated user
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
     return (
-      <div className="p-10 text-center">
-        <p>Vous devez être connecté.</p>
-        <a href="/login" className="text-blue-600 underline">Se connecter</a>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-200">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center">
+          <p className="text-gray-700 mb-4">Vous devez être connecté.</p>
+          <a href="/login" className="text-blue-600 underline">Se connecter</a>
+        </div>
       </div>
     );
   }
 
-  // 2️⃣ Fetch demandes for this user
+  // Fetch demandes
   const { data: demandes } = await supabase
     .from("demandes")
     .select("*")
     .eq("client_id", user.id)
     .order("created_at", { ascending: false });
 
-  // 3️⃣ Fetch propositions for this user
+  // Fetch propositions
   const { data: propositions } = await supabase
     .from("propositions")
     .select("*")
@@ -33,26 +35,24 @@ export default async function ClientDashboard() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">Espace Client</h1>
+    <main className="min-h-screen bg-gradient-to-b from-green-700 to-green-200 py-10 px-4">
+      <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg space-y-10">
+
+        {/* HEADER */}
+        <header className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">Espace Client</h1>
           <nav className="flex gap-4 text-sm">
             <a href="/create-request" className="text-blue-600 hover:underline">➕ Créer une demande</a>
             <a href="/profile" className="text-gray-700 hover:underline">👤 Mon profil</a>
             <a href="/logout" className="text-red-600 hover:underline">🚪 Déconnexion</a>
           </nav>
+        </header>
+
+        {/* FREE BANNER */}
+        <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
+          <p className="font-medium">Service gratuit pendant 6 mois</p>
+          <p className="text-sm">Profitez de l'accès complet sans abonnement pendant cette période.</p>
         </div>
-      </header>
-
-      {/* FREE BANNER */}
-      <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-4 max-w-5xl mx-auto rounded">
-        <p className="font-medium">Service gratuit pendant 6 mois</p>
-        <p className="text-sm">Profitez de l'accès complet sans abonnement pendant cette période.</p>
-      </div>
-
-      <main className="max-w-5xl mx-auto px-4 mt-8 space-y-10">
 
         {/* MES DEMANDES */}
         <section>
@@ -63,7 +63,7 @@ export default async function ClientDashboard() {
           ) : (
             <div className="space-y-4">
               {demandes.map((d) => (
-                <div key={d.id} className="bg-white p-4 rounded shadow-sm border">
+                <div key={d.id} className="bg-gray-50 p-4 rounded shadow-sm border">
                   <h3 className="font-medium">{d.titre}</h3>
                   <p className="text-gray-600 text-sm mt-1">{d.description}</p>
                   <a
@@ -87,7 +87,7 @@ export default async function ClientDashboard() {
           ) : (
             <div className="space-y-4">
               {propositions.map((p) => (
-                <div key={p.id} className="bg-white p-4 rounded shadow-sm border">
+                <div key={p.id} className="bg-gray-50 p-4 rounded shadow-sm border">
                   <p className="font-medium">{p.artisan_name}</p>
                   <p className="text-gray-600 text-sm mt-1">{p.message}</p>
                   <a
@@ -102,7 +102,7 @@ export default async function ClientDashboard() {
           )}
         </section>
 
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

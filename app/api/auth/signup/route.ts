@@ -9,16 +9,16 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      name,      // full name from form, e.g. "Paul Morland"
+      name,
       email,
       password,
-      role,      // "client" | "artisan"
+      role,
       ville,
-      metier,    // only for artisan
-      phone      // if your artisans table has it
+      metier,
+      phone
     } = body;
 
-    // 🔐 Basic validation
+    // Validate required fields
     if (!name || !email || !password || !role) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -26,10 +26,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 🧩 Split full name into nom + prenom
-    const parts = name.trim().split(" ");
-    const prenom = parts[0] || "";
-    const nom = parts.slice(1).join(" ") || "";
+    // Split name into nom + prenom
+    const [nom, prenom] = name.split(" ");
 
     // 1️⃣ Create Supabase Auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -39,12 +37,9 @@ export async function POST(request: NextRequest) {
         data: {
           role,
           nom,
-          prenom,
-          ville: ville || null
+          prenom
         },
-        emailRedirectTo: `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/auth/callback`
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/callback`
       }
     });
 
@@ -61,28 +56,27 @@ export async function POST(request: NextRequest) {
 
     const needsEmailVerification = !authData.session;
 
-    // 2️⃣ Hash password for your own tables
+    // 2️⃣ Hash password for your own table
     const password_hash = await bcrypt.hash(password, 10);
 
-    // 3️⃣ Build insert payload — ⚠️ no `id` here, Supabase sets it (auth.uid())
-    const isArtisan = role === "artisan";
-    const table = isArtisan ? "artisans" : "clients";
-
+    // 3️⃣ Prepare insert data (NO id — Supabase sets it automatically)
     let insertData: any = {
       nom,
       prenom,
       email,
-      ville: ville || "",
+      ville: ville || null,
+      phone: phone || null,
       password_hash,
       role
     };
 
-    if (isArtisan) {
-      insertData.metier = metier || "";
-      if (phone) insertData.phone = phone;
+    if (role === "artisan") {
+      insertData.metier = metier || null;
     }
 
-    // 4️⃣ Insert into correct table
+    const table = role === "artisan" ? "artisans" : "clients";
+
+    // 4️⃣ Insert into the correct table
     const { error } = await supabase.from(table).insert(insertData);
 
     if (error) {
@@ -96,6 +90,7 @@ export async function POST(request: NextRequest) {
         : "Signup successful",
       needsEmailVerification
     });
+
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },
