@@ -44,11 +44,12 @@ export default function ClientSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: `${formData.prenom} ${formData.nom}`,
+          prenom: formData.prenom,
+nom: formData.nom,
           email: formData.email,
           password: formData.password,
           role: 'client',
-          ville: formData.ville || null,
+          city: formData.ville || null,
         }),
       })
 

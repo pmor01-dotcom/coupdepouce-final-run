@@ -3,11 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useLanguage } from '../components/LanguageProvider'
 
 export default function ArtisanSignupPage() {
   const router = useRouter()
-  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     name: '',
@@ -34,8 +32,6 @@ export default function ArtisanSignupPage() {
     setError('')
     setLoading(true)
 
-    console.log('Form submitted with data:', formData)
-
     if (formData.password !== formData.confirmPassword) {
       setError('Les mots de passe ne correspondent pas')
       setLoading(false)
@@ -43,26 +39,23 @@ export default function ArtisanSignupPage() {
     }
 
     try {
-      console.log('Sending signup request to /api/auth/signup')
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          name: formData.name,          // backend splits into nom + prenom
           email: formData.email,
           password: formData.password,
           role: 'artisan',
           ville: formData.ville,
           metier: formData.metier,
-          phone: formData.phone,
+          phone: formData.phone || null,
         }),
       })
 
-      console.log('Response received:', response.status, response.statusText)
       const data = await response.json()
-      console.log('Response data:', data)
 
       if (!response.ok) {
         setError(data.error || 'Erreur lors de l\'inscription')
@@ -70,14 +63,12 @@ export default function ArtisanSignupPage() {
         return
       }
 
-      // If email verification is needed, redirect to check-email page
       if (data.needsEmailVerification) {
         router.push('/check-email')
       } else {
         router.push('/artisan-dashboard')
       }
     } catch (err: any) {
-      console.error('Signup error:', err)
       setError(err.message || 'Erreur inconnue')
     } finally {
       setLoading(false)
@@ -91,10 +82,6 @@ export default function ArtisanSignupPage() {
         <h2 className="text-3xl font-bold text-center text-gray-900">
           Créer un compte artisan
         </h2>
-
-        <p className="text-center text-gray-600">
-          Proposez vos services aux clients
-        </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
