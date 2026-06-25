@@ -142,29 +142,29 @@ export default function ClientDashboard() {
         </div>
 
         {/* Right-side vertical button bar */}
-<div className="absolute right-6 top-32 flex flex-col gap-3">
+<div className="fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2 sm:gap-2">
 
-  <button onClick={handleLogout} className="btn-secondary text-sm w-40 text-left">
+  <button onClick={handleLogout} className="btn-secondary text-sm whitespace-nowrap">
     Déconnexion
   </button>
 
-  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm w-40 text-left">
+  <button onClick={() => setActiveTab('demands')} className="btn-secondary text-sm whitespace-nowrap">
     Mes demandes
   </button>
 
-  <Link href="/create-demand" className="btn-secondary text-sm w-40 text-left">
+  <Link href="/create-demand" className="btn-secondary text-sm whitespace-nowrap">
     Créer une demande
   </Link>
 
-  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm w-40 text-left">
+  <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm whitespace-nowrap">
     Propositions reçues
   </button>
 
-  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm w-40 text-left">
+  <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm whitespace-nowrap">
     Messages
   </button>
 
-  <Link href="/client-profile" className="btn-secondary text-sm w-40 text-left">
+  <Link href="/client-profile" className="btn-secondary text-sm whitespace-nowrap">
     Modifier mon profil
   </Link>
 

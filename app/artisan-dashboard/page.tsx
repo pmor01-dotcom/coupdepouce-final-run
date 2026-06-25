@@ -121,23 +121,23 @@ export default function ArtisanDashboard() {
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         
         {/* Floating Buttons */}
-        <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 50, display: 'flex', gap: '8px' }}>
-          <button onClick={handleLogout} className="btn-secondary text-sm">
+        <div className="fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2 sm:gap-2">
+          <button onClick={handleLogout} className="btn-secondary text-sm whitespace-nowrap">
             Déconnexion
           </button>
-          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm">
+          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-sm whitespace-nowrap">
             Travaux disponibles
           </button>
-          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm">
+          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-sm whitespace-nowrap">
             Mes propositions
           </button>
-          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm">
+          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-sm whitespace-nowrap">
             Messages
           </button>
-          <Link href="/artisan-profile" className="btn-secondary text-sm">
-    Mon Profil
-  </Link>
-</div>
+          <Link href="/artisan-profile" className="btn-secondary text-sm whitespace-nowrap">
+            Mon Profil
+          </Link>
+        </div>
 {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
