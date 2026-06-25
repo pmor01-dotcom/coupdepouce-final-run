@@ -121,7 +121,24 @@ export default function ArtisanDashboard() {
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         
         {/* Floating Buttons */}
-        <div className="fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2 sm:gap-2">
+        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 sm:hidden">
+          <button onClick={handleLogout} className="btn-secondary text-xs px-2 py-1">
+            Déconnexion
+          </button>
+          <button onClick={() => setActiveTab('jobs')} className="btn-secondary text-xs px-2 py-1">
+            Travaux
+          </button>
+          <button onClick={() => { fetchProposals(); setActiveTab('proposals') }} className="btn-secondary text-xs px-2 py-1">
+            Propositions
+          </button>
+          <button onClick={() => setActiveTab('messages')} className="btn-secondary text-xs px-2 py-1">
+            Messages
+          </button>
+          <Link href="/artisan-profile" className="btn-secondary text-xs px-2 py-1">
+            Profil
+          </Link>
+        </div>
+        <div className="fixed top-4 right-4 z-50 hidden sm:flex flex-row gap-2">
           <button onClick={handleLogout} className="btn-secondary text-sm whitespace-nowrap">
             Déconnexion
           </button>
