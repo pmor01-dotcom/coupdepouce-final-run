@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/app/components/AuthProvider'
 import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 
 export default function EditProfile() {
   const { user } = useAuth()
-  const router = useRouter()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -133,23 +131,9 @@ export default function EditProfile() {
     )
   }
 
-  // Determine return path
-  const returnPath =
-    profileType === 'artisan'
-      ? '/artisan-dashboard'
-      : '/client-dashboard'
-
   return (
     <main className="min-h-screen bg-green-900 py-16 px-4">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-10 relative">
-
-        {/* RETURN BUTTON */}
-        <button
-          onClick={() => router.push(returnPath)}
-          className="absolute top-6 left-6 bg-green-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-800 shadow"
-        >
-          ← Retour
-        </button>
 
         {/* AVATAR SECTION */}
         <div className="flex flex-col items-center -mt-20 mb-6">
