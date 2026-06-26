@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/app/components/AuthProvider'
 import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export default function EditProfile() {
   const { user } = useAuth()
+  const router = useRouter()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -23,6 +25,14 @@ export default function EditProfile() {
   const [avatar, setAvatar] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
+  // Redirect if user is null (fixes Vercel build)
+  useEffect(() => {
+    if (user === null) {
+      router.push('/login')
+    }
+  }, [user, router])
+
+  // Load profile
   useEffect(() => {
     if (!user) return
 
@@ -64,6 +74,7 @@ export default function EditProfile() {
 
   // DELETE AVATAR (Option B: only remove from DB)
   const deleteAvatar = async () => {
+    if (!user) return
     if (!avatar) return
 
     const table = profileType === 'artisan' ? 'artisans' : 'clients'
@@ -77,8 +88,11 @@ export default function EditProfile() {
     setAvatarFile(null)
   }
 
+  // SAVE PROFILE
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user) return
+
     setSaving(true)
     setError('')
     setSuccess('')
@@ -123,7 +137,7 @@ export default function EditProfile() {
     setSaving(false)
   }
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <main className="p-6 text-center text-white bg-green-900 min-h-screen">
         Loading profile...
@@ -131,9 +145,22 @@ export default function EditProfile() {
     )
   }
 
+  const returnPath =
+    profileType === 'artisan'
+      ? '/artisan-dashboard'
+      : '/client-dashboard'
+
   return (
     <main className="min-h-screen bg-green-900 py-16 px-4">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-10 relative">
+
+        {/* RETURN BUTTON */}
+        <button
+          onClick={() => router.push(returnPath)}
+          className="absolute top-6 left-6 bg-green-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-800 shadow"
+        >
+          ← Retour
+        </button>
 
         {/* AVATAR SECTION */}
         <div className="flex flex-col items-center -mt-20 mb-6">
