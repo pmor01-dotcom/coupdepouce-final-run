@@ -8,7 +8,8 @@ import MessageNotifications from '../components/MessageNotifications'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PaymentStatus from '../components/PaymentStatus'
-import WelcomeUser from '../components/WelcomeUser'
+import WelcomeUser from '@/app/components/WelcomeUser'
+
 
 interface Demand {
   id: number
@@ -142,16 +143,16 @@ export default function ClientDashboard() {
           </Link>
         </div>
 
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <h1 className="text-3xl font-semibold text-gray-900">Espace Client</h1>
-                <span className="ml-2 text-sm text-gray-500">{getFirstName(user?.name)}</span>
-              </div>
-            </div>
-          </div>
-        </header>
+       <header className="bg-white shadow-sm border-b">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between items-center h-16">
+      <div className="flex items-center">
+        <h1 className="text-3xl font-semibold text-gray-900">Espace Client</h1>
+        <span className="ml-2 text-sm text-gray-500">{getFirstName(user?.name)}</span>
+      </div>
+    </div>
+  </div>
+</header>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
           <PaymentStatus />

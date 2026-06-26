@@ -5,13 +5,19 @@ import { useAuth } from './AuthProvider'
 export default function WelcomeUser() {
   const { user } = useAuth()
 
-  // Extract first name safely
   const firstName = user?.name?.split(' ')[0] ?? ''
 
   return (
-    <div className="flex items-center space-x-2 text-3xl font-semibold text-gray-900">
-      <span>Bienvenue</span>
-      {firstName && <span>{firstName}</span>}
+    <div className="flex items-baseline space-x-8">
+      <span className="text-7xl font-bold text-gray-900">
+        Bienvenue
+      </span>
+
+      {firstName && (
+        <span className="text-5xl font-semibold text-gray-800">
+          {firstName}
+        </span>
+      )}
     </div>
   )
 }
