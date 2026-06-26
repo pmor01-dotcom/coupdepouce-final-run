@@ -46,7 +46,6 @@ export default function MesDemandes() {
           <p className="text-gray-700 text-lg">Aucune demande trouvée.</p>
         )}
 
-        {/* Cards container */}
         <div className="space-y-6">
           {demands.map((demand: any) => (
             <div
