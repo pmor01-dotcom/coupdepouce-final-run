@@ -41,7 +41,7 @@ export default function ArtisanDashboard() {
   const { t } = useLanguage()
   const router = useRouter()
 
-  const [activeTab, setActiveTab] = useState<'jobs' | 'proposals' | 'messages'>('jobs')
+  const [activeTab, setActiveTab] = useState<'proposals' | 'messages'>('proposals')
   const [jobs, setJobs] = useState<Job[]>([])
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -89,7 +89,7 @@ export default function ArtisanDashboard() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Chargement...</p>
+        <p>{t('common.loading')}</p>
       </main>
     )
   }
@@ -100,57 +100,58 @@ export default function ArtisanDashboard() {
         className="min-h-screen overflow-x-hidden"
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
       >
+        {/* Centered Title at Top */}
+        <div className="text-center py-8">
+          <h1 className="text-3xl font-semibold text-white">
+            {t('app.title')}
+          </h1>
+        </div>
 
-       <div className="fixed top-40 right-4 z-50 grid grid-cols-1 sm:grid-cols-1 gap-3 max-w-[90vw]">
+        {/* Floating Buttons */}
+        <div className="fixed top-40 right-4 z-50 grid grid-cols-1 gap-3 max-w-[90vw]">
 
-  <button
-    onClick={handleLogout}
-    className="btn-secondary text-sm w-full max-w-[160px] text-left"
-  >
-    Déconnexion
-  </button>
+          <button
+            onClick={handleLogout}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
+            {t('dashboard.logout')}
+          </button>
 
-  <button
-    onClick={() => setActiveTab('jobs')}
-    className="btn-secondary text-sm w-full max-w-[160px] text-left"
-  >
-    Travaux disponibles
-  </button>
+          <button
+            onClick={() => { fetchProposals(); setActiveTab('proposals') }}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
+            {t('clientDashboard.myDemands')}
+          </button>
 
-  <button
-    onClick={() => { fetchProposals(); setActiveTab('proposals') }}
-    className="btn-secondary text-sm w-full max-w-[160px] text-left"
-  >
-    Mes propositions
-  </button>
+          <button
+            onClick={() => setActiveTab('messages')}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
+            {t('clientDashboard.messages')}
+          </button>
 
-  <button
-    onClick={() => setActiveTab('messages')}
-    className="btn-secondary text-sm w-full max-w-[160px] text-left"
-  >
-    Messages
-  </button>
+          <button
+            onClick={() => {
+              if (confirm(t('unsubscribe.confirm'))) {
+                logout()
+                router.push('/')
+              }
+            }}
+            className="btn-secondary text-sm w-full max-w-[160px] text-left"
+          >
+            {t('unsubscribe.title')}
+          </button>
 
-  <Link
-    href="/artisan-dashboard-inscription-info"
-    className="btn-secondary text-sm w-full max-w-[160px] text-left"
-  >
-    Mon Profil
-  </Link>
-
-</div>
-
+        </div>
 
         {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <h1 className="text-3xl font-semibold text-gray-900">
-                  Espace Artisan
-                </h1>
-                <span className="ml-2 text-sm text-gray-500">
-                  {getFirstName(user?.name)}
+                <span className="text-sm text-gray-500">
+                  {t('common.welcome')}, {getFirstName(user?.name)}
                 </span>
               </div>
             </div>
@@ -160,102 +161,39 @@ export default function ArtisanDashboard() {
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-          {/* JOBS TAB */}
-          {activeTab === 'jobs' && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Travaux disponibles
-              </h2>
-
-              {jobs.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 mb-4">
-                    Aucun travail disponible pour le moment
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {jobs.map((job) => (
-                    <div key={job.id} className="card w-full max-w-md mx-auto">
-                      <h3 className="text-sm font-semibold text-gray-900">{job.title}</h3>
-                      <p className="text-xs text-gray-600 mt-1">{job.description}</p>
-
-                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 my-2">
-                        <div><span className="font-medium">Localisation:</span> {job.location}</div>
-                        <div><span className="font-medium">Département:</span> {job.department}</div>
-                        <div><span className="font-medium">Budget:</span> {job.budget_range}</div>
-                        <div><span className="font-medium">Urgence:</span> {job.urgency}</div>
-                      </div>
-
-                      <p className="text-xs text-gray-500">
-                        Publié le {new Date(job.created_at).toLocaleDateString('fr-FR')}
-                      </p>
-
-                      <Link href={`/artisan/propose/${job.id}`} className="btn-success text-xs mt-3 inline-block">
-                        Faire une proposition
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* PROPOSALS TAB */}
           {activeTab === 'proposals' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Mes propositions
+                {t('clientDashboard.myDemands')}
               </h2>
 
-              {proposals.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 mb-4">
-                    Vous n'avez pas encore envoyé de propositions
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {proposals.map((proposal) => (
-                    <div key={proposal.id} className="card">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        {proposal.client?.name || 'Client'}
-                      </h3>
-                      <p className="text-gray-600 mb-2">{proposal.message}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {proposals.map((proposal) => (
+                  <div key={proposal.id} className="card">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {proposal.client?.name || 'Client'}
+                    </h3>
+                    <p className="text-gray-600 mb-2">{proposal.message}</p>
 
-                      <p className="text-sm text-gray-500 mb-2">
-                        Prix proposé: {proposal.proposed_price}€
-                      </p>
+                    <p className="text-sm text-gray-500 mb-2">
+                      {proposal.proposed_price}€
+                    </p>
 
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        proposal.status === 'PENDING'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : proposal.status === 'ACCEPTED'
-                          ? 'bg-green-100 text-green-800'
-                          : proposal.status === 'REJECTED'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {proposal.status === 'PENDING'
-                          ? 'En attente'
-                          : proposal.status === 'ACCEPTED'
-                          ? 'Acceptée'
-                          : proposal.status === 'REJECTED'
-                          ? 'Refusée'
-                          : 'Retirée'}
-                      </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      {proposal.status}
+                    </span>
 
-                      <div className="flex justify-between items-center mt-4">
-                        {proposal.client?.phone && (
-                          <a href={`tel:${proposal.client.phone}`} className="btn-secondary text-xs">
-                            Contacter
-                          </a>
-                        )}
-                      </div>
+                    <div className="flex justify-between items-center mt-4">
+                      {proposal.client?.phone && (
+                        <a href={`tel:${proposal.client.phone}`} className="btn-secondary text-xs">
+                          {t('dashboard.contactArtisan')}
+                        </a>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -263,29 +201,11 @@ export default function ArtisanDashboard() {
           {activeTab === 'messages' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Messages
+                {t('clientDashboard.messages')}
               </h2>
               <MessagingInterface />
             </div>
           )}
-        </div>
-
-        {/* Unsubscribe Button */}
-        <div className="fixed bottom-6 right-4 z-50 max-w-[90vw] overflow-hidden">
-          <button
-            onClick={() => {
-              if (confirm('Voulez-vous vraiment vous désinscrire ?')) {
-                logout()
-                router.push('/')
-              }
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200 w-full max-w-[200px]"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span className="text-sm font-medium">Se désinscrire</span>
-          </button>
         </div>
 
       </main>
