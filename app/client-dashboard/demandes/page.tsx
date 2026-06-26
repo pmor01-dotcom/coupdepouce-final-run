@@ -46,6 +46,7 @@ export default function MesDemandes() {
           <p className="text-gray-700 text-lg">Aucune demande trouvée.</p>
         )}
 
+        {/* Cards container */}
         <div className="space-y-6">
           {demands.map((demand: any) => (
             <div
@@ -58,7 +59,7 @@ export default function MesDemandes() {
 
               <p className="text-gray-700 mt-2">{demand.description}</p>
 
-              <div className="mt-4 text-sm text-gray-600">
+              <div className="mt-4 text-sm text-gray-600 space-y-1">
                 <p><strong>Catégorie :</strong> {demand.category}</p>
                 <p><strong>Département :</strong> {demand.department}</p>
                 <p><strong>Budget :</strong> {demand.budget_range}</p>
