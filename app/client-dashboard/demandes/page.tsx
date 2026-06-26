@@ -25,26 +25,49 @@ export default function MesDemandes() {
   }, [])
 
   if (loading) {
-    return <p className="p-6">Chargement…</p>
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-lg">Chargement…</p>
+      </main>
+    )
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Mes demandes</h1>
+    <main
+      className="min-h-screen overflow-x-hidden"
+      style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <h1 className="text-3xl font-semibold text-gray-900 mb-6">
+          Mes demandes
+        </h1>
 
-      {demands.length === 0 && (
-        <p>Aucune demande trouvée.</p>
-      )}
+        {demands.length === 0 && (
+          <p className="text-gray-700 text-lg">Aucune demande trouvée.</p>
+        )}
 
-      <ul className="space-y-4">
-        {demands.map((demand: any) => (
-          <li key={demand.id} className="p-4 bg-white shadow rounded">
-            <h2 className="font-semibold">{demand.title}</h2>
-            <p>{demand.description}</p>
-            <p className="text-sm text-gray-500">Statut : {demand.status}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
+        <div className="space-y-6">
+          {demands.map((demand: any) => (
+            <div
+              key={demand.id}
+              className="bg-white shadow-md rounded-lg p-6 border border-gray-200"
+            >
+              <h2 className="text-xl font-semibold text-gray-900">
+                {demand.title}
+              </h2>
+
+              <p className="text-gray-700 mt-2">{demand.description}</p>
+
+              <div className="mt-4 text-sm text-gray-600">
+                <p><strong>Catégorie :</strong> {demand.category}</p>
+                <p><strong>Département :</strong> {demand.department}</p>
+                <p><strong>Budget :</strong> {demand.budget_range}</p>
+                <p><strong>Statut :</strong> {demand.status}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
   )
 }
