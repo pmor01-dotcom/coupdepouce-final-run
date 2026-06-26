@@ -25,7 +25,7 @@ export default function EditProfile() {
   const [avatar, setAvatar] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
-  // Redirect if user is null (fixes Vercel build)
+  // Redirect if user is null
   useEffect(() => {
     if (user === null) {
       router.push('/login')
@@ -37,17 +37,18 @@ export default function EditProfile() {
     if (!user) return
 
     const loadProfile = async () => {
+      // FETCH BOTH TABLES (this was the missing piece)
       const { data: client } = await supabase
         .from('clients')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       const { data: artisan } = await supabase
         .from('artisans')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       const profile = client || artisan
 
@@ -57,8 +58,10 @@ export default function EditProfile() {
         return
       }
 
+      // Detect correct profile type
       setProfileType(client ? 'client' : 'artisan')
 
+      // Load fields
       setName(profile.name || '')
       setEmail(profile.email || '')
       setPhone(profile.phone || '')
@@ -72,10 +75,9 @@ export default function EditProfile() {
     loadProfile()
   }, [user])
 
-  // DELETE AVATAR (Option B: only remove from DB)
+  // DELETE AVATAR
   const deleteAvatar = async () => {
-    if (!user) return
-    if (!avatar) return
+    if (!user || !avatar) return
 
     const table = profileType === 'artisan' ? 'artisans' : 'clients'
 
@@ -178,7 +180,6 @@ export default function EditProfile() {
             )}
           </div>
 
-          {/* Upload Button */}
           <label className="mt-4 bg-green-900 text-white px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-green-800 shadow">
             Uploader une photo de profil
             <input
@@ -189,7 +190,6 @@ export default function EditProfile() {
             />
           </label>
 
-          {/* Delete Photo Button */}
           {avatar && (
             <button
               type="button"
@@ -208,7 +208,6 @@ export default function EditProfile() {
         {error && <p className="text-red-600 mb-4 text-center">{error}</p>}
         {success && <p className="text-green-700 mb-4 text-center">{success}</p>}
 
-        {/* FORM */}
         <form onSubmit={handleSave} className="space-y-6">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
