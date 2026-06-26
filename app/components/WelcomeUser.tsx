@@ -8,16 +8,10 @@ export default function WelcomeUser() {
   const firstName = user?.name?.split(' ')[0] ?? ''
 
   return (
-    <div className="flex items-baseline space-x-8">
+    <div className="flex items-baseline">
       <span className="text-7xl font-bold text-gray-900">
-        Bienvenue
+        {firstName ? `Bienvenue ${firstName}` : 'Bienvenue'}
       </span>
-
-      {firstName && (
-        <span className="text-5xl font-semibold text-gray-800">
-          {firstName}
-        </span>
-      )}
     </div>
   )
 }

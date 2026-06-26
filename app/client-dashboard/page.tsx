@@ -148,7 +148,8 @@ export default function ClientDashboard() {
     <div className="flex justify-between items-center h-16">
       <div className="flex items-center">
         <h1 className="text-3xl font-semibold text-gray-900">Espace Client</h1>
-        <span className="ml-2 text-sm text-gray-500">{getFirstName(user?.name)}</span>
+       {/* removed duplicate name */}
+
       </div>
     </div>
   </div>
