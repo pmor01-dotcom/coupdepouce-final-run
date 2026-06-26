@@ -45,6 +45,12 @@ export default function MesDemandes() {
         {demands.length === 0 && (
           <p className="text-gray-700 text-lg">Aucune demande trouvée.</p>
         )}
+<Link
+  href="/client-dashboard"
+  className="inline-block mb-6 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition"
+>
+  ← Retour au tableau de bord
+</Link>
 
         <div className="space-y-6">
           {demands.map((demand: any) => (
