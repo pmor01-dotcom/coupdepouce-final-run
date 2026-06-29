@@ -12,18 +12,12 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 interface UserProfile {
   id: string
   email: string
-  role?: 'client' | 'artisan'
+  role: 'client' | 'artisan'
   name?: string
-  isPaid?: boolean
+  phone?: string
   location?: string
-  department?: string
   metier?: string
-  subscription?: {
-    plan: 'monthly' | 'yearly'
-    startDate: string
-    endDate: string
-    paymentId: string
-  } | null
+  isPaid?: boolean
 }
 
 interface AuthContextType {
@@ -41,63 +35,139 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load session on mount
+  // Load session + fetch profile from correct table
   useEffect(() => {
     const loadSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession()
 
-      if (session?.user) {
-        const metadata = session.user.user_metadata || {}
+      if (!session?.user) {
+        setUser(null)
+        localStorage.removeItem('user')
+        setIsLoading(false)
+        return
+      }
 
+      const authUser = session.user
+
+      // 1️⃣ Try CLIENT table
+      const { data: clientProfile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
+
+      if (clientProfile) {
         const profile: UserProfile = {
-          id: session.user.id,
-          email: session.user.email ?? '',
-          role: metadata.role,
-          name: metadata.name,
-          isPaid: metadata.isPaid,
-          location: metadata.location,
-          department: metadata.department,
-          metier: metadata.metier,
-          subscription: metadata.subscription || null,
+          id: authUser.id,
+          email: authUser.email ?? '',
+          role: 'client',
+          name: clientProfile.name,
+          phone: clientProfile.phone,
+          location: clientProfile.location,
+          isPaid: clientProfile.isPaid ?? false,
         }
 
         setUser(profile)
         localStorage.setItem('user', JSON.stringify(profile))
-      } else {
-        setUser(null)
-        localStorage.removeItem('user')
+        setIsLoading(false)
+        return
       }
 
+      // 2️⃣ Try ARTISAN table
+      const { data: artisanProfile } = await supabase
+        .from('artisans')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
+
+      if (artisanProfile) {
+        const profile: UserProfile = {
+          id: authUser.id,
+          email: authUser.email ?? '',
+          role: 'artisan',
+          name: artisanProfile.name,
+          phone: artisanProfile.phone,
+          location: artisanProfile.ville,
+          metier: artisanProfile.metier,
+          isPaid: artisanProfile.isPaid ?? false,
+        }
+
+        setUser(profile)
+        localStorage.setItem('user', JSON.stringify(profile))
+        setIsLoading(false)
+        return
+      }
+
+      // 3️⃣ No profile found
+      setUser(null)
+      localStorage.removeItem('user')
       setIsLoading(false)
     }
 
     loadSession()
 
+    // Auth state listener
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session?.user) {
-          const metadata = session.user.user_metadata || {}
+      async (_event, session) => {
+        if (!session?.user) {
+          setUser(null)
+          localStorage.removeItem('user')
+          return
+        }
 
+        const authUser = session.user
+
+        // CLIENT
+        const { data: clientProfile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authUser.id)
+          .single()
+
+        if (clientProfile) {
           const profile: UserProfile = {
-            id: session.user.id,
-            email: session.user.email ?? '',
-            role: metadata.role,
-            name: metadata.name,
-            isPaid: metadata.isPaid,
-            location: metadata.location,
-            department: metadata.department,
-            metier: metadata.metier,
-            subscription: metadata.subscription || null,
+            id: authUser.id,
+            email: authUser.email ?? '',
+            role: 'client',
+            name: clientProfile.name,
+            phone: clientProfile.phone,
+            location: clientProfile.location,
+            isPaid: clientProfile.isPaid ?? false,
           }
 
           setUser(profile)
           localStorage.setItem('user', JSON.stringify(profile))
-        } else {
-          setUser(null)
-          localStorage.removeItem('user')
+          return
         }
+
+        // ARTISAN
+        const { data: artisanProfile } = await supabase
+          .from('artisans')
+          .select('*')
+          .eq('id', authUser.id)
+          .single()
+
+        if (artisanProfile) {
+          const profile: UserProfile = {
+            id: authUser.id,
+            email: authUser.email ?? '',
+            role: 'artisan',
+            name: artisanProfile.name,
+            phone: artisanProfile.phone,
+            location: artisanProfile.ville,
+            metier: artisanProfile.metier,
+            isPaid: artisanProfile.isPaid ?? false,
+          }
+
+          setUser(profile)
+          localStorage.setItem('user', JSON.stringify(profile))
+          return
+        }
+
+        setUser(null)
+        localStorage.removeItem('user')
       }
     )
 
@@ -116,24 +186,56 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error || !data.user) return false
 
-      const metadata = data.user.user_metadata || {}
+      const authUser = data.user
 
-      const profile: UserProfile = {
-        id: data.user.id,
-        email: data.user.email ?? '',
-        role: metadata.role,
-        name: metadata.name,
-        isPaid: metadata.isPaid,
-        location: metadata.location,
-        department: metadata.department,
-        metier: metadata.metier,
-        subscription: metadata.subscription || null,
+      // CLIENT
+      const { data: clientProfile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
+
+      if (clientProfile) {
+        const profile: UserProfile = {
+          id: authUser.id,
+          email: authUser.email ?? '',
+          role: 'client',
+          name: clientProfile.name,
+          phone: clientProfile.phone,
+          location: clientProfile.location,
+          isPaid: clientProfile.isPaid ?? false,
+        }
+
+        setUser(profile)
+        localStorage.setItem('user', JSON.stringify(profile))
+        return true
       }
 
-      setUser(profile)
-      localStorage.setItem('user', JSON.stringify(profile))
+      // ARTISAN
+      const { data: artisanProfile } = await supabase
+        .from('artisans')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
 
-      return true
+      if (artisanProfile) {
+        const profile: UserProfile = {
+          id: authUser.id,
+          email: authUser.email ?? '',
+          role: 'artisan',
+          name: artisanProfile.name,
+          phone: artisanProfile.phone,
+          location: artisanProfile.ville,
+          metier: artisanProfile.metier,
+          isPaid: artisanProfile.isPaid ?? false,
+        }
+
+        setUser(profile)
+        localStorage.setItem('user', JSON.stringify(profile))
+        return true
+      }
+
+      return false
     } catch {
       return false
     }
