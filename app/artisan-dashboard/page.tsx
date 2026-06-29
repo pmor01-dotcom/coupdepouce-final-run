@@ -116,40 +116,67 @@ export default function ClientDashboard() {
         </div>
 
         {/* BUTTONS STACKED VERTICALLY */}
-        <div className="max-w-3xl mx-auto px-4 mt-6 flex flex-col gap-3 w-full">
+        <div className="max-w-3xl mx-auto px-4 mt-6 w-full" style={{ display: 'block' }}>
 
-            <button
-              onClick={handleLogout}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full"
-            >
-              Déconnexion
-            </button>
+            <div style={{ marginBottom: '12px' }}>
+              <button
+                onClick={handleLogout}
+                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                Déconnexion
+              </button>
+            </div>
 
-            <Link href="/artisan-dashboard/demandes" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center block">
-              Mes demandes
-            </Link>
+            <div style={{ marginBottom: '12px' }}>
+              <Link href="/artisan-dashboard/demandes" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                Mes demandes
+              </Link>
+            </div>
 
-            <Link href="/create-demand" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center block">
-              Créer une demande
-            </Link>
+            <div style={{ marginBottom: '12px' }}>
+              <Link href="/create-demand" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                Créer une demande
+              </Link>
+            </div>
 
-            <button
-              onClick={() => setActiveTab('proposals')}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full"
-            >
-              Propositions reçues
-            </button>
+            <div style={{ marginBottom: '12px' }}>
+              <button
+                onClick={() => setActiveTab('proposals')}
+                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                Propositions reçues
+              </button>
+            </div>
 
-            <button
-              onClick={() => setActiveTab('messages')}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full"
-            >
-              Messages
-            </button>
+            <div style={{ marginBottom: '12px' }}>
+              <button
+                onClick={() => setActiveTab('messages')}
+                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                Messages
+              </button>
+            </div>
 
-            <Link href="/profile/edit" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center block">
-              Modifier mon profil
-            </Link>
+            <div style={{ marginBottom: '12px' }}>
+              <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                Modifier mon profil
+              </Link>
+            </div>
 
         </div>
 
