@@ -28,10 +28,17 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Fetch demands belonging to this user
+    // Fetch demands belonging to this user with client contact info
     const { data: demands, error: demandsError } = await supabase
       .from("demands")
-      .select("*")
+      .select(`
+        *,
+        users!demands_client_id_fkey (
+          name,
+          email,
+          phone
+        )
+      `)
       .eq("client_id", user.id);
 
     if (demandsError) {
