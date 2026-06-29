@@ -4,22 +4,19 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
 import { MessagingProvider } from '../components/MessagingProvider'
+import MessagingInterface from '../components/MessagingInterface'
 import MessageNotifications from '../components/MessageNotifications'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import PaymentStatus from '../components/PaymentStatus'
-import WelcomeUser from '@/app/components/WelcomeUser'
 
-interface Demand {
+interface Job {
   id: number
   title: string
   description: string
-  category: string
   location: string
   department: string
   budget_range: string
-  status: string
   urgency: string
+  status: string
   created_at: string
 }
 
@@ -28,28 +25,30 @@ interface Proposal {
   demand_id: number
   message: string
   proposed_price: string
-  estimated_duration?: string
-  availability?: string
   status: string
   created_at: string
-  artisan?: {
+  client?: {
     id: number
     name: string
-    metier: string
     location: string
     phone: string
   }
 }
 
-export default function ClientDashboard() {
+export default function ArtisanDashboard() {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
   const router = useRouter()
 
-  const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
-  const [demands, setDemands] = useState<Demand[]>([])
+  const [activeTab, setActiveTab] = useState<'proposals' | 'messages'>('proposals')
+  const [jobs, setJobs] = useState<Job[]>([])
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  const getFirstName = (fullName?: string) => {
+    if (!fullName) return ''
+    return fullName.split(' ')[0]
+  }
 
   const handleLogout = () => {
     logout()
@@ -57,26 +56,26 @@ export default function ClientDashboard() {
   }
 
   useEffect(() => {
-    fetchDemands()
+    fetchJobs()
   }, [])
 
-  const fetchDemands = async () => {
+  const fetchJobs = async () => {
     try {
-      const response = await fetch('/api/demands')
+      const response = await fetch('/api/artisan/jobs')
       if (response.ok) {
         const data = await response.json()
-        setDemands(data)
+        setJobs(data)
       }
     } catch (error) {
-      console.error('Error fetching demands:', error)
+      console.error('Error fetching jobs:', error)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const fetchProposals = async (demandId: number) => {
+  const fetchProposals = async () => {
     try {
-      const response = await fetch(`/api/proposals?demandId=${demandId}`)
+      const response = await fetch('/api/artisan/proposals')
       if (response.ok) {
         const data = await response.json()
         setProposals(data)
@@ -88,11 +87,4 @@ export default function ClientDashboard() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Chargement...</p>
-      </main>
-    )
-  }
-
-  return (
-    <MessagingProvider>
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center"></main>
