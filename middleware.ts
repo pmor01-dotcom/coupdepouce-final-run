@@ -1,41 +1,69 @@
 
 import { NextResponse } from 'next/server'
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import type { NextRequest } from 'next/server'
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
 
-  // Refresh session if needed
+  // Get current session
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session }
+  } = await supabase.auth.getSession()
 
   const pathname = req.nextUrl.pathname
 
-  // 1. If NOT logged in → redirect to login (except if already on login or signup pages)
-  const publicPaths = ['/login', '/signup', '/signup-client', '/signup-artisan', '/forgot-password', '/reset-password', '/check-email', '/auth/callback']
+  // Public routes that do NOT require login
+  const publicPaths = [
+    '/login',
+    '/signup',
+    '/signup-client',
+    '/signup-artisan',
+    '/forgot-password',
+    '/reset-password',
+    '/check-email',
+    '/auth/callback'
+  ]
+
   const isPublic = publicPaths.includes(pathname)
 
-  if (!user && !isPublic) {
+  // If NOT logged in → redirect to login (unless on public page)
+  if (!session && !isPublic) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  // 2. If logged in → redirect AWAY from login/signup pages
-  if (user && isPublic) {
-    const role = user.user_metadata.role
+  // If logged in → fetch REAL role from Supabase
+  if (session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
 
-    if (role === 'client') {
+    const role = profile?.role
+
+    // If logged in and on login/signup → redirect to correct dashboard
+    if (isPublic) {
+      if (role === 'client') {
+        return NextResponse.redirect(new URL('/client-dashboard', req.url))
+      }
+      if (role === 'artisan') {
+        return NextResponse.redirect(new URL('/artisan-dashboard', req.url))
+      }
+    }
+
+    // Protect artisan dashboard
+    if (pathname.startsWith('/artisan-dashboard') && role !== 'artisan') {
       return NextResponse.redirect(new URL('/client-dashboard', req.url))
     }
 
-    if (role === 'artisan') {
+    // Protect client dashboard
+    if (pathname.startsWith('/client-dashboard') && role !== 'client') {
       return NextResponse.redirect(new URL('/artisan-dashboard', req.url))
     }
   }
 
-  // 3. If logged in and already on a dashboard, allow access
   return res
 }
 
@@ -47,9 +75,9 @@ export const config = {
     '/signup-artisan',
     '/forgot-password',
     '/reset-password',
-    '/client-dashboard',
-    '/artisan-dashboard',
+    '/client-dashboard/:path*',
+    '/artisan-dashboard/:path*',
     '/check-email',
     '/auth/callback'
-  ],
+  ]
 }
