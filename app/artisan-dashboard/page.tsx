@@ -4,20 +4,22 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
 import { MessagingProvider } from '../components/MessagingProvider'
-import MessagingInterface from '../components/MessagingInterface'
 import MessageNotifications from '../components/MessageNotifications'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import PaymentStatus from '../components/PaymentStatus'
+import WelcomeUser from '@/app/components/WelcomeUser'
 
-interface Job {
+interface Demand {
   id: number
   title: string
   description: string
+  category: string
   location: string
   department: string
   budget_range: string
-  urgency: string
   status: string
+  urgency: string
   created_at: string
 }
 
@@ -26,30 +28,28 @@ interface Proposal {
   demand_id: number
   message: string
   proposed_price: string
+  estimated_duration?: string
+  availability?: string
   status: string
   created_at: string
-  client?: {
+  artisan?: {
     id: number
     name: string
+    metier: string
     location: string
     phone: string
   }
 }
 
-export default function ArtisanDashboard() {
+export default function ClientDashboard() {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
   const router = useRouter()
 
-  const [activeTab, setActiveTab] = useState<'proposals' | 'messages'>('proposals')
-  const [jobs, setJobs] = useState<Job[]>([])
+  const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
+  const [demands, setDemands] = useState<Demand[]>([])
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)
-
-  const getFirstName = (fullName?: string) => {
-    if (!fullName) return ''
-    return fullName.split(' ')[0]
-  }
 
   const handleLogout = () => {
     logout()
@@ -57,26 +57,26 @@ export default function ArtisanDashboard() {
   }
 
   useEffect(() => {
-    fetchJobs()
+    fetchDemands()
   }, [])
 
-  const fetchJobs = async () => {
+  const fetchDemands = async () => {
     try {
-      const response = await fetch('/api/artisan/jobs')
+      const response = await fetch('/api/demands')
       if (response.ok) {
         const data = await response.json()
-        setJobs(data)
+        setDemands(data)
       }
     } catch (error) {
-      console.error('Error fetching jobs:', error)
+      console.error('Error fetching demands:', error)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const fetchProposals = async () => {
+  const fetchProposals = async (demandId: number) => {
     try {
-      const response = await fetch('/api/artisan/proposals')
+      const response = await fetch(`/api/proposals?demandId=${demandId}`)
       if (response.ok) {
         const data = await response.json()
         setProposals(data)
@@ -89,7 +89,7 @@ export default function ArtisanDashboard() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>{t('common.loading')}</p>
+        <p>Chargement...</p>
       </main>
     )
   }
@@ -101,47 +101,44 @@ export default function ArtisanDashboard() {
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
       >
 
-        {/* TITLE */}
-        <div className="max-w-3xl mx-auto px-4 pt-8 text-center">
-          <h1 className="text-3xl font-semibold text-white">
-            {t('app.title')}
-          </h1>
+        {/* WELCOME + BUTTONS */}
+        <div className="max-w-3xl mx-auto px-4 pt-6">
+          <WelcomeUser />
 
-          {/* BUTTONS UNDER TITLE */}
           <div className="flex flex-col gap-3 mt-6 w-full">
 
             <button
               onClick={handleLogout}
               className="btn-secondary text-sm w-full"
             >
-              {t('dashboard.logout')}
+              Déconnexion
             </button>
 
+            <Link href="/client-dashboard/demandes" className="btn-secondary text-sm w-full">
+              Mes demandes
+            </Link>
+
+            <Link href="/create-demand" className="btn-secondary text-sm w-full">
+              Créer une demande
+            </Link>
+
             <button
-              onClick={() => { fetchProposals(); setActiveTab('proposals') }}
+              onClick={() => setActiveTab('proposals')}
               className="btn-secondary text-sm w-full"
             >
-              {t('clientDashboard.myDemands')}
+              Propositions reçues
             </button>
 
             <button
               onClick={() => setActiveTab('messages')}
               className="btn-secondary text-sm w-full"
             >
-              {t('clientDashboard.messages')}
+              Messages
             </button>
 
-            <button
-              onClick={() => {
-                if (confirm(t('unsubscribe.confirm'))) {
-                  logout()
-                  router.push('/')
-                }
-              }}
-              className="btn-secondary text-sm w-full"
-            >
-              {t('unsubscribe.title')}
-            </button>
+            <Link href="/profile/edit" className="btn-secondary text-sm w-full">
+              Modifier mon profil
+            </Link>
 
           </div>
         </div>
@@ -150,62 +147,36 @@ export default function ArtisanDashboard() {
         <header className="bg-white shadow-sm border-b mt-6">
           <div className="max-w-3xl mx-auto px-4">
             <div className="flex items-center h-16">
-              <span className="text-sm text-gray-500">
-                {t('common.welcome')}, {getFirstName(user?.name)}
-              </span>
+              <h1 className="text-2xl font-semibold text-gray-900">Espace Client</h1>
             </div>
           </div>
         </header>
 
-        {/* CONTENT */}
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        {/* PAYMENT STATUS */}
+        <div className="max-w-3xl mx-auto px-4 mt-4">
+          <PaymentStatus />
+        </div>
 
-          {/* PROPOSALS TAB */}
-          {activeTab === 'proposals' && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                {t('clientDashboard.myDemands')}
-              </h2>
+        {/* SPACING */}
+        <div className="max-w-3xl mx-auto px-4 py-8"></div>
 
-              <div className="grid grid-cols-1 gap-6">
-                {proposals.map((proposal) => (
-                  <div key={proposal.id} className="card">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {proposal.client?.name || 'Client'}
-                    </h3>
-
-                    <p className="text-gray-600 mb-2">{proposal.message}</p>
-
-                    <p className="text-sm text-gray-500 mb-2">
-                      {proposal.proposed_price}€
-                    </p>
-
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {proposal.status}
-                    </span>
-
-                    <div className="flex justify-between items-center mt-4">
-                      {proposal.client?.phone && (
-                        <a href={`tel:${proposal.client.phone}`} className="btn-secondary text-xs">
-                          {t('dashboard.contactArtisan')}
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* MESSAGES TAB */}
-          {activeTab === 'messages' && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                {t('clientDashboard.messages')}
-              </h2>
-              <MessagingInterface />
-            </div>
-          )}
+        {/* UNSUBSCRIBE BUTTON */}
+        <div className="max-w-3xl mx-auto px-4 pb-10">
+          <button
+            onClick={() => {
+              if (confirm(t('unsubscribe.confirm'))) {
+                logout()
+                router.push('/')
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200 w-full"
+            title={t('unsubscribe.title')}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
+          </button>
         </div>
 
       </main>
