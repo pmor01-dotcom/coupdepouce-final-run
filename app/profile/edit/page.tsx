@@ -37,37 +37,28 @@ export default function EditProfile() {
     if (!user) return
 
     const loadProfile = async () => {
-      // FETCH BOTH TABLES (this was the missing piece)
-      const { data: client } = await supabase
-        .from('clients')
+      const { data: profile, error } = await supabase
+        .from('users')
         .select('*')
         .eq('id', user.id)
-        .maybeSingle()
+        .single()
 
-      const { data: artisan } = await supabase
-        .from('artisans')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      const profile = client || artisan
-
-      if (!profile) {
+      if (error || !profile) {
         setError('Profile not found.')
         setLoading(false)
         return
       }
 
       // Detect correct profile type
-      setProfileType(client ? 'client' : 'artisan')
+      setProfileType(profile.role === 'ARTISAN' ? 'artisan' : 'client')
 
       // Load fields
       setName(profile.name || '')
       setEmail(profile.email || '')
       setPhone(profile.phone || '')
-      setAddress(profile.address || '')
+      setAddress(profile.location || '')
       setMetier(profile.metier || '')
-      setAvatar(profile.avatar_url || null)
+      setAvatar(null) // avatar_url not in schema
 
       setLoading(false)
     }
@@ -77,15 +68,6 @@ export default function EditProfile() {
 
   // DELETE AVATAR
   const deleteAvatar = async () => {
-    if (!user || !avatar) return
-
-    const table = profileType === 'artisan' ? 'artisans' : 'clients'
-
-    await supabase
-      .from(table)
-      .update({ avatar_url: null })
-      .eq('id', user.id)
-
     setAvatar(null)
     setAvatarFile(null)
   }
@@ -99,34 +81,14 @@ export default function EditProfile() {
     setError('')
     setSuccess('')
 
-    let avatarUrl = avatar
-
-    if (avatarFile) {
-      const fileName = `${user.id}-${Date.now()}`
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, avatarFile)
-
-      if (uploadError) {
-        setError('Error uploading avatar.')
-        setSaving(false)
-        return
-      }
-
-      avatarUrl = supabase.storage.from('avatars').getPublicUrl(fileName).data.publicUrl
-    }
-
-    const table = profileType === 'artisan' ? 'artisans' : 'clients'
-
     const { error: updateError } = await supabase
-      .from(table)
+      .from('users')
       .update({
         name,
         email,
         phone,
-        address,
-        metier,
-        avatar_url: avatarUrl
+        location: address,
+        metier
       })
       .eq('id', user.id)
 

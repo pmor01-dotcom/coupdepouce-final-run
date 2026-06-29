@@ -6,20 +6,19 @@ export async function POST(request: NextRequest) {
   const supabase = createRouteHandlerClient({ cookies });
   const body = await request.json();
 
-  const { id, description, experience_years, specialties, phone, ville } = body;
+  const { id, description, experience_years, specialties, phone, location, metier } = body;
 
   if (!id) {
-    return NextResponse.json({ error: "Missing artisan ID" }, { status: 400 });
+    return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
   }
 
   const { error } = await supabase
-    .from("artisans")
+    .from("users")
     .update({
-      description,
-      experience_years,
-      specialties,
       phone,
-      ville
+      location,
+      metier,
+      experience_years
     })
     .eq("id", id);
 

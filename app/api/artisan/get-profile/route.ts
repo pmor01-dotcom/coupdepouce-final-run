@@ -16,7 +16,7 @@ const {
   const userId = session.user.id;
 
   const { data, error } = await supabase
-    .from("artisans")
+    .from("users")
     .select("*")
     .eq("id", userId)
     .single();

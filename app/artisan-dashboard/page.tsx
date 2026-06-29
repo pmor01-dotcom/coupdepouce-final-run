@@ -101,46 +101,45 @@ export default function ClientDashboard() {
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
       >
 
-        {/* WELCOME + BUTTONS */}
+        {/* WELCOME */}
         <div className="max-w-3xl mx-auto px-4 pt-6">
           <WelcomeUser />
+        </div>
 
-          <div className="flex flex-col gap-3 mt-6 w-full">
+        {/* FIXED BUTTONS ON RIGHT SIDE */}
+        <div className="fixed right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50">
+          <button
+            onClick={handleLogout}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
+          >
+            Déconnexion
+          </button>
 
-            <button
-              onClick={handleLogout}
-              className="btn-secondary text-sm w-full"
-            >
-              Déconnexion
-            </button>
+          <Link href="/artisan-dashboard/demandes" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap text-center">
+            Mes demandes
+          </Link>
 
-            <Link href="/client-dashboard/demandes" className="btn-secondary text-sm w-full">
-              Mes demandes
-            </Link>
+          <Link href="/create-demand" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap text-center">
+            Créer une demande
+          </Link>
 
-            <Link href="/create-demand" className="btn-secondary text-sm w-full">
-              Créer une demande
-            </Link>
+          <button
+            onClick={() => setActiveTab('proposals')}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
+          >
+            Propositions reçues
+          </button>
 
-            <button
-              onClick={() => setActiveTab('proposals')}
-              className="btn-secondary text-sm w-full"
-            >
-              Propositions reçues
-            </button>
+          <button
+            onClick={() => setActiveTab('messages')}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
+          >
+            Messages
+          </button>
 
-            <button
-              onClick={() => setActiveTab('messages')}
-              className="btn-secondary text-sm w-full"
-            >
-              Messages
-            </button>
-
-            <Link href="/profile/edit" className="btn-secondary text-sm w-full">
-              Modifier mon profil
-            </Link>
-
-          </div>
+          <Link href="/profile/edit" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap text-center">
+            Modifier mon profil
+          </Link>
         </div>
 
         {/* HEADER */}
