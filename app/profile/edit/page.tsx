@@ -17,11 +17,20 @@ export default function EditProfile() {
 
   const [profileType, setProfileType] = useState<'client' | 'artisan' | null>(null)
 
+  // Shared fields
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+
+  // Artisan-only fields
+  const [nom, setNom] = useState('')
+  const [prenom, setPrenom] = useState('')
   const [metier, setMetier] = useState('')
+  const [description, setDescription] = useState('')
+  const [experienceYears, setExperienceYears] = useState('')
+  const [specialities, setSpecialities] = useState('')
+
   const [avatar, setAvatar] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
@@ -37,28 +46,49 @@ export default function EditProfile() {
     if (!user) return
 
     const loadProfile = async () => {
-      const { data: profile, error } = await supabase
+      // First check users table
+      const { data: userProfile } = await supabase
         .from('users')
         .select('*')
         .eq('id', user.id)
         .single()
 
-      if (error || !profile) {
+      if (userProfile) {
+        setProfileType('client')
+        setName(userProfile.name || '')
+        setEmail(userProfile.email || '')
+        setPhone(userProfile.phone || '')
+        setAddress(userProfile.location || '')
+        setLoading(false)
+        return
+      }
+
+      // Otherwise artisan table
+      const { data: artisanProfile, error } = await supabase
+        .from('artisans')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error || !artisanProfile) {
         setError('Profile not found.')
         setLoading(false)
         return
       }
 
-      // Detect correct profile type
-      setProfileType(profile.role === 'ARTISAN' ? 'artisan' : 'client')
+      setProfileType('artisan')
 
-      // Load fields
-      setName(profile.name || '')
-      setEmail(profile.email || '')
-      setPhone(profile.phone || '')
-      setAddress(profile.location || '')
-      setMetier(profile.metier || '')
-      setAvatar(null) // avatar_url not in schema
+      setName(artisanProfile.name || '')
+      setEmail(artisanProfile.email || '')
+      setPhone(artisanProfile.phone || '')
+      setAddress(artisanProfile.ville || '')
+
+      setNom(artisanProfile.nom || '')
+      setPrenom(artisanProfile.prenom || '')
+      setMetier(artisanProfile.metier || '')
+      setDescription(artisanProfile.description || '')
+      setExperienceYears(artisanProfile.experience_years || '')
+      setSpecialities(artisanProfile.specialities || '')
 
       setLoading(false)
     }
@@ -81,18 +111,38 @@ export default function EditProfile() {
     setError('')
     setSuccess('')
 
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({
+    let updateData: any = {
+      name,
+      email,
+      phone,
+      location: address
+    }
+
+    let table = 'users'
+
+    if (profileType === 'artisan') {
+      table = 'artisans'
+      updateData = {
         name,
         email,
         phone,
-        location: address,
-        metier
-      })
+        ville: address,
+        nom,
+        prenom,
+        metier,
+        description,
+        experience_years: experienceYears,
+        specialities
+      }
+    }
+
+    const { error: updateError } = await supabase
+      .from(table)
+      .update(updateData)
       .eq('id', user.id)
 
     if (updateError) {
+      console.error(updateError)
       setError('Unable to save changes.')
     } else {
       setSuccess('Profile updated successfully.')
@@ -164,7 +214,7 @@ export default function EditProfile() {
         </div>
 
         <h1 className="text-3xl font-bold text-center text-green-900 mb-8">
-          Edit My Profile
+          Modifier mon profil
         </h1>
 
         {error && <p className="text-red-600 mb-4 text-center">{error}</p>}
@@ -175,7 +225,7 @@ export default function EditProfile() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             <div>
-              <label className="block font-medium mb-1">Full Name</label>
+              <label className="block font-medium mb-1">Nom complet</label>
               <input
                 type="text"
                 className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -195,7 +245,7 @@ export default function EditProfile() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Phone</label>
+              <label className="block font-medium mb-1">Téléphone</label>
               <input
                 type="text"
                 className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -205,7 +255,7 @@ export default function EditProfile() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Address</label>
+              <label className="block font-medium mb-1">Ville</label>
               <input
                 type="text"
                 className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -215,15 +265,66 @@ export default function EditProfile() {
             </div>
 
             {profileType === 'artisan' && (
-              <div className="md:col-span-2">
-                <label className="block font-medium mb-1">Trade / Profession</label>
-                <input
-                  type="text"
-                  className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
-                  value={metier}
-                  onChange={(e) => setMetier(e.target.value)}
-                />
-              </div>
+              <>
+                <div>
+                  <label className="block font-medium mb-1">Nom</label>
+                  <input
+                    type="text"
+                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
+                    value={nom}
+                    onChange={(e) => setNom(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">Prénom</label>
+                  <input
+                    type="text"
+                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
+                    value={prenom}
+                    onChange={(e) => setPrenom(e.target.value)}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block font-medium mb-1">Métier</label>
+                  <input
+                    type="text"
+                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
+                    value={metier}
+                    onChange={(e) => setMetier(e.target.value)}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block font-medium mb-1">Description</label>
+                  <textarea
+                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">Années d'expérience</label>
+                  <input
+                    type="text"
+                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
+                    value={experienceYears}
+                    onChange={(e) => setExperienceYears(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-medium mb-1">Spécialités</label>
+                  <input
+                    type="text"
+                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
+                    value={specialities}
+                    onChange={(e) => setSpecialities(e.target.value)}
+                  />
+                </div>
+              </>
             )}
 
           </div>
