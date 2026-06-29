@@ -101,58 +101,62 @@ export default function ClientDashboard() {
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
       >
 
+        {/* HEADER AT TOP */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-3xl mx-auto px-4">
+            <div className="flex items-center justify-center h-20">
+              <h1 className="text-4xl font-bold text-gray-900">Espace Artisan</h1>
+            </div>
+          </div>
+        </header>
+
         {/* WELCOME */}
         <div className="max-w-3xl mx-auto px-4 pt-6">
           <WelcomeUser />
         </div>
 
-        {/* FIXED BUTTONS ON RIGHT SIDE */}
-        <div className="fixed right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-50">
-          <button
-            onClick={handleLogout}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
-          >
-            Déconnexion
-          </button>
+        {/* BUTTONS STACKED VERTICALLY */}
+        <div className="max-w-3xl mx-auto px-4 mt-6">
+          <div className="flex flex-col gap-3 w-full">
 
-          <Link href="/artisan-dashboard/demandes" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap text-center">
-            Mes demandes
-          </Link>
+            <button
+              onClick={handleLogout}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full"
+            >
+              Déconnexion
+            </button>
 
-          <Link href="/create-demand" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap text-center">
-            Créer une demande
-          </Link>
+            <Link href="/artisan-dashboard/demandes" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center">
+              Mes demandes
+            </Link>
 
-          <button
-            onClick={() => setActiveTab('proposals')}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
-          >
-            Propositions reçues
-          </button>
+            <Link href="/create-demand" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center">
+              Créer une demande
+            </Link>
 
-          <button
-            onClick={() => setActiveTab('messages')}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
-          >
-            Messages
-          </button>
+            <button
+              onClick={() => setActiveTab('proposals')}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full"
+            >
+              Propositions reçues
+            </button>
 
-          <Link href="/profile/edit" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap text-center">
-            Modifier mon profil
-          </Link>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full"
+            >
+              Messages
+            </button>
+
+            <Link href="/profile/edit" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center">
+              Modifier mon profil
+            </Link>
+
+          </div>
         </div>
 
-        {/* HEADER */}
-        <header className="bg-white shadow-sm border-b mt-6">
-          <div className="max-w-3xl mx-auto px-4">
-            <div className="flex items-center h-16">
-              <h1 className="text-2xl font-semibold text-gray-900">Espace Client</h1>
-            </div>
-          </div>
-        </header>
-
         {/* PAYMENT STATUS */}
-        <div className="max-w-3xl mx-auto px-4 mt-4">
+        <div className="max-w-3xl mx-auto px-4 mt-6">
           <PaymentStatus />
         </div>
 
@@ -168,7 +172,7 @@ export default function ClientDashboard() {
                 router.push('/')
               }
             }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-colors duration-200 w-full"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200 w-full"
             title={t('unsubscribe.title')}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
