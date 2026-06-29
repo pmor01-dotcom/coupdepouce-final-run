@@ -77,4 +77,82 @@ export default function Login() {
               src="/artisan-photo.jpg" 
               alt="Professional artisans working"
               className="w-full h-32 object-cover rounded-lg mb-4"
-              style={{ maxHeight: '128px', object
+              style={{ maxHeight: '128px', objectFit: 'cover' }}
+            />
+            <h2 className="text-xl font-semibold mb-2">Artisans</h2>
+            <p className="text-gray-700">
+              Skilled professionals ready to help with your projects.
+            </p>
+          </div>
+
+          {/* Right Image */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <img 
+              src="/client-photo.jpg" 
+              alt="Happy clients receiving help"
+              className="w-full h-32 object-cover rounded-lg mb-4"
+              style={{ maxHeight: '128px', objectFit: 'cover' }}
+            />
+            <h2 className="text-xl font-semibold mb-2">Clients</h2>
+            <p className="text-gray-700">
+              Get assistance quickly and easily from trusted artisans.
+            </p>
+          </div>
+        </div>
+
+        {/* Login Form */}
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+          <h1 className="text-3xl font-bold mb-6 text-center">{t('login')}</h1>
+
+          {error && (
+            <p className="text-red-600 text-center mb-4">{error}</p>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block mb-2 font-medium">{t('email')}</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className="w-full p-3 border rounded-lg"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 font-medium">{t('password')}</label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className="w-full p-3 border rounded-lg"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition"
+            >
+              {isLoading ? t('loading') : t('login')}
+            </button>
+          </form>
+
+          <div className="text-center mt-6">
+            <Link href="/forgot-password" className="text-green-700 hover:underline">
+              {t('forgotPassword')}
+            </Link>
+          </div>
+
+          <div className="text-center mt-4">
+            <Link href="/signup" className="text-green-700 hover:underline">
+              {t('noAccount')}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
