@@ -105,6 +105,7 @@ export default function ClientDashboard() {
         <div className="max-w-3xl mx-auto px-4 pt-6">
           <WelcomeUser />
 
+          {/* BUTTONS STACKED VERTICALLY */}
           <div className="flex flex-col gap-3 mt-6 w-full">
 
             <button
