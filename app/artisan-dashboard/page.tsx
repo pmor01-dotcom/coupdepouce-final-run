@@ -89,7 +89,7 @@ export default function ClientDashboard() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Chargement...</p>
+        <p>{t('common.loading')}</p>
       </main>
     )
   }
@@ -105,7 +105,7 @@ export default function ClientDashboard() {
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-3xl mx-auto px-4">
             <div className="flex items-center justify-center h-20">
-              <h1 className="text-4xl font-bold text-gray-900">Espace Artisan</h1>
+              <h1 className="text-4xl font-bold text-gray-900">{t('artisanDashboard.title')}</h1>
             </div>
           </div>
         </header>
@@ -125,7 +125,7 @@ export default function ClientDashboard() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
               >
-                Déconnexion
+                {t('dashboard.logout')}
               </button>
             </div>
 
@@ -134,7 +134,7 @@ export default function ClientDashboard() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
               >
-                Mes demandes
+                {t('artisanDashboard.myDemands')}
               </Link>
             </div>
 
@@ -143,7 +143,7 @@ export default function ClientDashboard() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
               >
-                Créer une demande
+                {t('artisanDashboard.createDemand')}
               </Link>
             </div>
 
@@ -154,7 +154,7 @@ export default function ClientDashboard() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
               >
-                Propositions reçues
+                {t('artisanDashboard.proposals')}
               </button>
             </div>
 
@@ -165,7 +165,7 @@ export default function ClientDashboard() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
               >
-                Messages
+                {t('clientDashboard.messages')}
               </button>
             </div>
 
@@ -174,7 +174,7 @@ export default function ClientDashboard() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
               >
-                Modifier mon profil
+                {t('artisanDashboard.editProfile')}
               </Link>
             </div>
 

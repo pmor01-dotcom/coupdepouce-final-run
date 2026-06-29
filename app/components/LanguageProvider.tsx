@@ -113,6 +113,29 @@ const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Chargement...",
     "common.error": "Une erreur est survenue",
     "common.redirecting": "Redirection...",
+    "common.welcome": "Bienvenue",
+
+    // Footer
+    "footer.description": "La plateforme de confiance qui met en relation les clients avec des artisans qualifiés pour réaliser tous vos projets.",
+    "footer.quickLinks": "Liens rapides",
+    "footer.home": "Accueil",
+    "footer.about": "À propos",
+    "footer.signup": "S'inscrire",
+    "footer.login": "Se connecter",
+    "footer.services": "Services",
+    "footer.forClients": "Pour les clients",
+    "footer.forArtisans": "Pour les artisans",
+    "footer.clientSpace": "Espace client",
+    "footer.artisanSpace": "Espace artisan",
+    "footer.legal": "Légal",
+    "footer.terms": "Conditions générales",
+    "footer.privacy": "Politique de confidentialité",
+    "footer.artisanTerms": "Conditions artisans",
+    "footer.contact": "Contact",
+    "footer.copyright": "Tous droits réservés.",
+    "footer.confidentiality": "Confidentialité",
+    "footer.cgu": "CGU",
+    "footer.support": "Support",
 
     // Payment
     "payment.title": "Choisissez votre abonnement",
@@ -175,6 +198,17 @@ const translations: Record<Language, Record<string, string>> = {
     "clientDashboard.myDemands": "Mes demandes",
     "clientDashboard.messages": "Messages",
     "clientDashboard.search": "Recherche",
+    "clientDashboard.title": "Espace Client",
+    "clientDashboard.createDemand": "Créer une demande",
+    "clientDashboard.proposals": "Propositions reçues",
+    "clientDashboard.editProfile": "Modifier mon profil",
+
+    // Artisan Dashboard
+    "artisanDashboard.title": "Espace Artisan",
+    "artisanDashboard.myDemands": "Mes demandes",
+    "artisanDashboard.createDemand": "Créer une demande",
+    "artisanDashboard.proposals": "Propositions reçues",
+    "artisanDashboard.editProfile": "Modifier mon profil",
 
     // Create Demand
     "createDemand.title": "Créer une demande",
@@ -280,6 +314,29 @@ const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Loading...",
     "common.error": "An error occurred",
     "common.redirecting": "Redirecting...",
+    "common.welcome": "Welcome",
+
+    // Footer
+    "footer.description": "The trusted platform connecting clients with qualified craftsmen to realize all your projects.",
+    "footer.quickLinks": "Quick Links",
+    "footer.home": "Home",
+    "footer.about": "About",
+    "footer.signup": "Sign Up",
+    "footer.login": "Login",
+    "footer.services": "Services",
+    "footer.forClients": "For Clients",
+    "footer.forArtisans": "For Craftsmen",
+    "footer.clientSpace": "Client Space",
+    "footer.artisanSpace": "Artisan Space",
+    "footer.legal": "Legal",
+    "footer.terms": "Terms of Service",
+    "footer.privacy": "Privacy Policy",
+    "footer.artisanTerms": "Craftsman Terms",
+    "footer.contact": "Contact",
+    "footer.copyright": "All rights reserved.",
+    "footer.confidentiality": "Privacy",
+    "footer.cgu": "TOS",
+    "footer.support": "Support",
 
     // Payment
     "payment.title": "Choose your subscription",
@@ -342,6 +399,17 @@ const translations: Record<Language, Record<string, string>> = {
     "clientDashboard.myDemands": "My Requests",
     "clientDashboard.messages": "Messages",
     "clientDashboard.search": "Search",
+    "clientDashboard.title": "Client Space",
+    "clientDashboard.createDemand": "Create a request",
+    "clientDashboard.proposals": "Proposals received",
+    "clientDashboard.editProfile": "Edit my profile",
+
+    // Artisan Dashboard
+    "artisanDashboard.title": "Artisan Space",
+    "artisanDashboard.myDemands": "My Requests",
+    "artisanDashboard.createDemand": "Create a request",
+    "artisanDashboard.proposals": "Proposals received",
+    "artisanDashboard.editProfile": "Edit my profile",
 
     // Create Demand
     "createDemand.title": "Create a request",

@@ -1,8 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { useLanguage } from './LanguageProvider'
 
 export default function Footer() {
+  const { t } = useLanguage()
+
   return (
     <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -10,11 +13,10 @@ export default function Footer() {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Coup de Pouce
+              {t('app.title')}
             </h3>
             <p className="text-gray-300 mb-4 max-w-md">
-              La plateforme de confiance qui met en relation les clients 
-              avec des artisans qualifiés pour réaliser tous vos projets.
+              {t('footer.description')}
             </p>
             <div className="flex space-x-4">
               <a 
@@ -50,27 +52,27 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">
-              Liens rapides
+              {t('footer.quickLinks')}
             </h4>
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="text-gray-400 hover:text-white transition-colors">
-                  Accueil
+                  {t('footer.home')}
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
-                  À propos
+                  {t('footer.about')}
                 </Link>
               </li>
               <li>
                 <Link href="/signup" className="text-gray-400 hover:text-white transition-colors">
-                  S'inscrire
+                  {t('footer.signup')}
                 </Link>
               </li>
               <li>
                 <Link href="/login" className="text-gray-400 hover:text-white transition-colors">
-                  Se connecter
+                  {t('footer.login')}
                 </Link>
               </li>
             </ul>
@@ -79,27 +81,27 @@ export default function Footer() {
           {/* Services */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">
-              Services
+              {t('footer.services')}
             </h4>
             <ul className="space-y-2">
               <li>
                 <Link href="/signup" className="text-gray-400 hover:text-white transition-colors">
-                  Pour les clients
+                  {t('footer.forClients')}
                 </Link>
               </li>
               <li>
                 <Link href="/signup-artisan" className="text-gray-400 hover:text-white transition-colors">
-                  Pour les artisans
+                  {t('footer.forArtisans')}
                 </Link>
               </li>
               <li>
                 <Link href="/client-dashboard" className="text-gray-400 hover:text-white transition-colors">
-                  Espace client
+                  {t('footer.clientSpace')}
                 </Link>
               </li>
               <li>
                 <Link href="/artisan-dashboard" className="text-gray-400 hover:text-white transition-colors">
-                  Espace artisan
+                  {t('footer.artisanSpace')}
                 </Link>
               </li>
             </ul>
@@ -108,27 +110,27 @@ export default function Footer() {
           {/* Legal */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">
-              Légal
+              {t('footer.legal')}
             </h4>
             <ul className="space-y-2">
               <li>
                 <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                  Conditions générales
+                  {t('footer.terms')}
                 </Link>
               </li>
               <li>
                 <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
-                  Politique de confidentialité
+                  {t('footer.privacy')}
                 </Link>
               </li>
               <li>
                 <Link href="/terms-artisan" className="text-gray-400 hover:text-white transition-colors">
-                  Conditions artisans
+                  {t('footer.artisanTerms')}
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
-                  Contact
+                  {t('footer.contact')}
                 </Link>
               </li>
             </ul>
@@ -139,17 +141,17 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {new Date().getFullYear()} Coup de Pouce. Tous droits réservés.
+              © {new Date().getFullYear()} {t('app.title')}. {t('footer.copyright')}
             </div>
             <div className="flex space-x-6">
               <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Confidentialité
+                {t('footer.confidentiality')}
               </Link>
               <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-                CGU
+                {t('footer.cgu')}
               </Link>
               <Link href="/contact" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Support
+                {t('footer.support')}
               </Link>
             </div>
           </div>
