@@ -130,24 +130,6 @@ export default function ClientDashboard() {
             </div>
 
             <div style={{ marginBottom: '12px' }}>
-              <Link href="/artisan-dashboard/demandes" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('artisanDashboard.myDemands')}
-              </Link>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <Link href="/create-demand" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('artisanDashboard.createDemand')}
-              </Link>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
               <button
                 onClick={() => setActiveTab('proposals')}
                 style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}

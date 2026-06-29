@@ -85,16 +85,6 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/signup" className="text-gray-400 hover:text-white transition-colors">
-                  {t('footer.forClients')}
-                </Link>
-              </li>
-              <li>
-                <Link href="/signup-artisan" className="text-gray-400 hover:text-white transition-colors">
-                  {t('footer.forArtisans')}
-                </Link>
-              </li>
-              <li>
                 <Link href="/client-dashboard" className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.clientSpace')}
                 </Link>
