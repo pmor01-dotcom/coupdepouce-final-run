@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server'
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import type { NextRequest } from 'next/server'
@@ -52,4 +53,3 @@ export const config = {
     '/auth/callback'
   ],
 }
-
