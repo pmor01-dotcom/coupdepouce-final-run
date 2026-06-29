@@ -16,7 +16,9 @@ export default function Login() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { login, session } = useAuth()
+
+  // ❌ Remove session from useAuth()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,11 +29,21 @@ export default function Login() {
       const success = await login(formData.email, formData.password)
 
       if (success) {
+        // ✅ Get fresh session directly from Supabase
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session?.user?.id) {
+          setError('Unable to load your session')
+          return
+        }
+
+        const userId = session.user.id
+
         // Fetch REAL role from Supabase
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
-          .eq('id', session?.user.id)
+          .eq('id', userId)
           .single()
 
         if (profileError || !profile) {
