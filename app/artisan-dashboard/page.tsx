@@ -116,8 +116,7 @@ export default function ClientDashboard() {
         </div>
 
         {/* BUTTONS STACKED VERTICALLY */}
-        <div className="max-w-3xl mx-auto px-4 mt-6">
-          <div className="flex flex-col gap-3 w-full">
+        <div className="max-w-3xl mx-auto px-4 mt-6 flex flex-col gap-3 w-full">
 
             <button
               onClick={handleLogout}
@@ -126,11 +125,11 @@ export default function ClientDashboard() {
               Déconnexion
             </button>
 
-            <Link href="/artisan-dashboard/demandes" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center">
+            <Link href="/artisan-dashboard/demandes" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center block">
               Mes demandes
             </Link>
 
-            <Link href="/create-demand" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center">
+            <Link href="/create-demand" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center block">
               Créer une demande
             </Link>
 
@@ -148,11 +147,10 @@ export default function ClientDashboard() {
               Messages
             </button>
 
-            <Link href="/profile/edit" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center">
+            <Link href="/profile/edit" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer w-full text-center block">
               Modifier mon profil
             </Link>
 
-          </div>
         </div>
 
         {/* PAYMENT STATUS */}
