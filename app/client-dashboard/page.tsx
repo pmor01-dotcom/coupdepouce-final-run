@@ -86,11 +86,6 @@ export default function ClientDashboard() {
     }
   }
 
-  const handleViewProposals = (demandId: number) => {
-    fetchProposals(demandId)
-    setActiveTab('proposals')
-  }
-
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -101,28 +96,3 @@ export default function ClientDashboard() {
 
   return (
     <MessagingProvider>
-      <main
-        className="min-h-screen overflow-x-hidden"
-        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
-      >
-        <div className="max-w-3xl mx-auto px-4 pt-6">
-          <WelcomeUser />
-
-          {/* BUTTONS NOW UNDER WELCOME TEXT */}
-          <div className="flex flex-col gap-3 mt-6 w-full">
-            <button onClick={handleLogout} className="btn-secondary text-sm w-full">
-              Déconnexion
-            </button>
-
-            <Link href="/client-dashboard/demandes" className="btn-secondary text-sm w-full">
-              Mes demandes
-            </Link>
-
-            <Link href="/create-demand" className="btn-secondary text-sm w-full">
-              Créer une demande
-            </Link>
-
-            <button onClick={() => setActiveTab('proposals')} className="btn-secondary text-sm w-full">
-              Propositions reçues
-            </button>
-
