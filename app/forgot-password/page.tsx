@@ -43,16 +43,16 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+      <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         <div className="max-w-md w-full">
-          <div className="card text-center p-8">
+          <div className="card text-center p-6 md:p-8">
             <div className="mb-4">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('forgotPassword.emailSent')}</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{t('forgotPassword.emailSent')}</h2>
               <p className="text-gray-600 mb-4">
                 {t('forgotPassword.emailSentDesc')}
               </p>
@@ -70,11 +70,11 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+    <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
       <div className="max-w-md w-full">
         <div className="card">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               {t('forgotPassword.title')}
             </h2>
             <p className="text-gray-600">

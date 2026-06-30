@@ -76,10 +76,22 @@ export default function ClientSignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
-      <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
+    <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
+      <div className="max-w-lg w-full bg-white p-6 md:p-8 rounded-lg shadow-md space-y-6">
 
-        <h2 className="text-3xl font-bold text-center text-gray-900">
+        {/* Photo Section */}
+        <div className="flex justify-center mb-6">
+          <div className="w-full md:w-1/2 bg-white rounded-lg shadow-lg p-4">
+            <img
+              src="/images/satisfied-clients.jpg"
+              alt="Happy clients"
+              className="w-full h-40 md:h-56 object-cover rounded-lg mb-4"
+            />
+            <h2 className="text-lg font-semibold mb-2 text-center">{t('home.satisfiedClients')}</h2>
+          </div>
+        </div>
+
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">
           {t('clientSignup.title')}
         </h2>
 

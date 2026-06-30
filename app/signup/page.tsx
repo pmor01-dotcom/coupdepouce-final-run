@@ -26,9 +26,9 @@ export default function SignupPage() {
 
   // Show role selection
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300 px-4">
+      <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-md w-full mx-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 text-center">
           {t('signup.title')}
         </h1>
         <p className="text-gray-600 text-center mb-8">

@@ -31,33 +31,33 @@ export default function Home() {
 
           {/* Site Title */}
           <div className="site-title text-center mb-10">
-            <h2 className="text-4xl font-bold text-white">{t('app.title')}</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white">{t('app.title')}</h2>
           </div>
 
           {/* Promo Banner */}
           <div className="promo-banner text-center mb-12 px-2">
-            <p className="promo-banner-title text-xl font-semibold text-white">
+            <p className="promo-banner-title text-lg md:text-xl font-semibold text-white">
               {t('home.freePromoBanner')}
             </p>
-            <p className="promo-banner-subtitle text-white opacity-90">
+            <p className="promo-banner-subtitle text-sm md:text-base text-white opacity-90">
               {t('home.freePromoBannerSub')}
             </p>
           </div>
 
           {/* Hero Grid */}
-          <section className="hero-grid grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 px-2">
+          <section className="hero-grid grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-16 px-2">
             <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
               <img
                 src="/images/artisan-photo-right.jpg"
                 alt="Professional artisans working"
-                className="hero-card-image w-full h-56 object-cover"
+                className="hero-card-image w-full h-40 md:h-56 object-cover"
                 loading="lazy"
               />
-              <div className="hero-card-content p-6 text-center md:text-left">
-                <h3 className="text-xl font-semibold mb-2">
+              <div className="hero-card-content p-4 md:p-6 text-center md:text-left">
+                <h3 className="text-lg md:text-xl font-semibold mb-2">
                   {t('home.qualifiedArtisans')}
                 </h3>
-                <p className="text-gray-700">
+                <p className="text-sm md:text-base text-gray-700">
                   {t('home.qualifiedArtisansDesc')}
                 </p>
               </div>
@@ -67,14 +67,14 @@ export default function Home() {
               <img
                 src="/images/satisfied-clients.jpg"
                 alt="Happy clients with completed projects"
-                className="hero-card-image w-full h-56 object-cover"
+                className="hero-card-image w-full h-40 md:h-56 object-cover"
                 loading="lazy"
               />
-              <div className="hero-card-content p-6 text-center md:text-left">
-                <h3 className="text-xl font-semibold mb-2">
+              <div className="hero-card-content p-4 md:p-6 text-center md:text-left">
+                <h3 className="text-lg md:text-xl font-semibold mb-2">
                   {t('home.satisfiedClients')}
                 </h3>
-                <p className="text-gray-700">
+                <p className="text-sm md:text-base text-gray-700">
                   {t('home.satisfiedClientsDesc')}
                 </p>
               </div>
@@ -90,8 +90,8 @@ export default function Home() {
 
           {/* Main Hero Section */}
           <section className="hero-main text-center text-white px-4">
-            <h1 className="text-4xl font-bold mb-4">{t('app.title')}</h1>
-            <p className="text-lg mb-8">{t('landing.subtitle')}</p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">{t('app.title')}</h1>
+            <p className="text-base md:text-lg mb-8">{t('landing.subtitle')}</p>
 
             <div className="hero-actions flex flex-col sm:flex-row justify-center gap-6">
 

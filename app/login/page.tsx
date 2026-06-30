@@ -66,14 +66,14 @@ export default function Login() {
       <div className="container mx-auto px-4 py-16">
 
         {/* Top Image Section */}
-        <div className="flex justify-center gap-8 mb-12">
+        <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mb-12">
 
           {/* Artisans */}
-          <div className="w-1/4 bg-white rounded-lg shadow-lg p-4">
-            <img 
+          <div className="w-full md:w-1/4 bg-white rounded-lg shadow-lg p-4">
+            <img
               src="/images/artisan-photo-right.jpg"
               alt="Professional artisans working"
-              className="w-full h-32 object-cover rounded-lg mb-4"
+              className="w-full h-40 md:h-56 object-cover rounded-lg mb-4"
             />
             <h2 className="text-lg font-semibold mb-2">{t('home.qualifiedArtisans')}</h2>
             <p className="text-gray-700 text-sm">
@@ -82,11 +82,11 @@ export default function Login() {
           </div>
 
           {/* Clients */}
-          <div className="w-1/4 bg-white rounded-lg shadow-lg p-4">
-            <img 
+          <div className="w-full md:w-1/4 bg-white rounded-lg shadow-lg p-4">
+            <img
               src="/images/satisfied-clients.jpg"
               alt="Happy clients receiving help"
-              className="w-full h-32 object-cover rounded-lg mb-4"
+              className="w-full h-40 md:h-56 object-cover rounded-lg mb-4"
             />
             <h2 className="text-lg font-semibold mb-2">{t('home.satisfiedClients')}</h2>
             <p className="text-gray-700 text-sm">
@@ -97,8 +97,8 @@ export default function Login() {
         </div>
 
         {/* Login Form */}
-        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
-          <h1 className="text-3xl font-bold mb-6 text-center">{t('login.title')}</h1>
+        <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-lg shadow-lg">
+          <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">{t('login.title')}</h1>
 
           {error && (
             <p className="text-red-600 text-center mb-4">{error}</p>
