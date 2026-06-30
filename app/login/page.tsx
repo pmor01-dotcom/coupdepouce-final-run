@@ -10,14 +10,10 @@ export default function Login() {
   const { t } = useLanguage()
   const supabase = createClientComponentClient()
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
+  const [formData, setFormData] = useState({ email: '', password: '' })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // ❌ Remove session from useAuth()
   const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +25,6 @@ export default function Login() {
       const success = await login(formData.email, formData.password)
 
       if (success) {
-        // ✅ Get fresh session directly from Supabase
         const { data: { session } } = await supabase.auth.getSession()
 
         if (!session?.user?.id) {
@@ -39,86 +34,65 @@ export default function Login() {
 
         const userId = session.user.id
 
-        // Fetch REAL role from Supabase
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', userId)
           .single()
 
-        if (profileError || !profile) {
+        if (!profile) {
           setError('Unable to load your profile')
           return
         }
 
         const role = profile.role
 
-        // Redirect based on REAL role
-        if (role === 'client') {
-          window.location.href = '/client-dashboard'
-        } else if (role === 'artisan') {
-          window.location.href = '/artisan-dashboard'
-        } else {
-          setError('Your account has no role assigned')
-        }
+        if (role === 'client') window.location.href = '/client-dashboard'
+        else if (role === 'artisan') window.location.href = '/artisan-dashboard'
+        else setError('Your account has no role assigned')
 
       } else {
         setError('Incorrect email or password')
       }
-    } catch (err) {
+    } catch {
       setError('Error during login')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
   return (
     <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
       <div className="container mx-auto px-4 py-16">
 
-        {/* Top Image Sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
 
-          {/* Left Image */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <img 
-              src="/artisan-photo.jpg" 
+              src="/images/artisan-photo.jpg"
               alt="Professional artisans working"
               className="w-full h-32 object-cover rounded-lg mb-4"
-              style={{ maxHeight: '128px', objectFit: 'cover' }}
             />
             <h2 className="text-xl font-semibold mb-2">Artisans</h2>
-            <p className="text-gray-700">
-              Skilled professionals ready to help with your projects.
-            </p>
+            <p className="text-gray-700">Skilled professionals ready to help with your projects.</p>
           </div>
 
-          {/* Right Image */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <img 
-              src="/client-photo.jpg" 
+              src="/images/client-photo.jpg"
               alt="Happy clients receiving help"
               className="w-full h-32 object-cover rounded-lg mb-4"
-              style={{ maxHeight: '128px', objectFit: 'cover' }}
             />
             <h2 className="text-xl font-semibold mb-2">Clients</h2>
-            <p className="text-gray-700">
-              Get assistance quickly and easily from trusted artisans.
-            </p>
+            <p className="text-gray-700">Get assistance quickly and easily from trusted artisans.</p>
           </div>
+
         </div>
 
-        {/* Login Form */}
         <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
           <h1 className="text-3xl font-bold mb-6 text-center">{t('login')}</h1>
 
-          {error && (
-            <p className="text-red-600 text-center mb-4">{error}</p>
-          )}
+          {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -126,7 +100,7 @@ export default function Login() {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full p-3 border rounded-lg"
                 required
               />
@@ -137,7 +111,7 @@ export default function Login() {
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full p-3 border rounded-lg"
                 required
               />
