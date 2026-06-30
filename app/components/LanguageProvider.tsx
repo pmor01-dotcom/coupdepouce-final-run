@@ -216,14 +216,6 @@ const translations: Record<Language, Record<string, string>> = {
     "payment.freeStatusTitle": "Service gratuit pendant 6 mois",
     "payment.freeStatusSubtitle": "Profitez de l'accès complet sans abonnement pendant cette période.",
 
-    // Artisan Signup
-    "artisanSignup.title": "Inscription Artisan",
-    "artisanSignup.subtitle": "Créez votre profil professionnel",
-    "artisanSignup.personal": "Informations personnelles",
-    "artisanSignup.business": "Informations professionnelles",
-    "artisanSignup.creating": "Création en cours...",
-    "artisanSignup.submit": "S'inscrire",
-
     // Dashboard
     "dashboard.logout": "Déconnexion",
     "dashboard.artisans.title": "Artisans disponibles",
@@ -454,14 +446,6 @@ const translations: Record<Language, Record<string, string>> = {
     "payment.freePromoBack": "Back to sign-up",
     "payment.freeStatusTitle": "Free service for 6 months",
     "payment.freeStatusSubtitle": "Enjoy full access without subscription during this period.",
-
-    // Artisan Signup
-    "artisanSignup.title": "Craftsman Sign Up",
-    "artisanSignup.subtitle": "Create your professional profile",
-    "artisanSignup.personal": "Personal Information",
-    "artisanSignup.business": "Business Information",
-    "artisanSignup.creating": "Creating...",
-    "artisanSignup.submit": "Sign Up",
 
     // Dashboard
     "dashboard.logout": "Logout",
