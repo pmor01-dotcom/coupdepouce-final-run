@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     // 2️⃣ Hash password for your own table
     const password_hash = await bcrypt.hash(password, 10);
 
-    // 3️⃣ Prepare insert data
+    // 3️⃣ Prepare insert data for users table
     let insertData: any = {
       id: userId,
       name,
@@ -66,17 +66,12 @@ export async function POST(request: NextRequest) {
       ville: ville || null,
       phone: phone || null,
       password_hash,
-      role
+      role: role.toUpperCase(), // Convert to uppercase to match schema (CLIENT/ARTISAN)
+      metier: metier || null
     };
 
-    if (role === "artisan") {
-      insertData.metier = metier || null;
-    }
-
-    const table = role === "artisan" ? "artisans" : "clients";
-
-    // 4️⃣ Insert into the correct table
-    const { error } = await supabase.from(table).insert(insertData);
+    // 4️⃣ Insert into users table
+    const { error } = await supabase.from('users').insert(insertData);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

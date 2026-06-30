@@ -40,6 +40,13 @@ export default function ClientSignupPage() {
     }
 
     try {
+      console.log('Sending signup request with data:', {
+        name: `${formData.prenom} ${formData.nom}`,
+        email: formData.email,
+        role: 'client',
+        ville: formData.ville || null,
+      })
+
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -55,9 +62,10 @@ export default function ClientSignupPage() {
       })
 
       const data = await response.json()
+      console.log('Signup response:', data)
 
       if (!response.ok) {
-        setError(data.error || 'Error during registration')
+        setError(data.error || t('signup.signupError'))
         setLoading(false)
         return
       }
@@ -69,6 +77,7 @@ export default function ClientSignupPage() {
         router.push('/client-dashboard')
       }
     } catch (err: any) {
+      console.error('Signup error:', err)
       setError(err.message || t('common.error'))
     } finally {
       setLoading(false)

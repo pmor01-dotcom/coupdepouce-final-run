@@ -34,8 +34,9 @@ export default function Login() {
 
         const userId = session.user.id
 
+        // Get role from users table
         const { data: profile } = await supabase
-          .from('profiles')
+          .from('users')
           .select('role')
           .eq('id', userId)
           .single()
@@ -45,7 +46,7 @@ export default function Login() {
           return
         }
 
-        const role = profile.role
+        const role = profile.role?.toLowerCase() // Convert CLIENT/ARTISAN to lowercase
 
         if (role === 'client') window.location.href = '/client-dashboard'
         else if (role === 'artisan') window.location.href = '/artisan-dashboard'
