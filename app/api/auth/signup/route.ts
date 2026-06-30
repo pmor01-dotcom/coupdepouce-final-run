@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       id: userId,
       name,
       email,
-      ville: ville || null,
+      location: ville || null, // Map 'ville' to 'location' column in schema
       phone: phone || null,
       password_hash,
       role: role.toUpperCase(), // Convert to uppercase to match schema (CLIENT/ARTISAN)
