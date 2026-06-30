@@ -66,35 +66,41 @@ export default function Login() {
       <div className="container mx-auto px-4 py-16">
 
         {/* Top Image Section */}
-        <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mb-12">
+        <section className="hero-grid grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12 px-2">
 
           {/* Artisans */}
-          <div className="w-full md:w-1/4 bg-white rounded-lg shadow-lg p-4">
+          <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
             <img
               src="/images/artisan-photo-right.jpg"
               alt="Professional artisans working"
-              className="w-full h-40 md:h-56 object-cover rounded-lg mb-4"
+              className="hero-card-image w-full h-40 md:h-56 object-cover"
+              loading="lazy"
             />
-            <h2 className="text-lg font-semibold mb-2">{t('home.qualifiedArtisans')}</h2>
-            <p className="text-gray-700 text-sm">
-              {t('home.qualifiedArtisansDesc')}
-            </p>
-          </div>
+            <div className="hero-card-content p-4 md:p-6 text-center md:text-left">
+              <h3 className="text-lg md:text-xl font-semibold mb-2">{t('home.qualifiedArtisans')}</h3>
+              <p className="text-sm md:text-base text-gray-700">
+                {t('home.qualifiedArtisansDesc')}
+              </p>
+            </div>
+          </article>
 
           {/* Clients */}
-          <div className="w-full md:w-1/4 bg-white rounded-lg shadow-lg p-4">
+          <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
             <img
               src="/images/satisfied-clients.jpg"
               alt="Happy clients receiving help"
-              className="w-full h-40 md:h-56 object-cover rounded-lg mb-4"
+              className="hero-card-image w-full h-40 md:h-56 object-cover"
+              loading="lazy"
             />
-            <h2 className="text-lg font-semibold mb-2">{t('home.satisfiedClients')}</h2>
-            <p className="text-gray-700 text-sm">
-              {t('home.satisfiedClientsDesc')}
-            </p>
-          </div>
+            <div className="hero-card-content p-4 md:p-6 text-center md:text-left">
+              <h3 className="text-lg md:text-xl font-semibold mb-2">{t('home.satisfiedClients')}</h3>
+              <p className="text-sm md:text-base text-gray-700">
+                {t('home.satisfiedClientsDesc')}
+              </p>
+            </div>
+          </article>
 
-        </div>
+        </section>
 
         {/* Login Form */}
         <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-lg shadow-lg">
