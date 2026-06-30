@@ -37,7 +37,7 @@ export default function ArtisanSignupPage() {
     console.log('Form submitted with data:', formData)
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
+      setError(t('signup.passwordMismatch'))
       setLoading(false)
       return
     }
@@ -65,7 +65,7 @@ export default function ArtisanSignupPage() {
       console.log('Response data:', data)
 
       if (!response.ok) {
-        setError(data.error || 'Error during registration')
+        setError(data.error || t('signup.signupError'))
         setLoading(false)
         return
       }
@@ -78,7 +78,7 @@ export default function ArtisanSignupPage() {
       }
     } catch (err: any) {
       console.error('Signup error:', err)
-      setError(err.message || 'Unknown error')
+      setError(err.message || t('common.error'))
     } finally {
       setLoading(false)
     }
@@ -89,18 +89,18 @@ export default function ArtisanSignupPage() {
       <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
 
         <h2 className="text-3xl font-bold text-center text-gray-900">
-          Create artisan account
+          {t('artisanSignup.title')}
         </h2>
 
         <p className="text-center text-gray-600">
-          Offer your services to clients
+          {t('artisanSignup.subtitle')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full name *
+              {t('artisanSignup.fullName')} *
             </label>
             <input
               type="text"
@@ -114,7 +114,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
+              {t('artisanSignup.email')} *
             </label>
             <input
               type="email"
@@ -128,7 +128,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password *
+              {t('artisanSignup.password')} *
             </label>
             <input
               type="password"
@@ -142,7 +142,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm password *
+              {t('artisanSignup.confirmPassword')} *
             </label>
             <input
               type="password"
@@ -156,7 +156,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Trade/Profession *
+              {t('artisanSignup.trade')} *
             </label>
             <input
               type="text"
@@ -170,7 +170,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              City *
+              {t('artisanSignup.city')} *
             </label>
             <input
               type="text"
@@ -184,7 +184,7 @@ export default function ArtisanSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone
+              {t('artisanSignup.phone')}
             </label>
             <input
               type="text"
@@ -202,13 +202,13 @@ export default function ArtisanSignupPage() {
             disabled={loading}
             className="btn-primary w-full"
           >
-            {loading ? 'Creating...' : 'Create my account'}
+            {loading ? t('artisanSignup.creating') : t('artisanSignup.create')}
           </button>
         </form>
 
         <div className="text-center text-sm text-gray-600">
           <Link href="/signup" className="hover:text-gray-900">
-            Back
+            {t('signup.back')}
           </Link>
         </div>
       </div>

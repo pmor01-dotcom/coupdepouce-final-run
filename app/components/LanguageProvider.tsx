@@ -83,6 +83,19 @@ const translations: Record<Language, Record<string, string>> = {
     "login.password": "Mot de passe",
     "login.button": "Se connecter",
     "login.noAccount": "Pas encore de compte ?",
+    "login.backToLogin": "Retour à la connexion",
+
+    // Forgot Password
+    "forgotPassword.title": "Mot de passe oublié ?",
+    "forgotPassword.subtitle": "Entrez votre email pour recevoir un lien de réinitialisation",
+    "forgotPassword.email": "Email",
+    "forgotPassword.placeholder": "votre@email.com",
+    "forgotPassword.send": "Envoyer le lien de réinitialisation",
+    "forgotPassword.sending": "Envoi en cours...",
+    "forgotPassword.backToLogin": "Retour à la connexion",
+    "forgotPassword.emailSent": "Email envoyé !",
+    "forgotPassword.emailSentDesc": "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.",
+    "forgotPassword.checkInbox": "Vérifiez votre boîte de réception et les spam.",
 
     // Signup
     "signup.title": "Inscription",
@@ -102,6 +115,31 @@ const translations: Record<Language, Record<string, string>> = {
     "signup.signupError": "Erreur lors de l'inscription",
     "signup.alreadyHaveAccount": "Vous avez déjà un compte ?",
     "signup.goToLogin": "Se connecter",
+    "signup.back": "Retour",
+
+    // Client Signup
+    "clientSignup.title": "Créer un compte client",
+    "clientSignup.firstName": "Prénom",
+    "clientSignup.lastName": "Nom",
+    "clientSignup.email": "Email",
+    "clientSignup.password": "Mot de passe",
+    "clientSignup.confirmPassword": "Confirmer le mot de passe",
+    "clientSignup.city": "Ville",
+    "clientSignup.create": "Créer mon compte",
+    "clientSignup.creating": "Création en cours...",
+
+    // Artisan Signup
+    "artisanSignup.title": "Créer un compte artisan",
+    "artisanSignup.subtitle": "Offrez vos services aux clients",
+    "artisanSignup.fullName": "Nom complet",
+    "artisanSignup.email": "Email",
+    "artisanSignup.password": "Mot de passe",
+    "artisanSignup.confirmPassword": "Confirmer le mot de passe",
+    "artisanSignup.trade": "Métier/Profession",
+    "artisanSignup.city": "Ville",
+    "artisanSignup.phone": "Téléphone",
+    "artisanSignup.create": "Créer mon compte",
+    "artisanSignup.creating": "Création en cours...",
 
     // Form
     "form.firstName": "Prénom",
@@ -284,6 +322,19 @@ const translations: Record<Language, Record<string, string>> = {
     "login.password": "Password",
     "login.button": "Connect",
     "login.noAccount": "Don't have an account?",
+    "login.backToLogin": "Back to login",
+
+    // Forgot Password
+    "forgotPassword.title": "Forgot password?",
+    "forgotPassword.subtitle": "Enter your email to receive a reset link",
+    "forgotPassword.email": "Email",
+    "forgotPassword.placeholder": "your@email.com",
+    "forgotPassword.send": "Send reset link",
+    "forgotPassword.sending": "Sending...",
+    "forgotPassword.backToLogin": "Back to login",
+    "forgotPassword.emailSent": "Email sent!",
+    "forgotPassword.emailSentDesc": "If an account exists with this email, you will receive a password reset link.",
+    "forgotPassword.checkInbox": "Check your inbox and spam folder.",
 
     // Signup
     "signup.title": "Sign Up",
@@ -303,6 +354,31 @@ const translations: Record<Language, Record<string, string>> = {
     "signup.signupError": "Error during registration",
     "signup.alreadyHaveAccount": "Already have an account?",
     "signup.goToLogin": "Log in",
+    "signup.back": "Back",
+
+    // Client Signup
+    "clientSignup.title": "Create client account",
+    "clientSignup.firstName": "First name",
+    "clientSignup.lastName": "Last name",
+    "clientSignup.email": "Email",
+    "clientSignup.password": "Password",
+    "clientSignup.confirmPassword": "Confirm password",
+    "clientSignup.city": "City",
+    "clientSignup.create": "Create my account",
+    "clientSignup.creating": "Creating...",
+
+    // Artisan Signup
+    "artisanSignup.title": "Create artisan account",
+    "artisanSignup.subtitle": "Offer your services to clients",
+    "artisanSignup.fullName": "Full name",
+    "artisanSignup.email": "Email",
+    "artisanSignup.password": "Password",
+    "artisanSignup.confirmPassword": "Confirm password",
+    "artisanSignup.trade": "Trade/Profession",
+    "artisanSignup.city": "City",
+    "artisanSignup.phone": "Phone",
+    "artisanSignup.create": "Create my account",
+    "artisanSignup.creating": "Creating...",
 
     // Form
     "form.firstName": "First name",

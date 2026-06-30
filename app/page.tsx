@@ -31,7 +31,7 @@ export default function Home() {
 
           {/* Site Title */}
           <div className="site-title text-center mb-10">
-            <h2 className="text-4xl font-bold text-white">Coupdepouce</h2>
+            <h2 className="text-4xl font-bold text-white">{t('app.title')}</h2>
           </div>
 
           {/* Promo Banner */}
@@ -48,7 +48,7 @@ export default function Home() {
           <section className="hero-grid grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 px-2">
             <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
               <img
-                src="/artisan-photo.jpg"
+                src="/images/artisan-photo-right.jpg"
                 alt="Professional artisans working"
                 className="hero-card-image w-full h-56 object-cover"
                 loading="lazy"

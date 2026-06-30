@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLanguage } from '../components/LanguageProvider'
 
 type SignupRole = null | 'client' | 'artisan'
 
 export default function SignupPage() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [selectedRole, setSelectedRole] = useState<SignupRole>(null)
   const [isRedirecting, setIsRedirecting] = useState(false)
 
@@ -27,10 +29,10 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-          Create an account
+          {t('signup.title')}
         </h1>
         <p className="text-gray-600 text-center mb-8">
-          Choose your account type to get started
+          {t('signup.subtitle')}
         </p>
 
         <div className="space-y-4">
@@ -45,8 +47,8 @@ export default function SignupPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Client</h3>
-                <p className="text-sm text-gray-600">Find artisans for your projects</p>
+                <h3 className="text-lg font-semibold text-gray-900">{t('signup.client')}</h3>
+                <p className="text-sm text-gray-600">{t('signup.client.desc')}</p>
               </div>
             </div>
           </Link>
@@ -62,17 +64,17 @@ export default function SignupPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Artisan</h3>
-                <p className="text-sm text-gray-600">Offer your services to clients</p>
+                <h3 className="text-lg font-semibold text-gray-900">{t('signup.artisan')}</h3>
+                <p className="text-sm text-gray-600">{t('signup.artisan.desc')}</p>
               </div>
             </div>
           </Link>
         </div>
 
         <p className="text-center text-gray-600 mt-8">
-          Already have an account?{' '}
+          {t('signup.alreadyHaveAccount')}{' '}
           <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">
-            Sign in
+            {t('signup.goToLogin')}
           </Link>
         </p>
       </div>

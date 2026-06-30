@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLanguage } from '../components/LanguageProvider'
 
 export default function ClientSignupPage() {
   const router = useRouter()
+  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     prenom: '',
@@ -32,7 +34,7 @@ export default function ClientSignupPage() {
     setLoading(true)
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
+      setError(t('signup.passwordMismatch'))
       setLoading(false)
       return
     }
@@ -67,7 +69,7 @@ export default function ClientSignupPage() {
         router.push('/client-dashboard')
       }
     } catch (err: any) {
-      setError(err.message || 'Unknown error')
+      setError(err.message || t('common.error'))
     } finally {
       setLoading(false)
     }
@@ -78,14 +80,14 @@ export default function ClientSignupPage() {
       <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
 
         <h2 className="text-3xl font-bold text-center text-gray-900">
-          Create client account
+          {t('clientSignup.title')}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              First name *
+              {t('clientSignup.firstName')} *
             </label>
             <input
               type="text"
@@ -99,7 +101,7 @@ export default function ClientSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Last name *
+              {t('clientSignup.lastName')} *
             </label>
             <input
               type="text"
@@ -113,7 +115,7 @@ export default function ClientSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
+              {t('clientSignup.email')} *
             </label>
             <input
               type="email"
@@ -127,7 +129,7 @@ export default function ClientSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password *
+              {t('clientSignup.password')} *
             </label>
             <input
               type="password"
@@ -141,7 +143,7 @@ export default function ClientSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm password *
+              {t('clientSignup.confirmPassword')} *
             </label>
             <input
               type="password"
@@ -155,7 +157,7 @@ export default function ClientSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              City *
+              {t('clientSignup.city')} *
             </label>
             <input
               type="text"
@@ -174,13 +176,13 @@ export default function ClientSignupPage() {
             disabled={loading}
             className="btn-primary w-full"
           >
-            {loading ? 'Creating...' : 'Create my account'}
+            {loading ? t('clientSignup.creating') : t('clientSignup.create')}
           </button>
         </form>
 
         <div className="text-center text-sm text-gray-600">
           <Link href="/signup" className="hover:text-gray-900">
-            Back
+            {t('signup.back')}
           </Link>
         </div>
       </div>

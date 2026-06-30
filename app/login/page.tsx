@@ -66,31 +66,31 @@ export default function Login() {
       <div className="container mx-auto px-4 py-16">
 
         {/* Top Image Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div className="flex justify-center gap-8 mb-12">
 
           {/* Artisans */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="w-1/4 bg-white rounded-lg shadow-lg p-4">
             <img 
-              src="/images/artisan-photo.jpg"
+              src="/images/artisan-photo-right.jpg"
               alt="Professional artisans working"
               className="w-full h-32 object-cover rounded-lg mb-4"
             />
-            <h2 className="text-xl font-semibold mb-2">Artisans</h2>
-            <p className="text-gray-700">
-              Skilled professionals ready to help with your projects.
+            <h2 className="text-lg font-semibold mb-2">{t('home.qualifiedArtisans')}</h2>
+            <p className="text-gray-700 text-sm">
+              {t('home.qualifiedArtisansDesc')}
             </p>
           </div>
 
           {/* Clients */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="w-1/4 bg-white rounded-lg shadow-lg p-4">
             <img 
               src="/images/satisfied-clients.jpg"
               alt="Happy clients receiving help"
               className="w-full h-32 object-cover rounded-lg mb-4"
             />
-            <h2 className="text-xl font-semibold mb-2">Clients</h2>
-            <p className="text-gray-700">
-              Get assistance quickly and easily from trusted artisans.
+            <h2 className="text-lg font-semibold mb-2">{t('home.satisfiedClients')}</h2>
+            <p className="text-gray-700 text-sm">
+              {t('home.satisfiedClientsDesc')}
             </p>
           </div>
 
@@ -98,7 +98,7 @@ export default function Login() {
 
         {/* Login Form */}
         <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
-          <h1 className="text-3xl font-bold mb-6 text-center">{t('login')}</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center">{t('login.title')}</h1>
 
           {error && (
             <p className="text-red-600 text-center mb-4">{error}</p>
@@ -106,7 +106,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block mb-2 font-medium">{t('email')}</label>
+              <label className="block mb-2 font-medium">{t('login.email')}</label>
               <input
                 type="email"
                 value={formData.email}
@@ -117,7 +117,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block mb-2 font-medium">{t('password')}</label>
+              <label className="block mb-2 font-medium">{t('login.password')}</label>
               <input
                 type="password"
                 value={formData.password}
@@ -132,19 +132,19 @@ export default function Login() {
               disabled={isLoading}
               className="w-full bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition"
             >
-              {isLoading ? t('loading') : t('login')}
+              {isLoading ? t('common.loading') : t('login.button')}
             </button>
           </form>
 
           <div className="text-center mt-6">
             <Link href="/forgot-password" className="text-green-700 hover:underline">
-              {t('forgotPassword')}
+              {t('signup.forgotPassword')}
             </Link>
           </div>
 
           <div className="text-center mt-4">
             <Link href="/signup" className="text-green-700 hover:underline">
-              {t('noAccount')}
+              {t('login.noAccount')}
             </Link>
           </div>
         </div>

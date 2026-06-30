@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLanguage } from '../components/LanguageProvider'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -50,15 +52,15 @@ export default function ForgotPasswordPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Email sent!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('forgotPassword.emailSent')}</h2>
               <p className="text-gray-600 mb-4">
-                If an account exists with this email, you will receive a password reset link.
+                {t('forgotPassword.emailSentDesc')}
               </p>
               <p className="text-sm text-gray-500 mb-6">
-                Check your inbox and spam folder.
+                {t('forgotPassword.checkInbox')}
               </p>
               <Link href="/login" className="btn-primary inline-block">
-                Back to login
+                {t('forgotPassword.backToLogin')}
               </Link>
             </div>
           </div>
@@ -73,10 +75,10 @@ export default function ForgotPasswordPage() {
         <div className="card">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Forgot password?
+              {t('forgotPassword.title')}
             </h2>
             <p className="text-gray-600">
-              Enter your email to receive a reset link
+              {t('forgotPassword.subtitle')}
             </p>
           </div>
 
@@ -89,7 +91,7 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                {t('forgotPassword.email')}
               </label>
               <input
                 id="email"
@@ -98,7 +100,7 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
-                placeholder="your@email.com"
+                placeholder={t('forgotPassword.placeholder')}
               />
             </div>
 
@@ -107,13 +109,13 @@ export default function ForgotPasswordPage() {
               disabled={isLoading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Sending...' : 'Send reset link'}
+              {isLoading ? t('forgotPassword.sending') : t('forgotPassword.send')}
             </button>
           </form>
 
           <div className="text-center mt-6">
             <Link href="/login" className="text-gray-600 hover:text-gray-900">
-              Back to login
+              {t('forgotPassword.backToLogin')}
             </Link>
           </div>
         </div>
