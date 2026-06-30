@@ -73,7 +73,8 @@ export async function POST(request: NextRequest) {
       phone: phone || null,
       password_hash,
       role: role.toUpperCase(), // Convert to uppercase to match schema (CLIENT/ARTISAN)
-      metier: metier || null
+      metier: metier || null,
+      updated_at: new Date().toISOString() // Add updated_at timestamp
     };
 
     // 4️⃣ Insert into users table using service role client (bypasses RLS)
