@@ -65,8 +65,10 @@ export default function Login() {
     <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
       <div className="container mx-auto px-4 py-16">
 
+        {/* Top Image Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
 
+          {/* Artisans */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <img 
               src="/images/artisan-photo.jpg"
@@ -74,25 +76,33 @@ export default function Login() {
               className="w-full h-32 object-cover rounded-lg mb-4"
             />
             <h2 className="text-xl font-semibold mb-2">Artisans</h2>
-            <p className="text-gray-700">Skilled professionals ready to help with your projects.</p>
+            <p className="text-gray-700">
+              Skilled professionals ready to help with your projects.
+            </p>
           </div>
 
+          {/* Clients */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <img 
-              src="/images/client-photo.jpg"
+              src="/images/satisfied-clients.jpg"
               alt="Happy clients receiving help"
               className="w-full h-32 object-cover rounded-lg mb-4"
             />
             <h2 className="text-xl font-semibold mb-2">Clients</h2>
-            <p className="text-gray-700">Get assistance quickly and easily from trusted artisans.</p>
+            <p className="text-gray-700">
+              Get assistance quickly and easily from trusted artisans.
+            </p>
           </div>
 
         </div>
 
+        {/* Login Form */}
         <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
           <h1 className="text-3xl font-bold mb-6 text-center">{t('login')}</h1>
 
-          {error && <p className="text-red-600 text-center mb-4">{error}</p>}
+          {error && (
+            <p className="text-red-600 text-center mb-4">{error}</p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
