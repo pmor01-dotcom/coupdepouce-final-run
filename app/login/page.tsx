@@ -73,14 +73,11 @@ export default function Login() {
             <img
               src="/images/artisan-photo-right.jpg"
               alt="Professional artisans working"
-              className="hero-card-image w-full h-40 md:h-56 object-cover"
+              className="hero-card-image w-full h-20 md:h-24 object-cover"
               loading="lazy"
             />
-            <div className="hero-card-content p-4 md:p-6 text-center md:text-left">
-              <h3 className="text-lg md:text-xl font-semibold mb-2">{t('home.qualifiedArtisans')}</h3>
-              <p className="text-sm md:text-base text-gray-700">
-                {t('home.qualifiedArtisansDesc')}
-              </p>
+            <div className="hero-card-content p-2 text-center md:text-left">
+              <h3 className="text-xs md:text-sm font-semibold mb-1">{t('home.qualifiedArtisans')}</h3>
             </div>
           </article>
 
@@ -89,14 +86,11 @@ export default function Login() {
             <img
               src="/images/satisfied-clients.jpg"
               alt="Happy clients receiving help"
-              className="hero-card-image w-full h-40 md:h-56 object-cover"
+              className="hero-card-image w-full h-20 md:h-24 object-cover"
               loading="lazy"
             />
-            <div className="hero-card-content p-4 md:p-6 text-center md:text-left">
-              <h3 className="text-lg md:text-xl font-semibold mb-2">{t('home.satisfiedClients')}</h3>
-              <p className="text-sm md:text-base text-gray-700">
-                {t('home.satisfiedClientsDesc')}
-              </p>
+            <div className="hero-card-content p-2 text-center md:text-left">
+              <h3 className="text-xs md:text-sm font-semibold mb-1">{t('home.satisfiedClients')}</h3>
             </div>
           </article>
 
