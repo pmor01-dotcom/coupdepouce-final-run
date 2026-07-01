@@ -51,57 +51,33 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
       const authUser = session.user
 
-      // 1️⃣ Try CLIENT table
-      const { data: clientProfile } = await supabase
+      // Get user profile from users table
+      const { data: profile } = await supabase
         .from('users')
         .select('*')
         .eq('id', authUser.id)
         .single()
 
-      if (clientProfile) {
-        const profile: UserProfile = {
+      if (profile) {
+        const role = profile.role?.toLowerCase() || 'client'
+        const userProfile: UserProfile = {
           id: authUser.id,
           email: authUser.email ?? '',
-          role: 'client',
-          name: clientProfile.name,
-          phone: clientProfile.phone,
-          location: clientProfile.location,
-          isPaid: clientProfile.isPaid ?? false,
+          role: role as 'client' | 'artisan',
+          name: profile.name,
+          phone: profile.phone,
+          location: profile.location,
+          metier: profile.metier,
+          isPaid: profile.isPaid ?? false,
         }
 
-        setUser(profile)
-        localStorage.setItem('user', JSON.stringify(profile))
+        setUser(userProfile)
+        localStorage.setItem('user', JSON.stringify(userProfile))
         setIsLoading(false)
         return
       }
 
-      // 2️⃣ Try ARTISAN from users table
-      const { data: artisanProfile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .eq('role', 'ARTISAN')
-        .single()
-
-      if (artisanProfile) {
-        const profile: UserProfile = {
-          id: authUser.id,
-          email: authUser.email ?? '',
-          role: 'artisan',
-          name: artisanProfile.name,
-          phone: artisanProfile.phone,
-          location: artisanProfile.location,
-          metier: artisanProfile.metier,
-          isPaid: artisanProfile.isPaid ?? false,
-        }
-
-        setUser(profile)
-        localStorage.setItem('user', JSON.stringify(profile))
-        setIsLoading(false)
-        return
-      }
-
-      // 3️⃣ No profile found
+      // No profile found
       setUser(null)
       localStorage.removeItem('user')
       setIsLoading(false)
@@ -120,51 +96,28 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
         const authUser = session.user
 
-        // CLIENT
-        const { data: clientProfile } = await supabase
+        // Get user profile from users table
+        const { data: profile } = await supabase
           .from('users')
           .select('*')
           .eq('id', authUser.id)
           .single()
 
-        if (clientProfile) {
-          const profile: UserProfile = {
+        if (profile) {
+          const role = profile.role?.toLowerCase() || 'client'
+          const userProfile: UserProfile = {
             id: authUser.id,
             email: authUser.email ?? '',
-            role: 'client',
-            name: clientProfile.name,
-            phone: clientProfile.phone,
-            location: clientProfile.location,
-            isPaid: clientProfile.isPaid ?? false,
+            role: role as 'client' | 'artisan',
+            name: profile.name,
+            phone: profile.phone,
+            location: profile.location,
+            metier: profile.metier,
+            isPaid: profile.isPaid ?? false,
           }
 
-          setUser(profile)
-          localStorage.setItem('user', JSON.stringify(profile))
-          return
-        }
-
-        // ARTISAN from users table
-        const { data: artisanProfile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', authUser.id)
-          .eq('role', 'ARTISAN')
-          .single()
-
-        if (artisanProfile) {
-          const profile: UserProfile = {
-            id: authUser.id,
-            email: authUser.email ?? '',
-            role: 'artisan',
-            name: artisanProfile.name,
-            phone: artisanProfile.phone,
-            location: artisanProfile.location,
-            metier: artisanProfile.metier,
-            isPaid: artisanProfile.isPaid ?? false,
-          }
-
-          setUser(profile)
-          localStorage.setItem('user', JSON.stringify(profile))
+          setUser(userProfile)
+          localStorage.setItem('user', JSON.stringify(userProfile))
           return
         }
 
@@ -190,51 +143,28 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
       const authUser = data.user
 
-      // CLIENT
-      const { data: clientProfile } = await supabase
+      // Get user profile from users table
+      const { data: profile } = await supabase
         .from('users')
         .select('*')
         .eq('id', authUser.id)
         .single()
 
-      if (clientProfile) {
-        const profile: UserProfile = {
+      if (profile) {
+        const role = profile.role?.toLowerCase() || 'client'
+        const userProfile: UserProfile = {
           id: authUser.id,
           email: authUser.email ?? '',
-          role: 'client',
-          name: clientProfile.name,
-          phone: clientProfile.phone,
-          location: clientProfile.location,
-          isPaid: clientProfile.isPaid ?? false,
+          role: role as 'client' | 'artisan',
+          name: profile.name,
+          phone: profile.phone,
+          location: profile.location,
+          metier: profile.metier,
+          isPaid: profile.isPaid ?? false,
         }
 
-        setUser(profile)
-        localStorage.setItem('user', JSON.stringify(profile))
-        return true
-      }
-
-      // ARTISAN from users table
-      const { data: artisanProfile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .eq('role', 'ARTISAN')
-        .single()
-
-      if (artisanProfile) {
-        const profile: UserProfile = {
-          id: authUser.id,
-          email: authUser.email ?? '',
-          role: 'artisan',
-          name: artisanProfile.name,
-          phone: artisanProfile.phone,
-          location: artisanProfile.location,
-          metier: artisanProfile.metier,
-          isPaid: artisanProfile.isPaid ?? false,
-        }
-
-        setUser(profile)
-        localStorage.setItem('user', JSON.stringify(profile))
+        setUser(userProfile)
+        localStorage.setItem('user', JSON.stringify(userProfile))
         return true
       }
 

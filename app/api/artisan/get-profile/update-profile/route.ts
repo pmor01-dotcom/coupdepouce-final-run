@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
       metier,
       experience_years
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("role", "ARTISAN");
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

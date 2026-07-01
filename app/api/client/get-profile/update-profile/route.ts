@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
       phone,
       location: ville
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("role", "CLIENT");
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

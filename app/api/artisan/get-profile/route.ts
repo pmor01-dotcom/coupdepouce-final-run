@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     .from("users")
     .select("*")
     .eq("id", userId)
+    .eq("role", "ARTISAN")
     .single();
 
   if (error) {
