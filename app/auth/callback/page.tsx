@@ -21,9 +21,15 @@ export default function AuthCallback() {
         }
 
         if (session) {
-          // Get user role from metadata
-          const role = session.user.user_metadata.role
-          
+          // Get user role from users table (more reliable than metadata)
+          const { data: profile } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', session.user.id)
+            .single()
+
+          const role = profile?.role?.toLowerCase()
+
           // Redirect to appropriate dashboard
           if (role === 'artisan') {
             router.push('/artisan-dashboard')

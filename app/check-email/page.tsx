@@ -35,8 +35,14 @@ export default function CheckEmailPage() {
       // Poll for session changes (user clicking email verification link)
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          const metadata = session.user.user_metadata || {}
-          const role = metadata.role
+          // Get role from users table
+          const { data: profile } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', session.user.id)
+            .single()
+
+          const role = profile?.role?.toLowerCase()
 
           if (role === 'client') {
             router.push('/client-dashboard')

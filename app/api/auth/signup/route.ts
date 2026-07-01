@@ -32,16 +32,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1️⃣ Create Supabase Auth user with email verification
+    // 1️⃣ Create Supabase Auth user with auto-confirm (no email verification)
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { 
+        data: {
           role,
           name
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
+        emailConfirm: true // Auto-confirm email to skip verification
       }
     });
 
@@ -58,8 +59,8 @@ export async function POST(request: NextRequest) {
 
     const userId = authData.user.id;
 
-    // Check if email confirmation is required
-    const needsEmailVerification = !authData.session;
+    // Always return false for email verification (disabled for immediate access)
+    const needsEmailVerification = false;
 
     // 2️⃣ Hash password for your own table
     const password_hash = await bcrypt.hash(password, 10);
