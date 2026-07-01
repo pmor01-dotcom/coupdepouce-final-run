@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1️⃣ Create Supabase Auth user with auto-confirm (no email verification)
+    // 1️⃣ Create Supabase Auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -40,9 +40,7 @@ export async function POST(request: NextRequest) {
         data: {
           role,
           name
-        },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
-        emailConfirm: true // Auto-confirm email to skip verification
+        }
       }
     });
 
