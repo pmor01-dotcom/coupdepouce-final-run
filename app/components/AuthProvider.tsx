@@ -75,11 +75,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      // 2️⃣ Try ARTISAN table
+      // 2️⃣ Try ARTISAN from users table
       const { data: artisanProfile } = await supabase
-        .from('artisans')
+        .from('users')
         .select('*')
         .eq('id', authUser.id)
+        .eq('role', 'ARTISAN')
         .single()
 
       if (artisanProfile) {
@@ -89,7 +90,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           role: 'artisan',
           name: artisanProfile.name,
           phone: artisanProfile.phone,
-          location: artisanProfile.ville,
+          location: artisanProfile.location,
           metier: artisanProfile.metier,
           isPaid: artisanProfile.isPaid ?? false,
         }
@@ -142,11 +143,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        // ARTISAN
+        // ARTISAN from users table
         const { data: artisanProfile } = await supabase
-          .from('artisans')
+          .from('users')
           .select('*')
           .eq('id', authUser.id)
+          .eq('role', 'ARTISAN')
           .single()
 
         if (artisanProfile) {
@@ -156,7 +158,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
             role: 'artisan',
             name: artisanProfile.name,
             phone: artisanProfile.phone,
-            location: artisanProfile.ville,
+            location: artisanProfile.location,
             metier: artisanProfile.metier,
             isPaid: artisanProfile.isPaid ?? false,
           }
@@ -211,11 +213,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         return true
       }
 
-      // ARTISAN
+      // ARTISAN from users table
       const { data: artisanProfile } = await supabase
-        .from('artisans')
+        .from('users')
         .select('*')
         .eq('id', authUser.id)
+        .eq('role', 'ARTISAN')
         .single()
 
       if (artisanProfile) {
@@ -225,7 +228,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           role: 'artisan',
           name: artisanProfile.name,
           phone: artisanProfile.phone,
-          location: artisanProfile.ville,
+          location: artisanProfile.location,
           metier: artisanProfile.metier,
           isPaid: artisanProfile.isPaid ?? false,
         }

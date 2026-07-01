@@ -10,7 +10,7 @@ interface ClientProfile {
   name: string
   email: string
   phone: string
-  ville?: string
+  location?: string
 }
 
 export default function ClientProfilePage() {
@@ -26,7 +26,7 @@ export default function ClientProfilePage() {
     name: '',
     email: '',
     phone: '',
-    ville: ''
+    location: ''
   })
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function ClientProfilePage() {
           name: data.name || '',
           email: data.email || '',
           phone: data.phone || '',
-          ville: data.ville || ''
+          location: data.location || ''
         })
       }
     } catch (error) {
@@ -172,8 +172,8 @@ export default function ClientProfilePage() {
                 </label>
                 <input
                   type="text"
-                  value={formData.ville}
-                  onChange={(e) => handleChange('ville', e.target.value)}
+                  value={formData.location}
+                  onChange={(e) => handleChange('location', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>

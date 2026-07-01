@@ -13,12 +13,12 @@ export async function POST(request: NextRequest) {
   }
 
   const { error } = await supabase
-    .from("clients")
+    .from("users")
     .update({
       name,
       email,
       phone,
-      ville
+      location: ville
     })
     .eq("id", id);
 

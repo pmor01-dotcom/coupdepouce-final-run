@@ -10,7 +10,7 @@ interface ArtisanProfile {
   name: string
   email: string
   phone: string
-  ville: string
+  location: string
   metier: string
   description?: string
   experience_years?: number
@@ -30,7 +30,7 @@ export default function ArtisanProfilePage() {
     name: '',
     email: '',
     phone: '',
-    ville: '',
+    location: '',
     metier: '',
     description: '',
     experience_years: '',
@@ -51,7 +51,7 @@ export default function ArtisanProfilePage() {
           name: data.name || '',
           email: data.email || '',
           phone: data.phone || '',
-          ville: data.ville || '',
+          location: data.location || '',
           metier: data.metier || '',
           description: data.description || '',
           experience_years: data.experience_years?.toString() || '',
@@ -185,8 +185,8 @@ export default function ArtisanProfilePage() {
                 </label>
                 <input
                   type="text"
-                  value={formData.ville}
-                  onChange={(e) => handleChange('ville', e.target.value)}
+                  value={formData.location}
+                  onChange={(e) => handleChange('location', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>

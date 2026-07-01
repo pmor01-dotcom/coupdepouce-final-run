@@ -12,7 +12,7 @@ export default function ArtisanProfileEditor() {
     experience_years: '',
     specialties: '',
     phone: '',
-    ville: ''
+    location: ''
   })
 
   const [loading, setLoading] = useState(true)
@@ -34,7 +34,7 @@ export default function ArtisanProfileEditor() {
           experience_years: data.experience_years || '',
           specialties: data.specialties || '',
           phone: data.phone || '',
-          ville: data.ville || ''
+          location: data.location || ''
         })
       }
     } catch (err) {
@@ -152,8 +152,8 @@ export default function ArtisanProfileEditor() {
             <input
               type="text"
               className="input-field"
-              value={formData.ville}
-              onChange={(e) => handleChange('ville', e.target.value)}
+              value={formData.location}
+              onChange={(e) => handleChange('location', e.target.value)}
               placeholder="Ville"
             />
           </div>

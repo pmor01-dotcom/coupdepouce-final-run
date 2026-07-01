@@ -22,14 +22,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Get role from auth metadata
-    const role = authData.user.user_metadata.role;
-    const table = role === 'artisan' ? 'artisans' : 'clients';
-
+    // Get user profile from users table
     const { data: userData, error: userError } = await supabase!
-      .from(table)
+      .from('users')
       .select('*')
-      .eq('email', email)
+      .eq('id', authData.user.id)
       .single();
 
     if (userError || !userData) {
