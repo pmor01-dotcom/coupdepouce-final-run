@@ -18,6 +18,7 @@ function ResetPasswordForm() {
   const [checkingSession, setCheckingSession] = useState(true)
 
   useEffect(() => {
+<<<<<<< HEAD
     const run = async () => {
       const code = new URLSearchParams(window.location.search).get('code')
 
@@ -37,6 +38,28 @@ function ResetPasswordForm() {
       }
 
       setCheckingSession(false)
+=======
+    // Check if user has a valid session from the reset link
+    const checkSession = async () => {
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSessionFromUrl({ storeSession: true })
+        if (sessionError) {
+          console.error('Failed to parse reset session from URL:', sessionError)
+        }
+
+        if (sessionData?.session) {
+          setHasValidSession(true)
+        } else {
+          const { data: { session } } = await supabase.auth.getSession()
+          setHasValidSession(!!session)
+        }
+      } catch (error) {
+        console.error('Reset session check error:', error)
+        setHasValidSession(false)
+      } finally {
+        setCheckingSession(false)
+      }
+>>>>>>> fe54eec (push)
     }
 
     run()
