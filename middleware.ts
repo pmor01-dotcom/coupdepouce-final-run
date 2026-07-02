@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
@@ -14,7 +13,7 @@ export async function middleware(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname
 
-  // Public routes that do NOT require login
+  // Public routes (exact matches)
   const publicPaths = [
     '/login',
     '/signup',
@@ -26,7 +25,11 @@ export async function middleware(req: NextRequest) {
     '/auth/callback'
   ]
 
-  const isPublic = publicPaths.includes(pathname)
+  // Public routes (wildcards)
+  const isPublic =
+    publicPaths.includes(pathname) ||
+    pathname.startsWith('/signup') ||
+    pathname.startsWith('/create-account')
 
   // If NOT logged in → redirect to login (unless on public page)
   if (!session && !isPublic) {
@@ -70,9 +73,9 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/login',
-    '/signup',
-    '/signup-client',
-    '/signup-artisan',
+    '/signup/:path*',
+    '/signup-client/:path*',
+    '/signup-artisan/:path*',
     '/forgot-password',
     '/reset-password',
     '/client-dashboard/:path*',
