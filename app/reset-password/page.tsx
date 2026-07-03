@@ -19,24 +19,41 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     const run = async () => {
-      const code = new URLSearchParams(window.location.search).get('code')
+      try {
+        // Try to let Supabase parse the session/token from the URL (access_token, refresh_token, recovery flows)
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSessionFromUrl({ storeSession: true })
+        if (sessionError) {
+          console.warn('getSessionFromUrl error:', sessionError)
+        }
 
-      if (!code) {
+        if (sessionData?.session) {
+          setHasValidSession(true)
+          setCheckingSession(false)
+          return
+        }
+
+        // Fallback: check for an OAuth-style `code` param and exchange it
+        const code = new URLSearchParams(window.location.search).get('code')
+        if (code) {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+          if (error) {
+            console.error('Recovery error:', error)
+            setHasValidSession(false)
+          } else {
+            setHasValidSession(true)
+          }
+          setCheckingSession(false)
+          return
+        }
+
+        // No session found
         setHasValidSession(false)
+      } catch (err) {
+        console.error('Reset session check error:', err)
+        setHasValidSession(false)
+      } finally {
         setCheckingSession(false)
-        return
       }
-
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-
-      if (error) {
-        console.error('Recovery error:', error)
-        setHasValidSession(false)
-      } else {
-        setHasValidSession(true)
-      }
-
-      setCheckingSession(false)
     }
 
     run()
@@ -60,6 +77,32 @@ function ResetPasswordForm() {
     }
 
     try {
+      // Preferred path: if we have a reset session client-side, update via Supabase SDK
+      if (hasValidSession) {
+        const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+        if (updateError) {
+          setError(updateError.message || 'Error updating password')
+          setIsLoading(false)
+          return
+        }
+
+        // Best-effort: call server endpoint to update password hash in DB (server reads session cookie set by getSessionFromUrl)
+        try {
+          await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newPassword })
+          })
+        } catch (err) {
+          console.error('Failed to call server reset endpoint:', err)
+        }
+
+        setSuccess(true)
+        setTimeout(() => router.push('/login'), 3000)
+        return
+      }
+
+      // Fallback: call server route which validates session server-side
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,9 +113,7 @@ function ResetPasswordForm() {
 
       if (response.ok && data.success) {
         setSuccess(true)
-        setTimeout(() => {
-          router.push('/login')
-        }, 3000)
+        setTimeout(() => router.push('/login'), 3000)
       } else {
         setError(data.error || 'Error resetting password')
       }
