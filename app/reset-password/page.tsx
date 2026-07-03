@@ -18,29 +18,28 @@ function ResetPasswordForm() {
   const [checkingSession, setCheckingSession] = useState(true)
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        // Parse the reset token from the URL and store the session
-        const { data, error } = await supabase.auth.getSessionFromUrl({
-          storeSession: true
-        })
+    const run = async () => {
+      const code = new URLSearchParams(window.location.search).get('code')
 
-        if (error) {
-          console.error('Failed to parse reset session:', error)
-          setHasValidSession(false)
-        } else {
-          // If Supabase restored a session, the link is valid
-          setHasValidSession(!!data?.session)
-        }
-      } catch (err) {
-        console.error('Reset session check error:', err)
+      if (!code) {
         setHasValidSession(false)
-      } finally {
         setCheckingSession(false)
+        return
       }
+
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+      if (error) {
+        console.error('Recovery error:', error)
+        setHasValidSession(false)
+      } else {
+        setHasValidSession(true)
+      }
+
+      setCheckingSession(false)
     }
 
-    checkSession()
+    run()
   }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
