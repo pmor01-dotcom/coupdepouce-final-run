@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { createSupabaseAdminClient } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
-    // Use service role client to bypass RLS for database insert
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabaseAdmin = createSupabaseAdminClient();
 
     const body = await request.json();
     const {

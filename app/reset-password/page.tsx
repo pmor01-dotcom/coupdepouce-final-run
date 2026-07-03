@@ -18,36 +18,36 @@ function ResetPasswordForm() {
   const [checkingSession, setCheckingSession] = useState(true)
 
   useEffect(() => {
+    let subscription: { data: { subscription: { unsubscribe: () => void } } } | null = null
+
     const run = async () => {
       try {
-        // Try to let Supabase parse the session/token from the URL (access_token, refresh_token, recovery flows)
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSessionFromUrl({ storeSession: true })
-        if (sessionError) {
-          console.warn('getSessionFromUrl error:', sessionError)
-        }
-
-        if (sessionData?.session) {
-          setHasValidSession(true)
-          setCheckingSession(false)
-          return
-        }
-
-        // Fallback: check for an OAuth-style `code` param and exchange it
-        const code = new URLSearchParams(window.location.search).get('code')
-        if (code) {
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-          if (error) {
-            console.error('Recovery error:', error)
-            setHasValidSession(false)
-          } else {
+        subscription = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'PASSWORD_RECOVERY' || session) {
             setHasValidSession(true)
+            setCheckingSession(false)
           }
-          setCheckingSession(false)
-          return
+        })
+
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) {
+          console.warn('getSession error:', sessionError)
         }
 
-        // No session found
-        setHasValidSession(false)
+        if (session) {
+          setHasValidSession(true)
+        } else {
+          const code = new URLSearchParams(window.location.search).get('code')
+          if (code) {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+            if (error) {
+              console.error('Recovery error:', error)
+              setHasValidSession(false)
+            } else if (data?.session) {
+              setHasValidSession(true)
+            }
+          }
+        }
       } catch (err) {
         console.error('Reset session check error:', err)
         setHasValidSession(false)
@@ -57,6 +57,12 @@ function ResetPasswordForm() {
     }
 
     run()
+
+    return () => {
+      if (subscription?.data?.subscription) {
+        subscription.data.subscription.unsubscribe()
+      }
+    }
   }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
