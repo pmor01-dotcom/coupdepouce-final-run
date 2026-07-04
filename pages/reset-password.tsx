@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
-  const searchParams = useSearchParams()
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -17,7 +16,7 @@ export default function ResetPasswordPage() {
   const [hasValidSession, setHasValidSession] = useState(false)
 
   useEffect(() => {
-    const code = searchParams.get('code')
+    const code = new URLSearchParams(window.location.search).get('code')
 
     if (!code) {
       setHasValidSession(false)
@@ -36,7 +35,7 @@ export default function ResetPasswordPage() {
     }
 
     run()
-  }, [searchParams, supabase])
+  }, [supabase])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
