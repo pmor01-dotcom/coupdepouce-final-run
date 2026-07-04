@@ -35,7 +35,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load session + fetch profile from correct table
+  // Restore user from localStorage FIRST
+  useEffect(() => {
+    const stored = localStorage.getItem('user')
+    if (stored) {
+      setUser(JSON.parse(stored))
+    }
+  }, [])
+
+  // Load session + fetch profile
   useEffect(() => {
     const loadSession = async () => {
       const {
@@ -51,7 +59,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
       const authUser = session.user
 
-      // Get user profile from users table
       const { data: profile } = await supabase
         .from('users')
         .select('*')
@@ -73,19 +80,17 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
         setUser(userProfile)
         localStorage.setItem('user', JSON.stringify(userProfile))
-        setIsLoading(false)
-        return
+      } else {
+        setUser(null)
+        localStorage.removeItem('user')
       }
 
-      // No profile found
-      setUser(null)
-      localStorage.removeItem('user')
       setIsLoading(false)
     }
 
     loadSession()
 
-    // Auth state listener
+    // Auth listener
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!session?.user) {
@@ -96,7 +101,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
         const authUser = session.user
 
-        // Get user profile from users table
         const { data: profile } = await supabase
           .from('users')
           .select('*')
@@ -118,11 +122,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
           setUser(userProfile)
           localStorage.setItem('user', JSON.stringify(userProfile))
-          return
+        } else {
+          setUser(null)
+          localStorage.removeItem('user')
         }
-
-        setUser(null)
-        localStorage.removeItem('user')
       }
     )
 
@@ -131,50 +134,44 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [supabase])
 
-  // LOGIN
+  // FIXED LOGIN
   const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-      if (error || !data.user) return false
+    if (error || !data.user) return false
 
-      const authUser = data.user
+    const authUser = data.user
 
-      // Get user profile from users table
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
+    const { data: profile } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', authUser.id)
+      .single()
 
-      if (profile) {
-        const role = profile.role?.toLowerCase() || 'client'
-        const userProfile: UserProfile = {
-          id: authUser.id,
-          email: authUser.email ?? '',
-          role: role as 'client' | 'artisan',
-          name: profile.name,
-          phone: profile.phone,
-          location: profile.location,
-          metier: profile.metier,
-          isPaid: profile.isPaid ?? false,
-        }
+    if (!profile) return false
 
-        setUser(userProfile)
-        localStorage.setItem('user', JSON.stringify(userProfile))
-        return true
-      }
+    const role = profile.role?.toLowerCase() || 'client'
 
-      return false
-    } catch {
-      return false
+    const userProfile: UserProfile = {
+      id: authUser.id,
+      email: authUser.email ?? '',
+      role: role as 'client' | 'artisan',
+      name: profile.name,
+      phone: profile.phone,
+      location: profile.location,
+      metier: profile.metier,
+      isPaid: profile.isPaid ?? false,
     }
+
+    setUser(userProfile)
+    localStorage.setItem('user', JSON.stringify(userProfile))
+
+    return true
   }
 
-  // LOGOUT
   const logout = async () => {
     await supabase.auth.signOut()
     setUser(null)
