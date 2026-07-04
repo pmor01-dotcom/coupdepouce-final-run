@@ -1,13 +1,13 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
-function ResetPasswordForm() {
+export default function ResetPasswordPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const searchParams = useSearchParams()
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -15,60 +15,33 @@ function ResetPasswordForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [hasValidSession, setHasValidSession] = useState(false)
-  const [checkingSession, setCheckingSession] = useState(true)
 
   useEffect(() => {
-    let subscription: { data: { subscription: { unsubscribe: () => void } } } | null = null
+    const code = searchParams.get('code')
+
+    if (!code) {
+      setHasValidSession(false)
+      return
+    }
 
     const run = async () => {
-      try {
-        subscription = supabase.auth.onAuthStateChange((event, session) => {
-          if (event === 'PASSWORD_RECOVERY' || session) {
-            setHasValidSession(true)
-            setCheckingSession(false)
-          }
-        })
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) {
-          console.warn('getSession error:', sessionError)
-        }
-
-        if (session) {
-          setHasValidSession(true)
-        } else {
-          const code = new URLSearchParams(window.location.search).get('code')
-          if (code) {
-            const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-            if (error) {
-              console.error('Recovery error:', error)
-              setHasValidSession(false)
-            } else if (data?.session) {
-              setHasValidSession(true)
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Reset session check error:', err)
+      if (error) {
+        console.error('Recovery error:', error)
         setHasValidSession(false)
-      } finally {
-        setCheckingSession(false)
+      } else if (data?.session) {
+        setHasValidSession(true)
       }
     }
 
     run()
+  }, [searchParams, supabase])
 
-    return () => {
-      if (subscription?.data?.subscription) {
-        subscription.data.subscription.unsubscribe()
-      }
-    }
-  }, [supabase])
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsLoading(true)
     setError('')
+    setIsLoading(true)
 
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match')
@@ -76,85 +49,33 @@ function ResetPasswordForm() {
       return
     }
 
-    if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters')
+    if (!hasValidSession) {
+      setError('Invalid or expired reset link')
       setIsLoading(false)
       return
     }
 
-    try {
-      // Preferred path: if we have a reset session client-side, update via Supabase SDK
-      if (hasValidSession) {
-        const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
-        if (updateError) {
-          setError(updateError.message || 'Error updating password')
-          setIsLoading(false)
-          return
-        }
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
 
-        // Best-effort: call server endpoint to update password hash in DB (server reads session cookie set by getSessionFromUrl)
-        try {
-          await fetch('/api/auth/reset-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ newPassword })
-          })
-        } catch (err) {
-          console.error('Failed to call server reset endpoint:', err)
-        }
-
-        setSuccess(true)
-        setTimeout(() => router.push('/login'), 3000)
-        return
-      }
-
-      // Fallback: call server route which validates session server-side
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword })
-      })
-
-      const data = await response.json()
-
-      if (response.ok && data.success) {
-        setSuccess(true)
-        setTimeout(() => router.push('/login'), 3000)
-      } else {
-        setError(data.error || 'Error resetting password')
-      }
-    } catch (err) {
-      setError('Connection error. Please try again.')
-    } finally {
+    if (updateError) {
+      setError(updateError.message || 'Error updating password')
       setIsLoading(false)
+      return
     }
-  }
 
-  if (checkingSession) {
-    return (
-      <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-        <div className="max-w-md w-full text-center">
-          <p>Verifying...</p>
-        </div>
-      </main>
-    )
+    setSuccess(true)
+    setTimeout(() => router.push('/login'), 3000)
   }
 
   if (!hasValidSession) {
     return (
-      <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-        <div className="max-w-md w-full">
-          <div className="card text-center p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Invalid or expired link</h2>
-            <p className="text-gray-600 mb-6">
-              This reset link is no longer valid. Please request a new link.
-            </p>
-            <Link href="/forgot-password" className="btn-primary inline-block">
-              Request new link
-            </Link>
-          </div>
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Invalid or expired link</h2>
+          <p className="mb-6">Please request a new password reset link.</p>
+          <a href="/forgot-password" className="btn-primary">Request new link</a>
         </div>
       </main>
     )
@@ -162,98 +83,48 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-        <div className="max-w-md w-full">
-          <div className="card text-center p-8">
-            <div className="mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Password reset!</h2>
-              <p className="text-gray-600 mb-4">Your password has been successfully updated.</p>
-              <p className="text-sm text-gray-500">You will be redirected to the login page...</p>
-            </div>
-          </div>
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Password reset!</h2>
+          <p className="mb-4">You will be redirected to login…</p>
         </div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-      style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-      <div className="max-w-md w-full">
-        <div className="card">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Reset password</h2>
-            <p className="text-gray-600">Enter your new password</p>
-          </div>
+    <main className="min-h-screen flex items-center justify-center">
+      <form onSubmit={handleSubmit} className="max-w-md w-full bg-white p-6 rounded shadow">
+        <h2 className="text-3xl font-bold mb-6 text-center">Reset password</h2>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
+        {error && <div className="mb-4 p-3 bg-red-100 text-red-700">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                New password
-              </label>
-              <input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-                minLength={8}
-              />
-              <p className="text-xs text-gray-500 mt-1">At least 8 characters</p>
-            </div>
+        <input
+          type="password"
+          placeholder="New password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className="w-full p-3 border rounded mb-4"
+          required
+        />
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-                minLength={8}
-              />
-            </div>
+        <input
+          type="password"
+          placeholder="Confirm password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="w-full p-3 border rounded mb-6"
+          required
+        />
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Resetting...' : 'Reset password'}
-            </button>
-          </form>
-
-          <div className="text-center mt-6">
-            <Link href="/login" className="text-gray-600 hover:text-gray-900">
-              Back to login
-            </Link>
-          </div>
-        </div>
-      </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-green-700 text-white py-3 rounded"
+        >
+          {isLoading ? 'Resetting…' : 'Reset password'}
+        </button>
+      </form>
     </main>
-  )
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ResetPasswordForm />
-    </Suspense>
   )
 }
