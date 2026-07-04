@@ -12,6 +12,7 @@ type Offer = {
   location: string
 }
 
+
 export default function Home() {
   // ⭐ Tell TypeScript what the array contains
   const [offers, setOffers] = useState<Offer[]>([])
