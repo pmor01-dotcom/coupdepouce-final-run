@@ -17,6 +17,5 @@ export async function GET() {
       { status: 500 }
     )
   }
-
-  return Response.json(data)
+return Response.json(data)
 }
