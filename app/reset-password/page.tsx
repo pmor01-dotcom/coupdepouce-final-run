@@ -33,12 +33,15 @@ function ResetPasswordContent() {
     }
 
     const run = async () => {
+      console.log("Attempting to exchange code for session:", code);
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
         console.error("Recovery error:", error);
+        setError(error.message || "Invalid or expired link");
         setHasValidSession(false);
       } else if (data?.session) {
+        console.log("Session established successfully");
         setHasValidSession(true);
       }
     };

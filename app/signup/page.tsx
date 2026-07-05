@@ -231,13 +231,29 @@ export default function SignupPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('artisanSignup.trade')} *
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.metier}
                   onChange={(e) => setFormData({ ...formData, metier: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
-                />
+                >
+                  <option value="">{t('work.select')}</option>
+                  <option value="Plombier">{t('work.plumber')}</option>
+                  <option value="Électricien">{t('work.electrician')}</option>
+                  <option value="Menuisier">{t('work.carpenter')}</option>
+                  <option value="Peintre">{t('work.painter')}</option>
+                  <option value="Maçon">{t('work.mason')}</option>
+                  <option value="Couvreur">{t('work.roofer')}</option>
+                  <option value="Serrurier">{t('work.locksmith')}</option>
+                  <option value="Chauffagiste">{t('work.heating')}</option>
+                  <option value="Plâtrier">{t('work.plasterer')}</option>
+                  <option value="Carreleur">{t('work.tiler')}</option>
+                  <option value="Location d'outils">{t('work.toolRental')}</option>
+                  <option value="Garde d'enfants">{t('work.babysitting')}</option>
+                  <option value="Jardinage">{t('work.gardening')}</option>
+                  <option value="Courses">{t('work.shopping')}</option>
+                  <option value="Autre">{t('work.other')}</option>
+                </select>
               </div>
 
               <div>

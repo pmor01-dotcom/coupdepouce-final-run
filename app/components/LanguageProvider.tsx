@@ -141,6 +141,24 @@ const translations: Record<Language, Record<string, string>> = {
     "artisanSignup.create": "Créer mon compte",
     "artisanSignup.creating": "Création en cours...",
 
+    // Work Titles
+    "work.plumber": "Plombier",
+    "work.electrician": "Électricien",
+    "work.carpenter": "Menuisier",
+    "work.painter": "Peintre",
+    "work.mason": "Maçon",
+    "work.roofer": "Couvreur",
+    "work.locksmith": "Serrurier",
+    "work.heating": "Chauffagiste",
+    "work.plasterer": "Plâtrier",
+    "work.tiler": "Carreleur",
+    "work.toolRental": "Location d'outils",
+    "work.babysitting": "Garde d'enfants",
+    "work.gardening": "Jardinage",
+    "work.shopping": "Courses",
+    "work.select": "Sélectionnez un métier",
+    "work.other": "Autre",
+
     // Form
     "form.firstName": "Prénom",
     "form.lastName": "Nom",
@@ -371,6 +389,24 @@ const translations: Record<Language, Record<string, string>> = {
     "artisanSignup.phone": "Phone",
     "artisanSignup.create": "Create my account",
     "artisanSignup.creating": "Creating...",
+
+    // Work Titles
+    "work.plumber": "Plumber",
+    "work.electrician": "Electrician",
+    "work.carpenter": "Carpenter",
+    "work.painter": "Painter",
+    "work.mason": "Mason",
+    "work.roofer": "Roofer",
+    "work.locksmith": "Locksmith",
+    "work.heating": "Heating technician",
+    "work.plasterer": "Plasterer",
+    "work.tiler": "Tiler",
+    "work.toolRental": "Tool rental",
+    "work.babysitting": "Babysitting",
+    "work.gardening": "Gardening",
+    "work.shopping": "Shopping",
+    "work.select": "Select a trade",
+    "work.other": "Other",
 
     // Form
     "form.firstName": "First name",

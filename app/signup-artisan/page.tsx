@@ -22,7 +22,7 @@ export default function ArtisanSignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -170,14 +170,30 @@ export default function ArtisanSignupPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('artisanSignup.trade')} *
             </label>
-            <input
-              type="text"
+            <select
               name="metier"
               value={formData.metier}
               onChange={handleChange}
               className="input-field"
               required
-            />
+            >
+              <option value="">{t('work.select')}</option>
+              <option value="Plombier">{t('work.plumber')}</option>
+              <option value="Électricien">{t('work.electrician')}</option>
+              <option value="Menuisier">{t('work.carpenter')}</option>
+              <option value="Peintre">{t('work.painter')}</option>
+              <option value="Maçon">{t('work.mason')}</option>
+              <option value="Couvreur">{t('work.roofer')}</option>
+              <option value="Serrurier">{t('work.locksmith')}</option>
+              <option value="Chauffagiste">{t('work.heating')}</option>
+              <option value="Plâtrier">{t('work.plasterer')}</option>
+              <option value="Carreleur">{t('work.tiler')}</option>
+              <option value="Location d'outils">{t('work.toolRental')}</option>
+              <option value="Garde d'enfants">{t('work.babysitting')}</option>
+              <option value="Jardinage">{t('work.gardening')}</option>
+              <option value="Courses">{t('work.shopping')}</option>
+              <option value="Autre">{t('work.other')}</option>
+            </select>
           </div>
 
           <div>

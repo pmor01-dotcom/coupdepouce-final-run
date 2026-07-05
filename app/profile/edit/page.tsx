@@ -288,12 +288,28 @@ export default function EditProfile() {
 
                 <div className="md:col-span-2">
                   <label className="block font-medium mb-1">Métier</label>
-                  <input
-                    type="text"
+                  <select
                     className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
                     value={metier}
                     onChange={(e) => setMetier(e.target.value)}
-                  />
+                  >
+                    <option value="">Sélectionnez un métier</option>
+                    <option value="Plombier">Plombier</option>
+                    <option value="Électricien">Électricien</option>
+                    <option value="Menuisier">Menuisier</option>
+                    <option value="Peintre">Peintre</option>
+                    <option value="Maçon">Maçon</option>
+                    <option value="Couvreur">Couvreur</option>
+                    <option value="Serrurier">Serrurier</option>
+                    <option value="Chauffagiste">Chauffagiste</option>
+                    <option value="Plâtrier">Plâtrier</option>
+                    <option value="Carreleur">Carreleur</option>
+                    <option value="Location d'outils">Location d'outils</option>
+                    <option value="Garde d'enfants">Garde d'enfants</option>
+                    <option value="Jardinage">Jardinage</option>
+                    <option value="Courses">Courses</option>
+                    <option value="Autre">Autre</option>
+                  </select>
                 </div>
 
                 <div className="md:col-span-2">
