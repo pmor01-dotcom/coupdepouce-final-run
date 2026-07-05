@@ -1,25 +1,34 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-function createSafeSupabaseClient(): SupabaseClient | null {
-  if (!supabaseUrl || !supabaseAnonKey) return null
-  return createClient(supabaseUrl, supabaseAnonKey, {
+function requireEnvVar(name: string, value: string | undefined): string {
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`)
+  }
+  return value
+}
+
+export function createSupabaseServerClient(): SupabaseClient {
+  const url = requireEnvVar('NEXT_PUBLIC_SUPABASE_URL', supabaseUrl)
+  const anonKey = requireEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY', supabaseAnonKey)
+
+  return createClient(url, anonKey, {
     auth: {
       persistSession: false
     }
   })
 }
 
-export const supabase = createSafeSupabaseClient()
+export function createSupabaseAdminClient(): SupabaseClient {
+  const url = requireEnvVar('NEXT_PUBLIC_SUPABASE_URL', supabaseUrl)
+  const serviceKey = requireEnvVar('SUPABASE_SERVICE_ROLE_KEY', serviceRoleKey)
 
-export const supabaseAdmin =
-  supabaseUrl && serviceRoleKey
-    ? createClient(supabaseUrl, serviceRoleKey, {
-        auth: {
-          persistSession: false
-        }
-      })
-    : null
+  return createClient(url, serviceKey, {
+    auth: {
+      persistSession: false
+    }
+  })
+}

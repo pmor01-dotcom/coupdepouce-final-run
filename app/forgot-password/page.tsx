@@ -1,125 +1,69 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useLanguage } from '../components/LanguageProvider'
+import { useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function ForgotPasswordPage() {
-  const router = useRouter()
-  const { t } = useLanguage()
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const supabase = createClientComponentClient();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      })
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setError("");
+    setLoading(true);
 
-      const data = await response.json()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
 
-      if (response.ok) {
-        setSuccess(true)
-      } else {
-        setError(data.error || 'Error sending password reset email')
-      }
-    } catch (err) {
-      setError('Connection error. Please try again.')
-    } finally {
-      setIsLoading(false)
+    if (error) {
+      setError(error.message || "Error sending reset email");
+      setLoading(false);
+      return;
     }
-  }
 
-  if (success) {
-    return (
-      <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-        <div className="max-w-md w-full">
-          <div className="card text-center p-6 md:p-8">
-            <div className="mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                </svg>
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{t('forgotPassword.emailSent')}</h2>
-              <p className="text-gray-600 mb-4">
-                {t('forgotPassword.emailSentDesc')}
-              </p>
-              <p className="text-sm text-gray-500 mb-6">
-                {t('forgotPassword.checkInbox')}
-              </p>
-              <Link href="/login" className="btn-primary inline-block">
-                {t('forgotPassword.backToLogin')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </main>
-    )
-  }
+    setMessage("A password reset link has been sent to your email.");
+    setLoading(false);
+  };
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-      <div className="max-w-md w-full">
-        <div className="card">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              {t('forgotPassword.title')}
-            </h2>
-            <p className="text-gray-600">
-              {t('forgotPassword.subtitle')}
-            </p>
-          </div>
+    <main className="min-h-screen flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-md w-full bg-white p-6 rounded shadow"
+      >
+        <h2 className="text-3xl font-bold mb-6 text-center">Forgot password</h2>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700">{error}</div>
+        )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('forgotPassword.email')}
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-                placeholder={t('forgotPassword.placeholder')}
-              />
-            </div>
+        {message && (
+          <div className="mb-4 p-3 bg-green-100 text-green-700">{message}</div>
+        )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? t('forgotPassword.sending') : t('forgotPassword.send')}
-            </button>
-          </form>
+        <input
+          type="email"
+          placeholder="Your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 border rounded mb-6"
+          required
+        />
 
-          <div className="text-center mt-6">
-            <Link href="/login" className="text-gray-600 hover:text-gray-900">
-              {t('forgotPassword.backToLogin')}
-            </Link>
-          </div>
-        </div>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-green-700 text-white py-3 rounded"
+        >
+          {loading ? "Sending…" : "Send reset link"}
+        </button>
+      </form>
     </main>
-  )
+  );
 }
