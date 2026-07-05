@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ResetPasswordPage() {
   return (
@@ -15,7 +15,6 @@ export default function ResetPasswordPage() {
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClientComponentClient();
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -47,7 +46,7 @@ function ResetPasswordContent() {
     };
 
     run();
-  }, [searchParams, supabase]);
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
