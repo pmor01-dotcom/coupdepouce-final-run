@@ -11,11 +11,13 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submitted with email:', email);
     setMessage("");
     setError("");
     setLoading(true);
 
     try {
+      console.log('Calling API endpoint...');
       const response = await fetch('/api/auth/custom-forgot-password', {
         method: 'POST',
         headers: {
@@ -24,7 +26,9 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
+      console.log('API response status:', response.status);
       const text = await response.text();
+      console.log('API response text:', text);
       const data = text ? JSON.parse(text) : {};
 
       if (!response.ok) {
