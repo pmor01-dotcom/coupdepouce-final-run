@@ -1,4 +1,5 @@
-import SocketHandler, { config } from '../../lib/socket'
+import SocketHandler from '../../lib/socket'
+import { config } from '../../lib/socket'
 
-export { config }
 export default SocketHandler
+export { config }
