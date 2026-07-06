@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send password reset email
+    console.log('Sending password reset email to:', email, 'with token:', resetToken)
     const emailSent = await EmailService.sendPasswordResetEmail(email, user.name, resetToken)
 
     if (!emailSent) {
@@ -74,6 +75,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+    
+    console.log('Password reset email sent successfully')
 
     return NextResponse.json({
       success: true,
