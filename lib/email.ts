@@ -7,12 +7,22 @@ const getCurrentYear = () => new Date().getFullYear()
 // Email service class
 export class EmailService {
   static async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+    console.log('EmailService.sendEmail called with:', { to, subject })
+    console.log('SMTP config check:', {
+      SMTP_HOST: process.env.SMTP_HOST,
+      SMTP_PORT: process.env.SMTP_PORT,
+      SMTP_USER: process.env.SMTP_USER,
+      SMTP_PASSWORD: process.env.SMTP_PASSWORD ? 'SET' : 'MISSING',
+      EMAIL_FROM: process.env.EMAIL_FROM,
+    })
+
     if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
       console.error('Missing SMTP credentials: SMTP_USER and SMTP_PASSWORD are required')
       return false
     }
 
     try {
+      console.log('Creating nodemailer transporter...')
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: parseInt(process.env.SMTP_PORT || '587'),
@@ -30,6 +40,7 @@ export class EmailService {
         html,
       }
 
+      console.log('Sending email with options:', { from: mailOptions.from, to: mailOptions.to, subject: mailOptions.subject })
       await transporter.sendMail(mailOptions)
       console.log(`Email sent successfully to ${to}`)
       return true
