@@ -2,7 +2,6 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 
 export default function ResetPasswordPage() {
   return (
@@ -21,31 +20,15 @@ function ResetPasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [hasValidSession, setHasValidSession] = useState(false);
+  const [isValidToken, setIsValidToken] = useState(false);
+  const [token, setToken] = useState("");
 
   useEffect(() => {
-    const code = searchParams.get("code");
-
-    if (!code) {
-      setHasValidSession(false);
-      return;
+    const tokenParam = searchParams.get("token");
+    if (tokenParam) {
+      setToken(tokenParam);
+      setIsValidToken(true);
     }
-
-    const run = async () => {
-      console.log("Attempting to exchange code for session:", code);
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-
-      if (error) {
-        console.error("Recovery error:", error);
-        setError(error.message || "Invalid or expired link");
-        setHasValidSession(false);
-      } else if (data?.session) {
-        console.log("Session established successfully");
-        setHasValidSession(true);
-      }
-    };
-
-    run();
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
@@ -59,27 +42,32 @@ function ResetPasswordContent() {
       return;
     }
 
-    if (!hasValidSession) {
-      setError("Invalid or expired reset link");
+    try {
+      const response = await fetch('/api/auth/custom-reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, newPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Error resetting password');
+        setIsLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      setTimeout(() => router.push("/login"), 3000);
+    } catch (error) {
+      setError('Error resetting password');
       setIsLoading(false);
-      return;
     }
-
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
-
-    if (updateError) {
-      setError(updateError.message || "Error updating password");
-      setIsLoading(false);
-      return;
-    }
-
-    setSuccess(true);
-    setTimeout(() => router.push("/login"), 3000);
   };
 
-  if (!hasValidSession) {
+  if (!isValidToken) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">

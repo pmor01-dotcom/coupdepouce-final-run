@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function ForgotPasswordPage() {
-  const supabase = createClientComponentClient();
 
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -17,18 +15,31 @@ export default function ForgotPasswordPage() {
     setError("");
     setLoading(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    try {
+      const response = await fetch('/api/auth/custom-forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
 
-    if (error) {
-      setError(error.message || "Error sending reset email");
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+
+      if (!response.ok) {
+        setError(data.error || 'Error sending reset email');
+        setLoading(false);
+        return;
+      }
+
+      setMessage("A password reset link has been sent to your email.");
       setLoading(false);
-      return;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      setError('Error sending reset email');
+      setLoading(false);
     }
-
-    setMessage("A password reset link has been sent to your email.");
-    setLoading(false);
   };
 
   return (
