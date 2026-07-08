@@ -1,84 +1,107 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
-
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('Form submitted with email:', email);
-    setMessage("");
-    setError("");
-    setLoading(true);
+  const handleReset = async () => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://www.coupdepouce-aide.com/reset-password",
+    });
 
-    try {
-      console.log('Calling API endpoint...');
-      const response = await fetch('/api/auth/custom-forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      console.log('API response status:', response.status);
-      const text = await response.text();
-      console.log('API response text:', text);
-      const data = text ? JSON.parse(text) : {};
-
-      if (!response.ok) {
-        setError(data.error || 'Error sending reset email');
-        setLoading(false);
-        return;
-      }
-
-      setMessage("A password reset link has been sent to your email.");
-      setLoading(false);
-    } catch (error) {
-      console.error('Forgot password error:', error);
-      setError('Error sending reset email');
-      setLoading(false);
+    if (error) {
+      setMessage("Erreur : " + error.message);
+    } else {
+      setMessage("Un email de réinitialisation a été envoyé.");
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-md w-full bg-white p-6 rounded shadow"
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(to bottom, #4CAF50 0%, #A5D6A7 40%, #ffffff 100%)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "30px",
+          borderRadius: "16px",
+          width: "90%",
+          maxWidth: "420px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          textAlign: "center",
+        }}
       >
-        <h2 className="text-3xl font-bold mb-6 text-center">Forgot password</h2>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700">{error}</div>
-        )}
-
-        {message && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700">{message}</div>
-        )}
+        <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
+          Réinitialiser le mot de passe
+        </h1>
 
         <input
           type="email"
-          placeholder="Your email"
+          placeholder="Votre email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded mb-6"
-          required
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            background: "#f2f2f2",
+            fontSize: "16px",
+            marginBottom: "15px",
+          }}
         />
 
         <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-green-700 text-white py-3 rounded"
+          onClick={handleReset}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            background: "#9e9e9e",
+            color: "white",
+            fontWeight: "bold",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: "15px",
+          }}
         >
-          {loading ? "Sending…" : "Send reset link"}
+          Envoyer le lien
         </button>
-      </form>
-    </main>
+
+        {message && (
+          <p style={{ marginBottom: "15px", fontSize: "14px", color: "#333" }}>
+            {message}
+          </p>
+        )}
+
+        <button
+          onClick={() => router.push("/")}
+          style={{
+            width: "100%",
+            padding: "10px 14px",
+            borderRadius: "10px",
+            background: "#bdbdbd",
+            color: "white",
+            fontWeight: "bold",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Retour
+        </button>
+      </div>
+    </div>
   );
 }
