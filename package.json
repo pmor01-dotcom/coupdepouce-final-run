@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --no-typecheck",
-    "vercel-build": "next build --no-typecheck",
+    "build": "next build",
+    "vercel-build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -18,7 +18,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^8.0.0",
     "bcryptjs": "^3.0.3",
-    "next": "^16.2.10",
+    "next": "^14.2.35",
     "nodemailer": "^9.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -32,7 +32,7 @@
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.14",
     "eslint": "^10.6.0",
-    "eslint-config-next": "^16.2.10",
+    "eslint-config-next": "^14.2.35",
     "postcss": "^8",
     "supabase": "^2.105.0",
     "typescript": "^5"
