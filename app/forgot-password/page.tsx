@@ -1,30 +1,51 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleReset = async () => {
-    // Auth v2: redirectTo must NOT be passed here
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    setLoading(true);
+    setMessage("");
 
-    if (error) {
-      setMessage("Erreur : " + error.message);
-    } else {
-      setMessage("Un email de réinitialisation a été envoyé.");
+    try {
+      const response = await fetch("/api/auth/custom-forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      // If the API returns an empty body, avoid .json() crash
+      let data = {};
+      try {
+        data = await response.json();
+      } catch {
+        data = { error: "Réponse invalide du serveur" };
+      }
+
+      if (!response.ok) {
+        setMessage("Erreur : " + (data.error || "Impossible d'envoyer le lien"));
+      } else {
+        setMessage("Un email de réinitialisation a été envoyé.");
+      }
+    } catch (err) {
+      setMessage("Erreur : Impossible de contacter le serveur.");
     }
+
+    setLoading(false);
   };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(to bottom, #4CAF50 0%, #A5D6A7 40%, #ffffff 100%)",
+        background:
+          "linear-gradient(to bottom, #4CAF50 0%, #A5D6A7 40%, #ffffff 100%)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -64,6 +85,7 @@ export default function ForgotPasswordPage() {
 
         <button
           onClick={handleReset}
+          disabled={loading}
           style={{
             width: "100%",
             padding: "12px 16px",
@@ -76,7 +98,7 @@ export default function ForgotPasswordPage() {
             marginBottom: "15px",
           }}
         >
-          Envoyer le lien
+          {loading ? "Envoi…" : "Envoyer le lien"}
         </button>
 
         {message && (
