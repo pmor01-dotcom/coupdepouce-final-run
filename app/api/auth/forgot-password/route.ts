@@ -1,65 +1,89 @@
-"use client";
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
+import { EmailService } from '@/lib/email'
 
-import { useState } from "react";
-import { useLanguage } from "../components/LanguageProvider";
+export const dynamic = 'force-dynamic'
 
-export default function ForgotPasswordPage() {
-  const { t } = useLanguage();
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+export async function POST(request: NextRequest) {
+  try {
+    const { email } = await request.json()
 
-  const handleReset = async () => {
-    setLoading(true);
-    setMessage("");
-
-    const response = await fetch("/api/auth/custom-forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setMessage("Erreur : " + data.error);
-    } else {
-      setMessage("Un email de réinitialisation a été envoyé.");
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      )
     }
 
-    setLoading(false);
-  };
+    // Find user by email
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single()
 
-  return (
-    <main className="min-h-screen flex items-center justify-center">
-      <form className="max-w-md w-full bg-white p-6 rounded shadow">
-        <h2 className="text-3xl font-bold mb-6 text-center">
-          {t("forgotPassword.title")}
-        </h2>
+    if (userError || !user) {
+      return NextResponse.json({
+        success: true,
+        message: 'If an account with this email exists, a password reset link has been sent.'
+      })
+    }
 
-        {message && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700">{message}</div>
-        )}
+    // Generate token
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
-        <input
-          type="email"
-          placeholder={t("forgotPassword.emailPlaceholder")}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded mb-6"
-          required
-        />
+    // Delete old tokens
+    await supabase
+      .from('password_reset_tokens')
+      .delete()
+      .eq('user_id', user.id)
 
-        <button
-          type="button"
-          onClick={handleReset}
-          disabled={loading}
-          className="w-full bg-green-700 text-white py-3 rounded"
-        >
-          {loading ? t("forgotPassword.sending") : t("forgotPassword.sendLink")}
-        </button>
-      </form>
-    </main>
-  );
+    // Insert new token
+    const { error: tokenError } = await supabase
+      .from('password_reset_tokens')
+      .insert({
+        user_id: user.id,
+        token: resetToken,
+        expires_at: expiresAt
+      })
+
+    if (tokenError) {
+      return NextResponse.json(
+        { error: 'Failed to create reset token' },
+        { status: 500 }
+      )
+    }
+
+    // Send email
+    const emailSent = await EmailService.sendPasswordResetEmail(
+      email,
+      user.name,
+      resetToken
+    )
+
+    if (!emailSent) {
+      return NextResponse.json(
+        { error: 'Failed to send reset email' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'If an account with this email exists, a password reset link has been sent.'
+    })
+  } catch (error) {
+    console.error('Custom forgot password error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
 }
