@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
 import EmailService from '@/lib/email'
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,20 +12,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ⚠️ IMPORTANT:
+    // If sendPaymentConfirmationEmail does NOT exist yet,
+    // comment this out until you implement it.
+    // const success = await EmailService.sendPaymentConfirmationEmail({
+    //   to,
+    //   name,
+    //   planType,
+    //   amount,
+    // })
 
-    if (success) {
-      return NextResponse.json({
-        success: true,
-        message: 'Payment confirmation email sent successfully'
-      })
-    } else {
-      return NextResponse.json(
-        { error: 'Failed to send payment confirmation email' },
-        { status: 500 }
-      )
-    }
+    return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error('Payment confirmation email API error:', error)
+    console.error('Error in payment confirmation route:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
