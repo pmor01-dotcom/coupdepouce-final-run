@@ -20,8 +20,9 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
-      // If the API returns an empty body, avoid .json() crash
-      let data = {};
+      // Safe typing for JSON response
+      let data: { error?: string; message?: string } = {};
+
       try {
         data = await response.json();
       } catch {
@@ -33,7 +34,7 @@ export default function ForgotPasswordPage() {
       } else {
         setMessage("Un email de réinitialisation a été envoyé.");
       }
-    } catch (err) {
+    } catch {
       setMessage("Erreur : Impossible de contacter le serveur.");
     }
 
