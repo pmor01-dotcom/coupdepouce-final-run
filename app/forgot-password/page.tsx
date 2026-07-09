@@ -10,9 +10,8 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
 
   const handleReset = async () => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://www.coupdepouce-aide.com/reset-password",
-    });
+    // Auth v2: redirectTo must NOT be passed here
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
 
     if (error) {
       setMessage("Erreur : " + error.message);
@@ -104,4 +103,3 @@ export default function ForgotPasswordPage() {
       </div>
     </div>
   );
-}
