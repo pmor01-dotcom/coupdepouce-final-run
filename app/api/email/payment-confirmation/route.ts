@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const success = await EmailService.sendPaymentConfirmationEmail(to, name, planType, amount)
 
     if (success) {
       return NextResponse.json({
