@@ -1,49 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+"use client";
 
-export const dynamic = 'force-dynamic'
+import { useState } from "react";
 
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
-    const { email } = await request.json()
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      )
+  const handleReset = async () => {
+    const response = await fetch("/api/auth/custom-forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage("Erreur : " + data.error);
+    } else {
+      setMessage("Un email de réinitialisation a été envoyé.");
     }
+  };
 
-    // Use Supabase's built-in password reset
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL
-      || process.env.APP_URL
-      || new URL(request.url).origin
-      || 'http://localhost:3000'
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${appUrl}/reset-password`
-    })
-
-    if (error) {
-      console.error('Password reset error:', error)
-      // Security: still return success to prevent email enumeration
-      return NextResponse.json({
-        success: true,
-        message: 'If an account with this email exists, a password reset link has been sent.'
-      })
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'If an account with this email exists, a password reset link has been sent.'
-    })
-  } catch (error) {
-    console.error('Forgot password error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+  return (
+    <div>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <button onClick={handleReset}>Envoyer le lien</button>
+      {message && <p>{message}</p>}
+    </div>
+  );
 }
