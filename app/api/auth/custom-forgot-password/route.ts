@@ -20,20 +20,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 🔥 FIX: Use listUsers() because getUserByEmail() is not available
-    const { data: users, error: listError } = await supabase.auth.admin.listUsers()
+    // Modern Supabase admin lookup
+    const { data: userData, error: userError } =
+      await supabase.auth.admin.getUserByEmail(email)
 
-    if (listError) {
-      console.error('Error listing users:', listError)
-      return NextResponse.json(
-        { error: 'Failed to lookup user' },
-        { status: 500 }
-      )
-    }
-
-    const userData = users.find(u => u.email === email)
-
-    if (!userData) {
+    if (userError || !userData) {
       return NextResponse.json({
         success: true,
         message:
@@ -44,19 +35,14 @@ export async function POST(request: NextRequest) {
     const userId = userData.id
     const userName = userData.user_metadata?.name ?? ''
 
-    // Generate secure token
     const resetToken = crypto.randomBytes(32).toString('hex')
-
-    // Token expires in 1 hour
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
-    // Delete old tokens
     await supabase
       .from('password_reset_tokens')
       .delete()
       .eq('user_id', userId)
 
-    // Insert new token
     const { error: tokenError } = await supabase
       .from('password_reset_tokens')
       .insert({
@@ -73,7 +59,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send email
     const emailSent = await EmailService.sendPasswordResetEmail(
       email,
       userName,
