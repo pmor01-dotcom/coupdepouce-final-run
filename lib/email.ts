@@ -8,7 +8,8 @@ const getCurrentYear = () => new Date().getFullYear();
 export class EmailService {
   static async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
     try {
-      const from = process.env.EMAIL_FROM || "support@coupdepouce-aide.com";
+      // IMPORTANT: Use the ONLY mailbox that actually exists in IONOS
+      const from = process.env.EMAIL_FROM || "info@coupdepouce-aide.com";
 
       const result = await resend.emails.send({
         from,
