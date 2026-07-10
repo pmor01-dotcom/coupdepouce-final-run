@@ -16,24 +16,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create Supabase admin client using SSR package
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         cookies: {
-          get() {
-            return ''
-          },
+          get() { return '' },
           set() {},
           remove() {}
         }
       }
     )
 
-    // Supabase v2: listUsers with email filter
+    // 1️⃣ Fetch all users (Supabase v2 has no email filter)
     const { data: users, error: listError } =
-      await supabase.auth.admin.listUsers({ email })
+      await supabase.auth.admin.listUsers()
 
     if (listError) {
       console.error('Error listing users:', listError)
@@ -43,7 +40,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userData = users?.users?.[0]
+    // 2️⃣ Filter manually
+    const userData = users.users.find(u => u.email === email)
 
     if (!userData) {
       return NextResponse.json({
@@ -56,17 +54,17 @@ export async function POST(request: NextRequest) {
     const userId = userData.id
     const userName = userData.user_metadata?.name ?? ''
 
-    // Generate secure token
+    // 3️⃣ Generate token
     const resetToken = crypto.randomBytes(32).toString('hex')
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
-    // Delete old tokens
+    // 4️⃣ Delete old tokens
     await supabase
       .from('password_reset_tokens')
       .delete()
       .eq('user_id', userId)
 
-    // Insert new token
+    // 5️⃣ Insert new token
     const { error: tokenError } = await supabase
       .from('password_reset_tokens')
       .insert({
@@ -83,7 +81,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send email
+    // 6️⃣ Send email
     const emailSent = await EmailService.sendPasswordResetEmail(
       email,
       userName,
@@ -103,6 +101,7 @@ export async function POST(request: NextRequest) {
       message:
         'If an account with this email exists, a password reset link has been sent.'
     })
+
   } catch (error) {
     console.error('Custom forgot password error:', error)
     return NextResponse.json(
