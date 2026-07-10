@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // 1️⃣ Fetch all users (Supabase v2 has no email filter)
-    const { data: users, error: listError } =
+    // 1️⃣ Fetch all users (Supabase v2)
+    const { data: usersPage, error: listError } =
       await supabase.auth.admin.listUsers()
 
     if (listError) {
@@ -40,8 +40,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 2️⃣ Filter manually
-    const userData = users.users.find(u => u.email === email)
+    // 2️⃣ Extract users safely (handles all Supabase v2 shapes)
+    const allUsers =
+      Array.isArray(usersPage)
+        ? usersPage
+        : Array.isArray(usersPage?.users)
+          ? usersPage.users
+          : []
+
+    console.log("Extracted users:", allUsers)
+
+    // 3️⃣ Find user by email
+    const userData = allUsers.find(u => u.email === email)
 
     if (!userData) {
       return NextResponse.json({
@@ -54,17 +64,17 @@ export async function POST(request: NextRequest) {
     const userId = userData.id
     const userName = userData.user_metadata?.name ?? ''
 
-    // 3️⃣ Generate token
+    // 4️⃣ Generate token
     const resetToken = crypto.randomBytes(32).toString('hex')
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
-    // 4️⃣ Delete old tokens
+    // 5️⃣ Delete old tokens
     await supabase
       .from('password_reset_tokens')
       .delete()
       .eq('user_id', userId)
 
-    // 5️⃣ Insert new token
+    // 6️⃣ Insert new token
     const { error: tokenError } = await supabase
       .from('password_reset_tokens')
       .insert({
@@ -81,7 +91,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 6️⃣ Send email
+    // 7️⃣ Send email via Resend (your custom flow)
     const emailSent = await EmailService.sendPasswordResetEmail(
       email,
       userName,
