@@ -9,7 +9,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
@@ -21,38 +20,47 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find user by email
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .single()
+    // 🔥 FIX: Use listUsers() because getUserByEmail() is not available
+    const { data: users, error: listError } = await supabase.auth.admin.listUsers()
 
-    if (userError || !user) {
-      // Security: still return success to prevent email enumeration
+    if (listError) {
+      console.error('Error listing users:', listError)
+      return NextResponse.json(
+        { error: 'Failed to lookup user' },
+        { status: 500 }
+      )
+    }
+
+    const userData = users.find(u => u.email === email)
+
+    if (!userData) {
       return NextResponse.json({
         success: true,
-        message: 'If an account with this email exists, a password reset link has been sent.'
+        message:
+          'If an account with this email exists, a password reset link has been sent.'
       })
     }
 
-    // Generate a secure random token
+    const userId = userData.id
+    const userName = userData.user_metadata?.name ?? ''
+
+    // Generate secure token
     const resetToken = crypto.randomBytes(32).toString('hex')
-    
-    // Set expiration to 1 hour from now
+
+    // Token expires in 1 hour
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
-    // Delete any existing tokens for this user
+    // Delete old tokens
     await supabase
       .from('password_reset_tokens')
       .delete()
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
 
-    // Insert new reset token
+    // Insert new token
     const { error: tokenError } = await supabase
       .from('password_reset_tokens')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         token: resetToken,
         expires_at: expiresAt
       })
@@ -65,9 +73,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send password reset email
-    console.log('Sending password reset email to:', email, 'with token:', resetToken)
-    const emailSent = await EmailService.sendPasswordResetEmail(email, user.name, resetToken)
+    // Send email
+    const emailSent = await EmailService.sendPasswordResetEmail(
+      email,
+      userName,
+      resetToken
+    )
 
     if (!emailSent) {
       console.error('Failed to send password reset email')
@@ -76,12 +87,11 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
-    
-    console.log('Password reset email sent successfully')
 
     return NextResponse.json({
       success: true,
-      message: 'If an account with this email exists, a password reset link has been sent.'
+      message:
+        'If an account with this email exists, a password reset link has been sent.'
     })
   } catch (error) {
     console.error('Custom forgot password error:', error)
