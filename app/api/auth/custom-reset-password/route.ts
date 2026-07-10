@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
 import bcrypt from 'bcryptjs'
 
 export const dynamic = 'force-dynamic'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,63 +15,85 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find the reset token
-    const { data: resetToken, error: tokenError } = await supabase
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        cookies: {
+          get() { return '' },
+          set() {},
+          remove() {}
+        }
+      }
+    )
+
+    // 1️⃣ Validate token
+    const { data: tokenRow, error: tokenError } = await supabase
       .from('password_reset_tokens')
       .select('*')
       .eq('token', token)
       .single()
 
-    if (tokenError || !resetToken) {
+    if (tokenError || !tokenRow) {
       return NextResponse.json(
         { error: 'Invalid or expired reset token' },
         { status: 400 }
       )
     }
 
-    // Check if token is expired
-    if (new Date(resetToken.expires_at) < new Date()) {
-      // Delete expired token
-      await supabase
-        .from('password_reset_tokens')
-        .delete()
-        .eq('id', resetToken.id)
-      
+    // Check expiration
+    if (new Date(tokenRow.expires_at) < new Date()) {
       return NextResponse.json(
         { error: 'Reset token has expired' },
         { status: 400 }
       )
     }
 
-    // Hash the new password
-    const passwordHash = await bcrypt.hash(newPassword, 10)
+    const userId = tokenRow.user_id
 
-    // Update user's password
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ password_hash: passwordHash })
-      .eq('id', resetToken.user_id)
+    // 2️⃣ Update password in Supabase Auth
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      userId,
+      { password: newPassword }
+    )
 
     if (updateError) {
-      console.error('Error updating password:', updateError)
       return NextResponse.json(
-        { error: 'Failed to update password' },
-        { status: 500 }
+        { error: updateError.message },
+        { status: 400 }
       )
     }
 
-    // Delete the used reset token
+    // 3️⃣ Update password hash in your DB (clients or artisans)
+    const { data: userData } = await supabase
+      .from('auth.users')
+      .select('raw_user_meta_data')
+      .eq('id', userId)
+      .single()
+
+    const role = userData?.raw_user_meta_data?.role
+    const table = role === 'artisan' ? 'artisans' : 'clients'
+
+    const password_hash = await bcrypt.hash(newPassword, 10)
+
+    await supabase
+      .from(table)
+      .update({ password_hash })
+      .eq('id', userId)
+
+    // 4️⃣ Delete used token
     await supabase
       .from('password_reset_tokens')
       .delete()
-      .eq('id', resetToken.id)
+      .eq('token', token)
 
     return NextResponse.json({
       success: true,
-      message: 'Password has been reset successfully'
+      message: 'Password reset successfully'
     })
+
   } catch (error) {
-    console.error('Custom reset password error:', error)
+    console.error('Reset password error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
