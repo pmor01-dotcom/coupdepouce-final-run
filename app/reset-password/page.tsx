@@ -1,135 +1,104 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 export default function ResetPasswordPage() {
-  return (
-    <Suspense>
-      <ResetPasswordContent />
-    </Suspense>
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-}
 
-function ResetPasswordContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [isValidToken, setIsValidToken] = useState(false);
-  const [token, setToken] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const tokenParam = searchParams.get("token");
-    if (tokenParam) {
-      setToken(tokenParam);
-      setIsValidToken(true);
-    }
-  }, [searchParams]);
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
 
-  const handleSubmit = async (e) => {
+    if (token) {
+      supabase.auth.exchangeCodeForSession(token);
+    }
+  }, []);
+
+  async function handleSubmit(e: any) {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
 
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      setMessage("Erreur lors de la mise à jour du mot de passe");
+    } else {
+      setMessage("Mot de passe mis à jour avec succès");
     }
-
-    try {
-      const response = await fetch('/api/auth/custom-reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, newPassword }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Error resetting password');
-        setIsLoading(false);
-        return;
-      }
-
-      setSuccess(true);
-      setTimeout(() => router.push("/login"), 3000);
-    } catch (error) {
-      setError('Error resetting password');
-      setIsLoading(false);
-    }
-  };
-
-  if (!isValidToken) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Invalid or expired link</h2>
-          <p className="mb-6">Please request a new password reset link.</p>
-          <a href="/forgot-password" className="btn-primary">
-            Request new link
-          </a>
-        </div>
-      </main>
-    );
-  }
-
-  if (success) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Password reset!</h2>
-          <p className="mb-4">You will be redirected to login…</p>
-        </div>
-      </main>
-    );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-md w-full bg-white p-6 rounded shadow"
+    <div
+      style={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(to bottom, #4CAF50 0%, #A5D6A7 40%, #ffffff 100%)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "30px",
+          borderRadius: "16px",
+          width: "90%",
+          maxWidth: "420px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          textAlign: "center",
+        }}
       >
-        <h2 className="text-3xl font-bold mb-6 text-center">Reset password</h2>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700">{error}</div>
-        )}
+        <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
+          Nouveau mot de passe
+        </h1>
 
         <input
           type="password"
-          placeholder="New password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full p-3 border rounded mb-4"
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Confirm password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full p-3 border rounded mb-6"
-          required
+          placeholder="Entrez votre nouveau mot de passe"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            background: "#f2f2f2",
+            fontSize: "16px",
+            marginBottom: "15px",
+          }}
         />
 
         <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-green-700 text-white py-3 rounded"
+          onClick={handleSubmit}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            background: "#4CAF50",
+            color: "white",
+            fontWeight: "bold",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: "15px",
+          }}
         >
-          {isLoading ? "Resetting…" : "Reset password"}
+          Mettre à jour le mot de passe
         </button>
-      </form>
-    </main>
+
+        {message && (
+          <p style={{ marginBottom: "15px", fontSize: "14px", color: "#333" }}>
+            {message}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
