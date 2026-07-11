@@ -136,9 +136,10 @@ export default function Login() {
             </button>
           </form>
 
+          {/* FIXED LINE BELOW */}
           <div className="text-center mt-6">
             <Link href="/forgot-password" className="text-green-700 hover:underline">
-              {t('signup.forgotPassword')}
+              {t('login.forgotPassword')}
             </Link>
           </div>
 
