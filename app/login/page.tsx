@@ -28,13 +28,12 @@ export default function Login() {
         const { data: { session } } = await supabase.auth.getSession()
 
         if (!session?.user?.id) {
-          setError('Unable to load your session')
+          setError(t('login.sessionError'))
           return
         }
 
         const userId = session.user.id
 
-        // Get role from users table
         const { data: profile } = await supabase
           .from('users')
           .select('role')
@@ -42,21 +41,21 @@ export default function Login() {
           .single()
 
         if (!profile) {
-          setError('Unable to load your profile')
+          setError(t('login.profileError'))
           return
         }
 
-        const role = profile.role?.toLowerCase() // Convert CLIENT/ARTISAN to lowercase
+        const role = profile.role?.toLowerCase()
 
         if (role === 'client') window.location.href = '/client-dashboard'
         else if (role === 'artisan') window.location.href = '/artisan-dashboard'
-        else setError('Your account has no role assigned')
+        else setError(t('login.noRole'))
 
       } else {
-        setError('Incorrect email or password')
+        setError(t('login.incorrectCredentials'))
       }
     } catch {
-      setError('Error during login')
+      setError(t('login.genericError'))
     } finally {
       setIsLoading(false)
     }
@@ -73,7 +72,7 @@ export default function Login() {
           <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
             <img
               src="/images/artisan-photo-right.jpg"
-              alt="Professional artisans working"
+              alt={t('home.artisanAlt')}
               className="hero-card-image w-full h-20 md:h-24 object-cover"
               loading="lazy"
             />
@@ -86,7 +85,7 @@ export default function Login() {
           <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
             <img
               src="/images/satisfied-clients.jpg"
-              alt="Happy clients receiving help"
+              alt={t('home.clientAlt')}
               className="hero-card-image w-full h-20 md:h-24 object-cover"
               loading="lazy"
             />
