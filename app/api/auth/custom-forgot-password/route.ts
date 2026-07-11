@@ -14,55 +14,24 @@ export async function POST(req: Request) {
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    // 1️⃣ Fetch all users (Supabase v2)
-    const { data: usersPage, error: listError } =
-      await supabase.auth.admin.listUsers()
+    // Supabase v2 correct method
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://www.coupdepouce-aide.com/reset-password'
+    })
 
-    if (listError) {
-      console.error('Error listing users:', listError)
+    if (error) {
+      console.error('Reset error:', error)
       return NextResponse.json(
-        { error: 'Failed to lookup user' },
-        { status: 500 }
-      )
-    }
-
-    // 2️⃣ Extract users safely (handles all Supabase v2 shapes)
-    const allUsers =
-      Array.isArray(usersPage)
-        ? usersPage
-        : Array.isArray(usersPage?.users)
-          ? usersPage.users
-          : []
-
-    console.log("Extracted users:", allUsers)
-
-    // 3️⃣ Find user by email
-    const userData = allUsers.find(u => u.email === email)
-
-    if (!userData) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    // 4️⃣ Create a reset token
-    const { data: resetData, error: resetError } =
-      await supabase.auth.admin.generateResetPasswordForEmail(email)
-
-    if (resetError) {
-      console.error('Error generating reset token:', resetError)
-      return NextResponse.json(
-        { error: 'Failed to generate reset token' },
+        { error: 'Failed to send reset email' },
         { status: 500 }
       )
     }
 
     return NextResponse.json(
-      { message: 'Reset email sent', data: resetData },
+      { message: 'Reset email sent' },
       { status: 200 }
     )
 
