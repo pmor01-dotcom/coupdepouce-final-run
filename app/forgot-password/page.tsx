@@ -9,7 +9,7 @@ export default function ForgotPasswordPage() {
     supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   });
 
-  const [email, setEmail] = useState("");
+const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
