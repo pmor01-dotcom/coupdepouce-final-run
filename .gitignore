@@ -2,3 +2,5 @@ node_modules/
 .7z
 *.next/
 .env.local
+
+.vercel

@@ -2,29 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const supabase = createRouteHandlerClient({ cookies });
+  const body = await request.json();
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { id, description, experience_years, specialties, phone, location, metier } = body;
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  if (!id) {
+    return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
   }
 
-  const userId = session.user.id;
-
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("users")
-    .select("*")
-    .eq("id", userId)
-    .eq("role", "ARTISAN")
-    .single();
+    .update({
+      phone,
+      location,
+      metier,
+      experience_years
+    })
+    .eq("id", id)
+    .eq("role", "ARTISAN");
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json({ success: true });
 }

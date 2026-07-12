@@ -1,89 +1,215 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { useAuth } from '../components/AuthProvider'
+import { useLanguage } from '../components/LanguageProvider'
+import { MessagingProvider } from '../components/MessagingProvider'
+import MessageNotifications from '../components/MessageNotifications'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import PaymentStatus from '../components/PaymentStatus'
+import WelcomeUser from '@/app/components/WelcomeUser'
 
-export default function MesDemandes() {
-  const [demands, setDemands] = useState([])
-  const [loading, setLoading] = useState(true)
+interface Demand {
+  id: number
+  title: string
+  description: string
+  category: string
+  location: string
+  department: string
+  budget_range: string
+  status: string
+  urgency: string
+  created_at: string
+}
+
+interface Proposal {
+  id: number
+  demand_id: number
+  message: string
+  proposed_price: string
+  estimated_duration?: string
+  availability?: string
+  status: string
+  created_at: string
+  artisan?: {
+    id: number
+    name: string
+    metier: string
+    location: string
+    phone: string
+  }
+}
+
+export default function ClientDashboard() {
+  const { user, logout } = useAuth()
+  const { t } = useLanguage()
+  const router = useRouter()
+
+  const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
+  const [demands, setDemands] = useState<Demand[]>([])
+  const [proposals, setProposals] = useState<Proposal[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
 
   useEffect(() => {
-    const loadDemands = async () => {
-      try {
-        const res = await fetch('/api/demands')
-        if (res.ok) {
-          const data = await res.json()
-          setDemands(data)
-        }
-      } catch (err) {
-        console.error('Erreur lors du chargement des demandes :', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadDemands()
+    fetchDemands()
   }, [])
 
-  if (loading) {
+  const fetchDemands = async () => {
+    try {
+      const response = await fetch('/api/demands')
+      if (response.ok) {
+        const data = await response.json()
+        setDemands(data)
+      }
+    } catch (error) {
+      console.error('Error fetching demands:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const fetchProposals = async (demandId: number) => {
+    try {
+      const response = await fetch(`/api/proposals?demandId=${demandId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setProposals(data)
+      }
+    } catch (error) {
+      console.error('Error fetching proposals:', error)
+    }
+  }
+
+  if (isLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-lg">Chargement…</p>
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p>{t('common.loading')}</p>
       </main>
     )
   }
 
   return (
-    <main
-      className="min-h-screen overflow-x-hidden"
-      style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-3xl font-semibold text-gray-900 mb-6">
-          Mes demandes
-        </h1>
+    <MessagingProvider>
+      <main
+        className="min-h-screen overflow-x-hidden"
+        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+      >
 
-        {demands.length === 0 && (
-          <p className="text-gray-700 text-lg">Aucune demande trouvée.</p>
-        )}
-<Link
-  href="/client-dashboard"
-  className="inline-block mb-6 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition"
->
-  ← Retour au tableau de bord
-</Link>
-
-        <div className="space-y-6">
-          {demands.map((demand: any) => (
-            <div
-              key={demand.id}
-              className="bg-white shadow-md rounded-lg p-6 border border-gray-200"
-            >
-              <h2 className="text-xl font-semibold text-gray-900">
-                {demand.title}
-              </h2>
-
-              <p className="text-gray-700 mt-2">{demand.description}</p>
-
-              <div className="mt-4 text-sm text-gray-600 space-y-1">
-                <p><strong>Catégorie :</strong> {demand.category}</p>
-                <p><strong>Département :</strong> {demand.department}</p>
-                <p><strong>Budget :</strong> {demand.budget_range}</p>
-                <p><strong>Statut :</strong> {demand.status}</p>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Contact</h3>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p><strong>Nom :</strong> {demand.users?.name || 'N/A'}</p>
-                  <p><strong>Email :</strong> {demand.users?.email || 'N/A'}</p>
-                  <p><strong>Téléphone :</strong> {demand.users?.phone || 'N/A'}</p>
-                </div>
-              </div>
+        {/* HEADER AT TOP */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-3xl mx-auto px-4">
+            <div className="flex items-center justify-center h-20">
+              <h1 className="text-4xl font-bold text-gray-900">{t('clientDashboard.title')}</h1>
             </div>
-          ))}
+          </div>
+        </header>
+
+        {/* WELCOME */}
+        <div className="max-w-3xl mx-auto px-4 pt-6">
+          <WelcomeUser />
         </div>
-      </div>
-    </main>
+
+        {/* BUTTONS STACKED VERTICALLY */}
+        <div className="max-w-3xl mx-auto px-4 mt-6 w-full" style={{ display: 'block' }}>
+
+            <div style={{ marginBottom: '12px' }}>
+              <button
+                onClick={handleLogout}
+                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                {t('dashboard.logout')}
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <Link href="/client-dashboard/demandes" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                {t('clientDashboard.myDemands')}
+              </Link>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <Link href="/create-demand" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                {t('clientDashboard.createDemand')}
+              </Link>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <button
+                onClick={() => setActiveTab('proposals')}
+                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                {t('clientDashboard.proposals')}
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <button
+                onClick={() => setActiveTab('messages')}
+                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                {t('clientDashboard.messages')}
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+              >
+                {t('clientDashboard.editProfile')}
+              </Link>
+            </div>
+
+        </div>
+
+        {/* PAYMENT STATUS */}
+        <div className="max-w-3xl mx-auto px-4 mt-6">
+          <PaymentStatus />
+        </div>
+
+        {/* SPACING */}
+        <div className="max-w-3xl mx-auto px-4 py-8"></div>
+
+        {/* UNSUBSCRIBE BUTTON */}
+        <div className="max-w-3xl mx-auto px-4 pb-10">
+          <button
+            onClick={() => {
+              if (confirm(t('unsubscribe.confirm'))) {
+                logout()
+                router.push('/')
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200 w-full"
+            title={t('unsubscribe.title')}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
+          </button>
+        </div>
+
+      </main>
+
+      <MessageNotifications />
+    </MessagingProvider>
   )
 }
