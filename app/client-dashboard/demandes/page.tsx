@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '../components/AuthProvider'
-import { useLanguage } from '../components/LanguageProvider'
-import { MessagingProvider } from '../components/MessagingProvider'
-import MessageNotifications from '../components/MessageNotifications'
+import { useAuth } from '@/app/components/AuthProvider'
+import { useLanguage } from '@/app/components/LanguageProvider'
+import { MessagingProvider } from '@/app/components/MessagingProvider'
+import MessageNotification from '@/app/components/MessageNotification'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import PaymentStatus from '../components/PaymentStatus'
+import PaymentStatus from '@/app/components/PaymentStatus'
 import WelcomeUser from '@/app/components/WelcomeUser'
 
 interface Demand {
@@ -101,115 +101,8 @@ export default function ClientDashboard() {
         style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
       >
 
-        {/* HEADER AT TOP */}
+        {/* HEADER */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-3xl mx-auto px-4">
             <div className="flex items-center justify-center h-20">
-              <h1 className="text-4xl font-bold text-gray-900">{t('clientDashboard.title')}</h1>
-            </div>
-          </div>
-        </header>
-
-        {/* WELCOME */}
-        <div className="max-w-3xl mx-auto px-4 pt-6">
-          <WelcomeUser />
-        </div>
-
-        {/* BUTTONS STACKED VERTICALLY */}
-        <div className="max-w-3xl mx-auto px-4 mt-6 w-full" style={{ display: 'block' }}>
-
-            <div style={{ marginBottom: '12px' }}>
-              <button
-                onClick={handleLogout}
-                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('dashboard.logout')}
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <Link href="/client-dashboard/demandes" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('clientDashboard.myDemands')}
-              </Link>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <Link href="/create-demand" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('clientDashboard.createDemand')}
-              </Link>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <button
-                onClick={() => setActiveTab('proposals')}
-                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('clientDashboard.proposals')}
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <button
-                onClick={() => setActiveTab('messages')}
-                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('clientDashboard.messages')}
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('clientDashboard.editProfile')}
-              </Link>
-            </div>
-
-        </div>
-
-        {/* PAYMENT STATUS */}
-        <div className="max-w-3xl mx-auto px-4 mt-6">
-          <PaymentStatus />
-        </div>
-
-        {/* SPACING */}
-        <div className="max-w-3xl mx-auto px-4 py-8"></div>
-
-        {/* UNSUBSCRIBE BUTTON */}
-        <div className="max-w-3xl mx-auto px-4 pb-10">
-          <button
-            onClick={() => {
-              if (confirm(t('unsubscribe.confirm'))) {
-                logout()
-                router.push('/')
-              }
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200 w-full"
-            title={t('unsubscribe.title')}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
-          </button>
-        </div>
-
-      </main>
-
-      <MessageNotifications />
-    </MessagingProvider>
-  )
-}
+              <h1 className="text-4xl font-bold text-gray-900">{t('clientDashboard
