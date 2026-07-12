@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
           </p>
         )}
 
-        <button
+      <button
           onClick={() => router.push("/")}
           style={{
             width: "100%",
