@@ -1,188 +1,71 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-
-interface UserProfile {
-  id: string
-  email: string
-  role: 'client' | 'artisan'
-  name?: string
-  phone?: string
-  location?: string
-  metier?: string
-  isPaid?: boolean
-}
+import { createContext, useContext, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/app/lib/supabaseClient'
 
 interface AuthContextType {
-  user: UserProfile | null
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
+  user: any
+  signup: (email: string, password: string) => Promise<{ success: boolean; message?: string }>
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>
   logout: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | null>(null)
 
-export default function AuthProvider({ children }: { children: ReactNode }) {
- const supabase = createClientComponentClient({
-  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-})
- const [user, setUser] = useState<UserProfile | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
 
-  // Restore user from localStorage FIRST
+  // Restore session on load
   useEffect(() => {
-    const stored = localStorage.getItem('user')
-    if (stored) {
-      setUser(JSON.parse(stored))
-    }
-  }, [])
-
-  // Load session + fetch profile
-  useEffect(() => {
-    const loadSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        setUser(null)
-        localStorage.removeItem('user')
-        setIsLoading(false)
-        return
+    const session = supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setUser(data.session.user)
       }
+    })
 
-      const authUser = session.user
-
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
-
-      if (profile) {
-        const role = profile.role?.toLowerCase() || 'client'
-        const userProfile: UserProfile = {
-          id: authUser.id,
-          email: authUser.email ?? '',
-          role: role as 'client' | 'artisan',
-          name: profile.name,
-          phone: profile.phone,
-          location: profile.location,
-          metier: profile.metier,
-          isPaid: profile.isPaid ?? false,
-        }
-
-        setUser(userProfile)
-        localStorage.setItem('user', JSON.stringify(userProfile))
-      } else {
-        setUser(null)
-        localStorage.removeItem('user')
-      }
-
-      setIsLoading(false)
-    }
-
-    loadSession()
-
-    // Auth listener
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!session?.user) {
-          setUser(null)
-          localStorage.removeItem('user')
-          return
-        }
-
-        const authUser = session.user
-
-        const { data: profile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', authUser.id)
-          .single()
-
-        if (profile) {
-          const role = profile.role?.toLowerCase() || 'client'
-          const userProfile: UserProfile = {
-            id: authUser.id,
-            email: authUser.email ?? '',
-            role: role as 'client' | 'artisan',
-            name: profile.name,
-            phone: profile.phone,
-            location: profile.location,
-            metier: profile.metier,
-            isPaid: profile.isPaid ?? false,
-          }
-
-          setUser(userProfile)
-          localStorage.setItem('user', JSON.stringify(userProfile))
-        } else {
-          setUser(null)
-          localStorage.removeItem('user')
-        }
-      }
-    )
+    // Listen for auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
 
     return () => {
       listener.subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [])
 
-  // FIXED LOGIN
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+  // SIGNUP
+  const signup = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({ email, password })
 
-    if (error || !data.user) return false
-
-    const authUser = data.user
-
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', authUser.id)
-      .single()
-
-    if (!profile) return false
-
-    const role = profile.role?.toLowerCase() || 'client'
-
-    const userProfile: UserProfile = {
-      id: authUser.id,
-      email: authUser.email ?? '',
-      role: role as 'client' | 'artisan',
-      name: profile.name,
-      phone: profile.phone,
-      location: profile.location,
-      metier: profile.metier,
-      isPaid: profile.isPaid ?? false,
+    if (error) {
+      return { success: false, message: error.message }
     }
 
-    setUser(userProfile)
-    localStorage.setItem('user', JSON.stringify(userProfile))
-
-    return true
+    return { success: true }
   }
 
+  // LOGIN
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      return { success: false, message: error.message }
+    }
+
+    return { success: true }
+  }
+
+  // LOGOUT
   const logout = async () => {
     await supabase.auth.signOut()
     setUser(null)
-    localStorage.removeItem('user')
-    window.location.href = '/'
+    router.push('/')
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, signup, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
@@ -190,6 +73,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within an AuthProvider')
+  if (!ctx) {
+    throw new Error('useAuth must be used inside AuthProvider')
+  }
   return ctx
 }

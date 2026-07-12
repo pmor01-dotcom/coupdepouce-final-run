@@ -2,64 +2,37 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
-import Link from 'next/link'
+import { useAuth } from '@/app/components/AuthProvider'
 import { useLanguage } from '@/app/components/LanguageProvider'
 
 export default function SignupPage() {
-  const router = useRouter()
+  const { signup } = useAuth()
   const { t } = useLanguage()
+  const router = useRouter()
 
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [role, setRole] = useState<'client' | 'artisan'>('client')
+  const [error, setError] = useState<string | null>(null)
 
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    city: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
-
-    if (formData.password !== formData.confirmPassword) {
-      setError(t('signup.passwordMismatch'))
-      setLoading(false)
-      return
-    }
+    setError(null)
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            prenom: formData.firstName,
-            nom: formData.lastName,
-            phone: formData.phone,
-            ville: formData.city,
-            role: role
-          }
-        }
-      })
+      const { success, message } = await signup(email, password)
 
-      if (signUpError) {
-        setError(signUpError.message)
+      if (!success) {
+        setError(message || t('signup.error'))
       } else {
-        router.push('/login')
+        router.push('/client-dashboard')
       }
     } catch (err) {
-      setError('Une erreur est survenue.')
+      setError(t('signup.error'))
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
@@ -69,124 +42,38 @@ export default function SignupPage() {
           {t('signup.title')}
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <p className="text-red-600 text-center mb-4">{error}</p>
+        )}
 
-          {/* First Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('signup.firstName')}
-            </label>
-            <input
-              type="text"
-              value={formData.firstName}
-              onChange={(e) =>
-                setFormData({ ...formData, firstName: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
+        <form onSubmit={handleSignup} className="space-y-4">
+          <input
+            type="email"
+            placeholder={t('signup.email')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            required
+          />
 
-          {/* Last Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('signup.lastName')}
-            </label>
-            <input
-              type="text"
-              value={formData.lastName}
-              onChange={(e) =>
-                setFormData({ ...formData, lastName: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
+          <input
+            type="password"
+            placeholder={t('signup.password')}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            required
+          />
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('artisanSignup.phone')}
-            </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          {/* City */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('signup.city')}
-            </label>
-            <input
-              type="text"
-              value={formData.city}
-              onChange={(e) =>
-                setFormData({ ...formData, city: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('signup.password')}
-            </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('signup.confirmPassword')}
-            </label>
-            <input
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, confirmPassword: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition disabled:opacity-50"
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition"
           >
-            {loading ? t('clientSignup.creating') : t('clientSignup.create')}
+            {loading ? t('common.loading') : t('signup.submit')}
           </button>
         </form>
-
-        <p className="text-center text-gray-600 mt-6">
-          {t('signup.alreadyHaveAccount')}{' '}
-          <Link
-            href="/login"
+      </div>
+    </div>
+  )
+}
