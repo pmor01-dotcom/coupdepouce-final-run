@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabaseClient'
 
 interface AuthContextType {
   user: any
-  isLoading: boolean
   signup: (email: string, password: string) => Promise<{ success: boolean; message?: string }>
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>
   logout: () => Promise<void>
@@ -16,23 +15,18 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setUser(data.session.user)
-      setIsLoading(false)
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      setIsLoading(false)
     })
 
-    return () => {
-      listener.subscription.unsubscribe()
-    }
+    return () => listener.subscription.unsubscribe()
   }, [])
 
   const signup = async (email: string, password: string) => {
@@ -54,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signup, login, logout }}>
+    <AuthContext.Provider value={{ user, signup, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
