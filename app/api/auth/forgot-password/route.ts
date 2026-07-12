@@ -1,89 +1,69 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import crypto from 'crypto'
-import { EmailService } from '@/lib/email'
+'use client'
 
-export const dynamic = 'force-dynamic'
+import { useState } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useLanguage } from '../components/LanguageProvider'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+export default function ForgotPassword() {
+  const { t } = useLanguage()
+  const supabase = createClientComponentClient()
 
-export async function POST(request: NextRequest) {
-  try {
-    const { email } = await request.json()
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      )
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+    setLoading(true)
 
-    // Find user by email
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .single()
-
-    if (userError || !user) {
-      return NextResponse.json({
-        success: true,
-        message: 'If an account with this email exists, a password reset link has been sent.'
-      })
-    }
-
-    // Generate token
-    const resetToken = crypto.randomBytes(32).toString('hex')
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
-
-    // Delete old tokens
-    await supabase
-      .from('password_reset_tokens')
-      .delete()
-      .eq('user_id', user.id)
-
-    // Insert new token
-    const { error: tokenError } = await supabase
-      .from('password_reset_tokens')
-      .insert({
-        user_id: user.id,
-        token: resetToken,
-        expires_at: expiresAt
-      })
-
-    if (tokenError) {
-      return NextResponse.json(
-        { error: 'Failed to create reset token' },
-        { status: 500 }
-      )
-    }
-
-    // Send email
-    const emailSent = await EmailService.sendPasswordResetEmail(
-      email,
-      user.name,
-      resetToken
-    )
-
-    if (!emailSent) {
-      return NextResponse.json(
-        { error: 'Failed to send reset email' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'If an account with this email exists, a password reset link has been sent.'
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://www.coupdepouce-aide.com/reset-password'
     })
-  } catch (error) {
-    console.error('Custom forgot password error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+
+    setLoading(false)
+
+    if (error) {
+      setError(t('forgotPassword.genericError'))
+      return
+    }
+
+    setMessage(t('forgotPassword.emailSent'))
   }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-4">{t('forgotPassword.title')}</h1>
+
+        {message && <p className="text-green-600 mb-4">{message}</p>}
+        {error && <p className="text-red-600 mb-4">{error}</p>}
+
+        <input
+          type="email"
+          className="w-full p-3 border rounded mb-4"
+          placeholder={t('forgotPassword.email')}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-green-700 text-white p-3 rounded"
+        >
+          {loading ? t('forgotPassword.sending') : t('forgotPassword.submit')}
+        </button>
+
+        <div className="text-center mt-4">
+          <a href="/login" className="text-green-700 hover:underline">
+            {t('forgotPassword.backToLogin')}
+          </a>
+        </div>
+      </form>
+    </main>
+  )
 }
