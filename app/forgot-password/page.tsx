@@ -113,6 +113,7 @@ export default function ForgotPasswordPage() {
             border: "none",
             cursor: "pointer",
           }}
+          
         >
           Retour
         </button>
