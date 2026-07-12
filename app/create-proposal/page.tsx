@@ -1,0 +1,259 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useAuth } from '../components/AuthProvider'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+
+interface Demand {
+  id: number
+  title: string
+  description: string
+  category: string
+  location: string
+  department: string
+  budget: string
+  clientName: string
+  createdAt: string
+}
+
+export default function CreateProposal() {
+  const { user } = useAuth()
+  const router = useRouter()
+  const [demand, setDemand] = useState<Demand | null>(null)
+  const [formData, setFormData] = useState({
+    message: '',
+    proposedPrice: '',
+    estimatedDuration: '',
+    availability: ''
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    // Get demand ID from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const demandId = urlParams.get('demand')
+    
+    if (demandId) {
+      // Mock demand data - in real app, fetch from API
+      const mockDemand: Demand = {
+        id: parseInt(demandId),
+        title: 'Installation plomberie cuisine',
+        description: 'Besoin d\'installer un nouveau évier et robinetterie dans la cuisine. Ancienne installation à démonter.',
+        category: 'Plomberie',
+        location: 'Toulouse',
+        department: '31',
+        budget: '500-800',
+        clientName: 'Jean Dupont',
+        createdAt: '2024-01-15'
+      }
+      setDemand(mockDemand)
+    }
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (!formData.message || !formData.proposedPrice) {
+      setError('Please fill in all required fields')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Mock proposal creation - in real app, call API
+      const newProposal = {
+        id: Math.floor(Math.random() * 1000),
+        demandId: demand?.id,
+        demandTitle: demand?.title,
+        message: formData.message,
+        proposedPrice: formData.proposedPrice,
+        estimatedDuration: formData.estimatedDuration,
+        availability: formData.availability,
+        artisanName: user?.name || '',
+        artisanEmail: user?.email || '',
+        status: 'pending',
+        createdAt: new Date().toISOString().split('T')[0]
+      }
+
+      console.log('Proposal created:', newProposal)
+      
+      // Redirect to artisan dashboard
+      router.push('/artisan-dashboard')
+    } catch (err) {
+      setError('Error creating proposal')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  if (!demand) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p>Loading demand...</p>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Link href="/artisan-dashboard" className="text-gray-600 hover:text-gray-900 mr-4">
+                &larr; Back
+              </Link>
+              <h1 className="text-xl font-semibold text-gray-900">
+                Offer my services
+              </h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Demand Details */}
+        <div className="card mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Demand details
+          </h2>
+          
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-md font-medium text-gray-900">{demand.title}</h3>
+              <p className="text-sm text-gray-600 mt-1">{demand.description}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="font-medium">Client:</span> {demand.clientName}
+              </div>
+              <div>
+                <span className="font-medium">Catégorie:</span> {demand.category}
+              </div>
+              <div>
+                <span className="font-medium">Localisation:</span> {demand.location}
+              </div>
+              <div>
+                <span className="font-medium">Département:</span> {demand.department}
+              </div>
+              <div>
+                <span className="font-medium">Budget:</span> {demand.budget}
+              </div>
+              <div>
+                <span className="font-medium">Publié le:</span> {demand.createdAt}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="card">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Your proposal
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                  Message to client *
+                </label>
+                <textarea
+                  id="message"
+                  required
+                  rows={4}
+                  className="input-field mt-1"
+                  value={formData.message}
+                  onChange={(e) => handleInputChange('message', e.target.value)}
+                  placeholder="Describe your solution, your experience, and how you can help this client..."
+                />
+              </div>
+
+              <div>
+                <label htmlFor="proposedPrice" className="block text-sm font-medium text-gray-700">
+                  Proposed price *
+                </label>
+                <input
+                  type="text"
+                  id="proposedPrice"
+                  required
+                  className="input-field mt-1"
+                  value={formData.proposedPrice}
+                  onChange={(e) => handleInputChange('proposedPrice', e.target.value)}
+                  placeholder="Ex: 650, 700-800, on-site quote..."
+                />
+              </div>
+
+              <div>
+                <label htmlFor="estimatedDuration" className="block text-sm font-medium text-gray-700">
+                  Estimated duration
+                </label>
+                <input
+                  type="text"
+                  id="estimatedDuration"
+                  className="input-field mt-1"
+                  value={formData.estimatedDuration}
+                  onChange={(e) => handleInputChange('estimatedDuration', e.target.value)}
+                  placeholder="Ex: 2 days, 1 week, depending on quote..."
+                />
+              </div>
+
+              <div>
+                <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
+                  Availability
+                </label>
+                <textarea
+                  id="availability"
+                  rows={2}
+                  className="input-field mt-1"
+                  value={formData.availability}
+                  onChange={(e) => handleInputChange('availability', e.target.value)}
+                  placeholder="When are you available for this work?"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
+            <p className="font-medium mb-2">Important:</p>
+            <ul className="text-sm space-y-1">
+              <li>The client will be able to see your proposal and contact you directly</li>
+              <li>You cannot contact the client directly before they contact you</li>
+              <li>Be clear and precise in your proposal to increase your chances</li>
+            </ul>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link href="/artisan-dashboard" className="btn-secondary">
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn-success disabled:opacity-50"
+            >
+              {isLoading ? 'Sending...' : 'Send proposal'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  )
+}
