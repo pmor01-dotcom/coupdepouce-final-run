@@ -1,7 +1,10 @@
+'use client'
+
 import type { Metadata } from 'next'
-import './globals.css'
+import './globals.css'   // ← adjust this path if needed
 import { Providers } from './providers'
 import LanguageToggle from './components/LanguageToggle'
+import { AuthProvider } from './components/AuthProvider'
 
 export const metadata: Metadata = {
   title: 'Coup de Pouce - Artisans & Clients',
@@ -17,10 +20,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body>
-        <Providers>
-          <LanguageToggle />
-          {children}
-        </Providers>
+        <AuthProvider>
+          <Providers>
+            <LanguageToggle />
+            {children}
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   )
