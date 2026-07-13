@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import AuthProvider, { useAuth } from '@/app/components/AuthProvider'
+import { useAuth } from '@/app/components/AuthProvider'
+
 import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider'
 
 
