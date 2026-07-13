@@ -3,33 +3,27 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import AuthProvider from '@/app/components/AuthProvider'
-import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider'
-
-
-
+import { useLanguage } from '@/app/components/LanguageProvider'
 
 export default function MessagesPage() {
-  
   const supabase = createClientComponentClient()
-const [user, setUser] = useState<any>(null)
-
-useEffect(() => {
-  const loadUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    setUser(user)
-  }
-  loadUser()
-}, [])
-
-
+  const [user, setUser] = useState<any>(null)
   const { t } = useLanguage()
 
- const [conversations, setConversations] = useState<any[]>([])
+  const [conversations, setConversations] = useState<any[]>([])
 
+  // Load logged-in user
+  useEffect(() => {
+    const loadUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    loadUser()
+  }, [])
 
+  // Load conversations once user is available
   useEffect(() => {
     if (!user) return
 
@@ -40,7 +34,7 @@ useEffect(() => {
         .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
         .order('updated_at', { ascending: false })
 
-      if (!error) setConversations(data)
+      if (!error) setConversations(data || [])
     }
 
     loadConversations()
