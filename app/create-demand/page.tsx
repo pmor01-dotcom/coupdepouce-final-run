@@ -9,7 +9,8 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 export default function CreateDemandPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
-  const { user, isLoading: authLoading } = useAuth()
+  const { user } = useAuth()
+
   const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
