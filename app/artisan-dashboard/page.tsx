@@ -124,7 +124,7 @@ export default function ArtisanDashboard() {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
-              {t('dashboard.logout')}
+              {t('logout')}
             </button>
           </div>
 
@@ -138,7 +138,7 @@ export default function ArtisanDashboard() {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
-              {t('artisanDashboard.proposals')}
+              {t('proposals')}
             </button>
           </div>
 
@@ -149,7 +149,7 @@ export default function ArtisanDashboard() {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
-              {t('clientDashboard.messages')}
+              {t('messages')}
             </button>
           </div>
 
@@ -160,7 +160,7 @@ export default function ArtisanDashboard() {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
-              {t('artisanDashboard.editProfile')}
+              {t('edit Profile')}
             </Link>
           </div>
 
@@ -172,7 +172,7 @@ export default function ArtisanDashboard() {
         {activeTab === 'proposals' && (
           <div className="max-w-3xl mx-auto px-4 py-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              {t('artisanDashboard.proposals')}
+              {t('proposals')}
             </h2>
 
             {proposals.length === 0 && (
@@ -188,7 +188,7 @@ export default function ArtisanDashboard() {
                 <p className="text-gray-700 mt-2">{proposal.message}</p>
 
                 <p className="text-sm text-gray-500 mt-2">
-                  {t('artisanDashboard.proposedPrice')}: {proposal.proposed_price}
+                  {t('proposedPrice')}: {proposal.proposed_price}
                 </p>
 
                 <button
