@@ -76,9 +76,12 @@ export default function ClientProfilePage() {
 
       if (response.ok) {
         setSuccess(true)
-        setTimeout(() => setSuccess(false), 3000)
-        // Update local profile data
-        fetchProfile()
+
+        // ⭐ REDIRECT TO DASHBOARD AFTER SUCCESSFUL SAVE ⭐
+        setTimeout(() => {
+          router.push('/client-dashboard')
+        }, 800)
+
       } else {
         setError(data.error || 'Error updating profile')
       }
@@ -116,7 +119,7 @@ export default function ClientProfilePage() {
 
           {success && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-              Profile updated successfully!
+              Profile updated successfully! Redirecting…
             </div>
           )}
 

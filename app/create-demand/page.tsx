@@ -10,7 +10,6 @@ export default function CreateDemandPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
   const { user } = useAuth()
-
   const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
@@ -65,14 +64,7 @@ export default function CreateDemandPage() {
     }
   }
 
-  if (user) {
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-600">{t('common.loading')}</p>
-      </main>
-    )
-  }
-
+  // If not authenticated, send to login
   if (!user) {
     router.push('/login')
     return null
