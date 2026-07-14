@@ -1,7 +1,5 @@
-'use client'
-
 import type { Metadata } from 'next'
-import './globals.css'   // ← adjust this path if needed
+import './globals.css'
 import { Providers } from './providers'
 import LanguageToggle from './components/LanguageToggle'
 import { AuthProvider } from './components/AuthProvider'
