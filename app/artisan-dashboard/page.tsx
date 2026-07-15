@@ -1,197 +1,153 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useAuth } from '../components/AuthProvider'
-import { useLanguage } from '../components/LanguageProvider'
-import { MessagingProvider } from '../components/MessagingProvider'
-import MessageNotifications from '../components/MessageNotifications'
 import Link from 'next/link'
+import { useAuth } from '../components/AuthProvider'
 import { useRouter } from 'next/navigation'
-import PaymentStatus from '../components/PaymentStatus'
-import WelcomeUser from '@/app/components/WelcomeUser'
+import { useLanguage } from '../components/LanguageProvider'
 
-interface Demand {
-  id: number
-  title: string
-  description: string
-  category: string
-  location: string
-  department: string
-  budget_range: string
-  status: string
-  urgency: string
-  created_at: string
-}
-
-interface Proposal {
-  id: number
-  demand_id: number
-  message: string
-  proposed_price: string
-  estimated_duration?: string
-  availability?: string
-  status: string
-  created_at: string
-  artisan?: {
-    id: number
-    name: string
-    metier: string
-    location: string
-    phone: string
-  }
-}
-
-export default function ClientDashboard() {
-  const { user, logout } = useAuth()
-  const { t } = useLanguage()
+export default function ArtisanDashboard() {
+  const { logout } = useAuth()
   const router = useRouter()
-
-  const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
-  const [demands, setDemands] = useState<Demand[]>([])
-  const [proposals, setProposals] = useState<Proposal[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { t } = useLanguage()
 
   const handleLogout = () => {
     logout()
     router.push('/')
   }
 
-  useEffect(() => {
-    fetchDemands()
-  }, [])
-
-  const fetchDemands = async () => {
-    try {
-      const response = await fetch('/api/demands')
-      if (response.ok) {
-        const data = await response.json()
-        setDemands(data)
-      }
-    } catch (error) {
-      console.error('Error fetching demands:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const fetchProposals = async (demandId: number) => {
-    try {
-      const response = await fetch(`/api/proposals?demandId=${demandId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setProposals(data)
-      }
-    } catch (error) {
-      console.error('Error fetching proposals:', error)
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>{t('common.loading')}</p>
-      </main>
-    )
-  }
-
   return (
-    <MessagingProvider>
-      <main
-        className="min-h-screen overflow-x-hidden"
-        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
-      >
+    <main
+      className="min-h-screen overflow-x-hidden"
+      style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+    >
 
-        {/* HEADER AT TOP */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-3xl mx-auto px-4">
-            <div className="flex items-center justify-center h-20">
-              <h1 className="text-4xl font-bold text-gray-900">{t('artisanDashboard.title')}</h1>
-            </div>
+      {/* HEADER — TRANSLATED */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="flex items-center justify-center h-20">
+            <h1 className="text-4xl font-bold text-gray-900">
+              {t('artisanHeader')}
+            </h1>
           </div>
-        </header>
-
-        {/* WELCOME */}
-        <div className="max-w-3xl mx-auto px-4 pt-6">
-          <WelcomeUser />
         </div>
+      </header>
 
-        {/* BUTTONS STACKED VERTICALLY */}
-        <div className="max-w-3xl mx-auto px-4 mt-6 w-full" style={{ display: 'block' }}>
+      {/* BUTTONS ONLY */}
+      <div className="max-w-3xl mx-auto px-4 mt-10 w-full">
 
-            <div style={{ marginBottom: '12px' }}>
-              <button
-                onClick={handleLogout}
-                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('dashboard.logout')}
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <button
-                onClick={() => setActiveTab('proposals')}
-                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('artisanDashboard.proposals')}
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <button
-                onClick={() => setActiveTab('messages')}
-                style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('clientDashboard.messages')}
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '12px' }}>
-              <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
-              >
-                {t('artisanDashboard.editProfile')}
-              </Link>
-            </div>
-
-        </div>
-
-        {/* PAYMENT STATUS */}
-        <div className="max-w-3xl mx-auto px-4 mt-6">
-          <PaymentStatus />
-        </div>
-
-        {/* SPACING */}
-        <div className="max-w-3xl mx-auto px-4 py-8"></div>
-
-        {/* UNSUBSCRIBE BUTTON */}
-        <div className="max-w-3xl mx-auto px-4 pb-10">
+        <div style={{ marginBottom: '12px' }}>
           <button
-            onClick={() => {
-              if (confirm(t('unsubscribe.confirm'))) {
-                logout()
-                router.push('/')
-              }
+            onClick={handleLogout}
+            style={{
+              backgroundColor: '#6b7280',
+              color: 'white',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              width: '100%',
+              cursor: 'pointer',
+              border: 'none'
             }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200 w-full"
-            title={t('unsubscribe.title')}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
+            {t('logout')}
           </button>
         </div>
 
-      </main>
+        <div style={{ marginBottom: '12px' }}>
+          <Link
+            href="/proposals"
+            style={{
+              backgroundColor: '#6b7280',
+              color: 'white',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              width: '100%',
+              cursor: 'pointer',
+              border: 'none',
+              display: 'block',
+              textAlign: 'center',
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
+          >
+            {t('proposals')}
+          </Link>
+        </div>
 
-      <MessageNotifications />
-    </MessagingProvider>
+        <div style={{ marginBottom: '12px' }}>
+          <Link
+            href="/messages"
+            style={{
+              backgroundColor: '#6b7280',
+              color: 'white',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              width: '100%',
+              cursor: 'pointer',
+              border: 'none',
+              display: 'block',
+              textAlign: 'center',
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
+          >
+            {t('messages')}
+          </Link>
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <Link
+            href="/artisan-profile-editor"
+            style={{
+              backgroundColor: '#6b7280',
+              color: 'white',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              width: '100%',
+              cursor: 'pointer',
+              border: 'none',
+              display: 'block',
+              textAlign: 'center',
+              textDecoration: 'none'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
+          >
+            {t('editProfile')}
+          </Link>
+        </div>
+
+      </div>
+
+      {/* UNSUBSCRIBE BUTTON ONLY */}
+      <div className="max-w-3xl mx-auto px-4 pb-10 mt-10">
+        <button
+          onClick={() => {
+            if (confirm(t('unsubscribeConfirm'))) {
+              logout()
+              router.push('/')
+            }
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200 w-full"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          <span className="text-sm font-medium">{t('unsubscribe')}</span>
+        </button>
+      </div>
+
+    </main>
   )
 }
