@@ -4,11 +4,9 @@ import { useState } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import Link from 'next/link'
 import { useLanguage } from '../components/LanguageProvider'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function Login() {
   const { t } = useLanguage()
-  const supabase = createClientComponentClient()
 
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [isLoading, setIsLoading] = useState(false)
@@ -22,31 +20,11 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      const success = await login(formData.email, formData.password)
+      const result = await login(formData.email, formData.password)
 
-      if (success) {
-        const { data: { session } } = await supabase.auth.getSession()
-
-        if (!session?.user?.id) {
-          setError('Unable to load your session')
-          return
-        }
-
-        const userId = session.user.id
-
-        // Get role from users table
-        const { data: profile } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', userId)
-          .single()
-
-        if (!profile) {
-          setError('Unable to load your profile')
-          return
-        }
-
-        const role = profile.role?.toLowerCase() // Convert CLIENT/ARTISAN to lowercase
+      if (result && typeof result !== 'boolean') {
+        // result is the user profile
+        const role = result.role
 
         if (role === 'client') window.location.href = '/client-dashboard'
         else if (role === 'artisan') window.location.href = '/artisan-dashboard'

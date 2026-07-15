@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const getAppUrl = () => process.env.APP_URL || "https://www.coupdepouce-aide.com";
 const getCurrentYear = () => new Date().getFullYear();
@@ -8,6 +8,11 @@ const getCurrentYear = () => new Date().getFullYear();
 export class EmailService {
   static async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
     try {
+      if (!resend) {
+        console.error("Resend API key not configured");
+        return false;
+      }
+
       // IMPORTANT: Use the ONLY mailbox that actually exists in IONOS
       const from = process.env.EMAIL_FROM || "info@coupdepouce-aide.com";
 

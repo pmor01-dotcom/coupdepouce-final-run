@@ -23,7 +23,7 @@ interface UserProfile {
 interface AuthContextType {
   user: UserProfile | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<boolean | UserProfile>
   logout: () => Promise<void>
 }
 
@@ -135,7 +135,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase])
 
   // FIXED LOGIN
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean | UserProfile> => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -169,7 +169,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userProfile)
     localStorage.setItem('user', JSON.stringify(userProfile))
 
-    return true
+    return userProfile
   }
 
   const logout = async () => {
