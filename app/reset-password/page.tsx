@@ -14,10 +14,13 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
+    const accessToken = params.get("access_token");
 
-    if (token) {
-      supabase.auth.exchangeCodeForSession(token);
+    if (accessToken) {
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: params.get("refresh_token") || ""
+      });
     }
   }, []);
 
