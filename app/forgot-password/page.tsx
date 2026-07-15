@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { useLanguage } from "../components/LanguageProvider";
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,9 +28,9 @@ export default function ForgotPasswordPage() {
     });
 
     if (error) {
-      setMessage("Erreur : " + error.message);
+      setMessage(t('common.error') + " : " + error.message);
     } else {
-      setMessage("Un email de réinitialisation a été envoyé.");
+      setMessage(t('forgotPassword.emailSentDesc'));
     }
 
     setLoading(false);
@@ -58,12 +60,12 @@ export default function ForgotPasswordPage() {
         }}
       >
         <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
-          Réinitialiser le mot de passe
+          {t('forgotPassword.title')}
         </h1>
 
         <input
           type="email"
-          placeholder="Votre email"
+          placeholder={t('forgotPassword.email')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{
@@ -92,7 +94,7 @@ export default function ForgotPasswordPage() {
             marginBottom: "15px",
           }}
         >
-          {loading ? "Envoi…" : "Envoyer le lien"}
+          {loading ? t('forgotPassword.sending') : t('forgotPassword.send')}
         </button>
 
         {message && (
@@ -115,7 +117,7 @@ export default function ForgotPasswordPage() {
           }}
           
         >
-          Retour
+          {t('app.back')}
         </button>
       </div>
     </div>

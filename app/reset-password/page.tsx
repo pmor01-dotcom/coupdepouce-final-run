@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useLanguage } from "../components/LanguageProvider";
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage();
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -30,9 +32,9 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      setMessage("Erreur lors de la mise à jour du mot de passe");
+      setMessage(t('common.error'));
     } else {
-      setMessage("Mot de passe mis à jour avec succès");
+      setMessage(t('forgotPassword.passwordUpdated'));
     }
   }
 
@@ -60,12 +62,12 @@ export default function ResetPasswordPage() {
         }}
       >
         <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
-          Nouveau mot de passe
+          {t('forgotPassword.title')}
         </h1>
 
         <input
           type="password"
-          placeholder="Entrez votre nouveau mot de passe"
+          placeholder={t('login.password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{
@@ -93,7 +95,7 @@ export default function ResetPasswordPage() {
             marginBottom: "15px",
           }}
         >
-          Mettre à jour le mot de passe
+          {t('forgotPassword.updatePassword')}
         </button>
 
         {message && (
