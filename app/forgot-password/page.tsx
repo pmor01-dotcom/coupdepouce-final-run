@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -9,33 +10,25 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // ⭐ Supabase client (frontend)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  // ⭐ NEW handleReset — Supabase only, no backend route
   const handleReset = async () => {
     setLoading(true);
     setMessage("");
 
-    try {
-      const response = await fetch("/api/auth/custom-forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://localhost/update-password",
+    });
 
-      // Safe typing for JSON response
-      let data: { error?: string; message?: string } = {};
-
-      try {
-        data = await response.json();
-      } catch {
-        data = { error: "Réponse invalide du serveur" };
-      }
-
-      if (!response.ok) {
-        setMessage("Erreur : " + (data.error || "Impossible d'envoyer le lien"));
-      } else {
-        setMessage("Un email de réinitialisation a été envoyé.");
-      }
-    } catch {
-      setMessage("Erreur : Impossible de contacter le serveur.");
+    if (error) {
+      setMessage("Erreur : " + error.message);
+    } else {
+      setMessage("Un email de réinitialisation a été envoyé.");
     }
 
     setLoading(false);
@@ -108,7 +101,7 @@ export default function ForgotPasswordPage() {
           </p>
         )}
 
-        <button
+      <button
           onClick={() => router.push("/")}
           style={{
             width: "100%",
@@ -120,6 +113,7 @@ export default function ForgotPasswordPage() {
             border: "none",
             cursor: "pointer",
           }}
+          
         >
           Retour
         </button>

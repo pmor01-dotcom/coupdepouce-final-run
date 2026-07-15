@@ -28,13 +28,13 @@ export default function Login() {
 
         if (role === 'client') window.location.href = '/client-dashboard'
         else if (role === 'artisan') window.location.href = '/artisan-dashboard'
-        else setError('Your account has no role assigned')
+        else setError(t('login.noRole'))
 
       } else {
-        setError('Incorrect email or password')
+        setError(t('login.incorrectCredentials'))
       }
     } catch {
-      setError('Error during login')
+      setError(t('login.genericError'))
     } finally {
       setIsLoading(false)
     }
@@ -51,7 +51,7 @@ export default function Login() {
           <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
             <img
               src="/images/artisan-photo-right.jpg"
-              alt="Professional artisans working"
+              alt={t('home.artisanAlt')}
               className="hero-card-image w-full h-20 md:h-24 object-cover"
               loading="lazy"
             />
@@ -64,7 +64,7 @@ export default function Login() {
           <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
             <img
               src="/images/satisfied-clients.jpg"
-              alt="Happy clients receiving help"
+              alt={t('home.clientAlt')}
               className="hero-card-image w-full h-20 md:h-24 object-cover"
               loading="lazy"
             />
@@ -115,9 +115,10 @@ export default function Login() {
             </button>
           </form>
 
+          {/* FIXED LINE BELOW */}
           <div className="text-center mt-6">
             <Link href="/forgot-password" className="text-green-700 hover:underline">
-              {t('signup.forgotPassword')}
+              {t('login.forgotPassword')}
             </Link>
           </div>
 
