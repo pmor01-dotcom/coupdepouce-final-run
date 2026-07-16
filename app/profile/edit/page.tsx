@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/app/components/AuthProvider'
-import { useLanguage } from '../components/LanguageProvider'
+import { useLanguage } from '../../components/LanguageProvider'
 import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
