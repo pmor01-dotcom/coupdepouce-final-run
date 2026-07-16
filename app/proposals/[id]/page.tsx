@@ -3,7 +3,7 @@
 import { useEffect, useState, FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useLanguage } from '../components/LanguageProvider'
+import { useLanguage } from '../../components/LanguageProvider'
 
 type Demand = {
   id: string
@@ -75,7 +75,6 @@ export default function ProposePage() {
         return
       }
 
-      // After sending proposal, go back to artisan dashboard or demand page
       router.push('/artisan-dashboard')
     } catch (err) {
       console.error('Unexpected error creating proposal:', err)
