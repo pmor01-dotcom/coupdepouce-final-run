@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
+import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
 
 export default function ArtisanProfileEditor() {
   const { user } = useAuth()
+  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     description: '',
@@ -63,9 +65,9 @@ export default function ArtisanProfileEditor() {
     })
 
     if (res.ok) {
-      setSuccess('Profil mis à jour avec succès')
+      setSuccess(t('profileUpdated'))
     } else {
-      alert('Erreur lors de la mise à jour')
+      alert(t('updateError'))
     }
 
     setSaving(false)
@@ -74,7 +76,7 @@ export default function ArtisanProfileEditor() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p>Chargement...</p>
+        <p>{t('loading')}</p>
       </main>
     )
   }
@@ -84,14 +86,14 @@ export default function ArtisanProfileEditor() {
       
       <div className="fixed top-6 right-6 flex gap-3">
         <Link href="/artisan-dashboard" className="btn-secondary text-sm">
-          Retour au tableau de bord
+          {t('backToDashboard')}
         </Link>
       </div>
 
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center">
           <h1 className="text-xl font-semibold text-gray-900">
-            Mon Profil Artisan
+            {t('myArtisanProfile')}
           </h1>
         </div>
       </header>
@@ -107,18 +109,18 @@ export default function ArtisanProfileEditor() {
         <form onSubmit={handleSubmit} className="space-y-8">
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Description</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('descriptionSection')}</h2>
             <textarea
               className="input-field h-32"
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Décrivez votre activité..."
+              placeholder={t('descriptionPlaceholder2')}
               required
             />
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Années d'expérience</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('experienceYears')}</h2>
             <input
               type="number"
               className="input-field"
@@ -130,40 +132,40 @@ export default function ArtisanProfileEditor() {
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Spécialités</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('specialtiesSection')}</h2>
             <input
               type="text"
               className="input-field"
               value={formData.specialties}
               onChange={(e) => handleChange('specialties', e.target.value)}
-              placeholder="Ex: Maçonnerie, Rénovation..."
+              placeholder={t('specialtiesPlaceholder2')}
             />
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Contact</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('contact')}</h2>
             <input
               type="text"
               className="input-field mb-4"
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
-              placeholder="Téléphone"
+              placeholder={t('phonePlaceholder')}
             />
             <input
               type="text"
               className="input-field"
               value={formData.location}
               onChange={(e) => handleChange('location', e.target.value)}
-              placeholder="Ville"
+              placeholder={t('cityPlaceholder')}
             />
           </div>
 
           <div className="flex justify-end gap-4">
             <Link href="/artisan-dashboard" className="btn-secondary">
-              Annuler
+              {t('cancel')}
             </Link>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Enregistrement...' : 'Enregistrer'}
+              {saving ? t('saving') : t('save')}
             </button>
           </div>
 

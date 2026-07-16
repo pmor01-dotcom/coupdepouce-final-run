@@ -3,6 +3,7 @@
 import { useEffect, useState, FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useLanguage } from '../components/LanguageProvider'
 
 type Demand = {
   id: string
@@ -13,6 +14,7 @@ type Demand = {
 export default function ProposePage() {
   const supabase = createClientComponentClient()
   const router = useRouter()
+  const { t } = useLanguage()
   const params = useParams() as { id: string }
 
   const [user, setUser] = useState<any>(null)
@@ -84,7 +86,7 @@ export default function ProposePage() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Chargement...</p>
+        <p>{t('proposals.loading')}</p>
       </main>
     )
   }
@@ -92,7 +94,7 @@ export default function ProposePage() {
   if (!demand) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Demande introuvable.</p>
+        <p>{t('proposals.demandNotFound')}</p>
       </main>
     )
   }
@@ -104,15 +106,15 @@ export default function ProposePage() {
           onClick={() => router.back()}
           className="text-sm text-gray-600 hover:text-gray-800 mb-4"
         >
-          ← Retour
+          ← {t('proposals.back')}
         </button>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Envoyer une proposition
+          {t('proposals.title')}
         </h1>
 
         <p className="text-sm text-gray-600 mb-6">
-          Vous répondez à la demande :
+          {t('proposals.respondingTo')}
         </p>
 
         <div className="card p-4 mb-8">
@@ -123,14 +125,14 @@ export default function ProposePage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Message à envoyer au client
+              {t('proposals.messageLabel')}
             </label>
             <textarea
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
               rows={6}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Expliquez comment vous pouvez aider, vos disponibilités, etc."
+              placeholder={t('proposals.messagePlaceholder')}
               required
             />
           </div>
@@ -141,14 +143,14 @@ export default function ProposePage() {
               onClick={() => router.back()}
               className="btn-secondary"
             >
-              Annuler
+              {t('proposals.cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !message.trim()}
               className="btn-primary"
             >
-              {isSubmitting ? 'Envoi en cours...' : 'Envoyer la proposition'}
+              {isSubmitting ? t('proposals.sending') : t('proposals.send')}
             </button>
           </div>
         </form>

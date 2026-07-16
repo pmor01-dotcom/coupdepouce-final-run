@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../components/AuthProvider'
+import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
 
 interface ArtisanProfile {
@@ -20,6 +21,7 @@ interface ArtisanProfile {
 export default function ArtisanProfilePage() {
   const router = useRouter()
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [profile, setProfile] = useState<ArtisanProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -60,7 +62,7 @@ export default function ArtisanProfilePage() {
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
-      setError('Error loading profile')
+      setError(t('errorLoadingProfile'))
     } finally {
       setIsLoading(false)
     }
@@ -93,10 +95,10 @@ export default function ArtisanProfilePage() {
         // Update local profile data
         fetchProfile()
       } else {
-        setError(data.error || 'Error updating profile')
+        setError(data.error || t('errorUpdatingProfile'))
       }
     } catch (error) {
-      setError('Connection error')
+      setError(t('connectionError'))
     } finally {
       setIsSaving(false)
     }
@@ -109,7 +111,7 @@ export default function ArtisanProfilePage() {
   if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p>Loading...</p>
+        <p>{t('loading')}</p>
       </main>
     )
   }
@@ -119,17 +121,17 @@ export default function ArtisanProfilePage() {
       {/* Fixed Right Sidebar Buttons */}
       <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
         <Link href="/artisan-dashboard" className="btn-secondary text-sm w-full text-right">
-          Back to dashboard
+          {t('backToDashboard')}
         </Link>
       </aside>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">My Artisan Profile</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('artisanProfile')}</h1>
 
           {success && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-              Profile updated successfully!
+              {t('profileUpdated')}
             </div>
           )}
 
@@ -143,7 +145,7 @@ export default function ArtisanProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full name
+                  {t('fullName')}
                 </label>
                 <input
                   type="text"
@@ -156,7 +158,7 @@ export default function ArtisanProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  {t('email')}
                 </label>
                 <input
                   type="email"
@@ -169,7 +171,7 @@ export default function ArtisanProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
+                  {t('phone')}
                 </label>
                 <input
                   type="tel"
@@ -181,7 +183,7 @@ export default function ArtisanProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City
+                  {t('city')}
                 </label>
                 <input
                   type="text"
@@ -193,7 +195,7 @@ export default function ArtisanProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trade/Profession
+                  {t('trade')}
                 </label>
                 <input
                   type="text"
@@ -206,7 +208,7 @@ export default function ArtisanProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Years of experience
+                  {t('yearsOfExperience')}
                 </label>
                 <input
                   type="number"
@@ -220,27 +222,27 @@ export default function ArtisanProfilePage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                {t('description')}
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Describe your services and expertise..."
+                placeholder={t('descriptionPlaceholder')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Specialties (comma-separated)
+                {t('specialties')}
               </label>
               <input
                 type="text"
                 value={formData.specialties}
                 onChange={(e) => handleChange('specialties', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Ex: Plumbing, Heating, Bathroom"
+                placeholder={t('specialtiesPlaceholder')}
               />
             </div>
 
@@ -249,7 +251,7 @@ export default function ArtisanProfilePage() {
               disabled={isSaving}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Saving...' : 'Save changes'}
+              {isSaving ? t('saving') : t('saveChanges')}
             </button>
           </form>
         </div>

@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/app/components/AuthProvider'
+import { useLanguage } from '../components/LanguageProvider'
 import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 export default function EditProfile() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const router = useRouter()
 
   const [loading, setLoading] = useState(true)
@@ -71,7 +73,7 @@ export default function EditProfile() {
         .single()
 
       if (error || !artisanProfile) {
-        setError('Profile not found.')
+        setError(t('profileEdit.profileNotFound'))
         setLoading(false)
         return
       }
@@ -143,9 +145,9 @@ export default function EditProfile() {
 
     if (updateError) {
       console.error(updateError)
-      setError('Unable to save changes.')
+      setError(t('profileEdit.unableToSave'))
     } else {
-      setSuccess('Profile updated successfully.')
+      setSuccess(t('profileEdit.updatedSuccessfully'))
     }
 
     setSaving(false)
@@ -154,7 +156,7 @@ export default function EditProfile() {
   if (loading || !user) {
     return (
       <main className="p-6 text-center text-white bg-green-900 min-h-screen">
-        Loading profile...
+        {t('profileEdit.loading')}
       </main>
     )
   }
@@ -173,7 +175,7 @@ export default function EditProfile() {
           onClick={() => router.push(returnPath)}
           className="absolute top-6 left-6 bg-green-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-800 shadow"
         >
-          ← Retour
+          ← {t('profileEdit.return')}
         </button>
 
         {/* AVATAR SECTION */}
@@ -193,7 +195,7 @@ export default function EditProfile() {
           </div>
 
           <label className="mt-4 bg-green-900 text-white px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-green-800 shadow">
-            Uploader une photo de profil
+            {t('profileEdit.uploadPhoto')}
             <input
               type="file"
               accept="image/*"
@@ -208,13 +210,13 @@ export default function EditProfile() {
               onClick={deleteAvatar}
               className="mt-3 text-red-600 text-sm font-medium hover:underline"
             >
-              Supprimer la photo
+              {t('profileEdit.deletePhoto')}
             </button>
           )}
         </div>
 
         <h1 className="text-3xl font-bold text-center text-green-900 mb-8">
-          Modifier mon profil
+          {t('profileEdit.title')}
         </h1>
 
         {error && <p className="text-red-600 mb-4 text-center">{error}</p>}
@@ -225,7 +227,7 @@ export default function EditProfile() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             <div>
-              <label className="block font-medium mb-1">Nom complet</label>
+              <label className="block font-medium mb-1">{t('profileEdit.fullName')}</label>
               <input
                 type="text"
                 className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -235,7 +237,7 @@ export default function EditProfile() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Email</label>
+              <label className="block font-medium mb-1">{t('profileEdit.email')}</label>
               <input
                 type="email"
                 className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -245,7 +247,7 @@ export default function EditProfile() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Téléphone</label>
+              <label className="block font-medium mb-1">{t('profileEdit.phone')}</label>
               <input
                 type="text"
                 className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -255,7 +257,7 @@ export default function EditProfile() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Ville</label>
+              <label className="block font-medium mb-1">{t('profileEdit.city')}</label>
               <input
                 type="text"
                 className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -267,7 +269,7 @@ export default function EditProfile() {
             {profileType === 'artisan' && (
               <>
                 <div>
-                  <label className="block font-medium mb-1">Nom</label>
+                  <label className="block font-medium mb-1">{t('profileEdit.lastName')}</label>
                   <input
                     type="text"
                     className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -277,7 +279,7 @@ export default function EditProfile() {
                 </div>
 
                 <div>
-                  <label className="block font-medium mb-1">Prénom</label>
+                  <label className="block font-medium mb-1">{t('profileEdit.firstName')}</label>
                   <input
                     type="text"
                     className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -287,13 +289,13 @@ export default function EditProfile() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block font-medium mb-1">Métier</label>
+                  <label className="block font-medium mb-1">{t('profileEdit.trade')}</label>
                   <select
                     className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
                     value={metier}
                     onChange={(e) => setMetier(e.target.value)}
                   >
-                    <option value="">Sélectionnez un métier</option>
+                    <option value="">{t('profileEdit.selectTrade')}</option>
                     <option value="Plombier">Plombier</option>
                     <option value="Électricien">Électricien</option>
                     <option value="Menuisier">Menuisier</option>
@@ -313,7 +315,7 @@ export default function EditProfile() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block font-medium mb-1">Description</label>
+                  <label className="block font-medium mb-1">{t('profileEdit.description')}</label>
                   <textarea
                     className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
                     value={description}
@@ -322,7 +324,7 @@ export default function EditProfile() {
                 </div>
 
                 <div>
-                  <label className="block font-medium mb-1">Années d'expérience</label>
+                  <label className="block font-medium mb-1">{t('profileEdit.experienceYears')}</label>
                   <input
                     type="text"
                     className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -332,7 +334,7 @@ export default function EditProfile() {
                 </div>
 
                 <div>
-                  <label className="block font-medium mb-1">Spécialités</label>
+                  <label className="block font-medium mb-1">{t('profileEdit.specialties')}</label>
                   <input
                     type="text"
                     className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
@@ -350,7 +352,7 @@ export default function EditProfile() {
             disabled={saving}
             className="w-full bg-green-900 text-white py-3 rounded-lg font-semibold shadow hover:bg-green-800 transition"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? t('profileEdit.saving') : t('profileEdit.saveChanges')}
           </button>
 
         </form>

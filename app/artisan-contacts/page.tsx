@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
+import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
 
 interface Contact {
@@ -23,6 +24,7 @@ interface Contact {
 
 export default function ArtisanContacts() {
   const { user } = useAuth()
+  const { t } = useLanguage()
 
   // Helper function to get first name
   const getFirstName = (fullName?: string) => {
@@ -113,13 +115,13 @@ export default function ArtisanContacts() {
   const getStatusText = (status: Contact['status']) => {
     switch (status) {
       case 'initial':
-        return ''
+        return t('statusInitial')
       case 'ongoing':
-        return ''
+        return t('statusOngoing')
       case 'completed':
-        return 'Terminé'
+        return t('statusCompleted')
       default:
-        return 'Inconnu'
+        return t('statusUnknown')
     }
   }
 
@@ -135,7 +137,7 @@ export default function ArtisanContacts() {
 
   const handleDeleteContact = (contactId: number, e: React.MouseEvent) => {
     e.stopPropagation() // Prevent opening details modal
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) {
+    if (window.confirm(t('deleteContactConfirm'))) {
       setContacts(prev => prev.filter(contact => contact.id !== contactId))
       // Update localStorage
       const updatedContacts = contacts.filter(contact => contact.id !== contactId)
@@ -148,7 +150,7 @@ export default function ArtisanContacts() {
       <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
-            <p className="text-white">Chargement des contacts...</p>
+            <p className="text-white">{t('loadingContacts')}</p>
           </div>
         </div>
       </main>
@@ -160,7 +162,7 @@ export default function ArtisanContacts() {
       {/* Floating Top Right Buttons */}
       <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 50, display: 'flex', gap: '8px' }}>
         <Link href="/artisan-dashboard" className="btn-secondary text-sm">
-          Retour au tableau de bord
+          {t('backToDashboard')}
         </Link>
       </div>
 
@@ -168,10 +170,10 @@ export default function ArtisanContacts() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-white mb-4">
-              Bienvenue, {getFirstName(user?.name)} - Mes contacts
+              {t('welcomeContacts').replace('{name}', getFirstName(user?.name))}
             </h1>
             <p className="text-xl text-gray-200">
-              Gérez vos communications avec les clients
+              {t('manageContacts')}
             </p>
           </div>
 
@@ -183,13 +185,13 @@ export default function ArtisanContacts() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Aucun contact
+                {t('noContacts')}
               </h3>
               <p className="text-gray-600 mb-6">
-                Vous n'avez pas encore de contacts avec des clients.
+                {t('noContactsDesc')}
               </p>
               <Link href="/artisan-dashboard" className="btn-primary">
-                Consulter les demandes disponibles
+                {t('viewRequests')}
               </Link>
             </div>
           ) : (
@@ -216,9 +218,9 @@ export default function ArtisanContacts() {
                       <button
                         onClick={(e) => handleDeleteContact(contact.id, e)}
                         className="btn-secondary text-xs"
-                        title="Supprimer ce contact"
+                        title={t('deleteContact')}
                       >
-                        Supprimer
+                        {t('deleteContact')}
                       </button>
                     </div>
                   </div>
@@ -268,7 +270,7 @@ export default function ArtisanContacts() {
           <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-screen overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                Détails du contact
+                {t('contactDetails')}
               </h2>
               <button
                 onClick={handleCloseDetails}
@@ -284,31 +286,31 @@ export default function ArtisanContacts() {
               {/* Client Information */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Informations client
+                  {t('clientInfo')}
                 </h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Nom:</span>
+                      <span className="text-sm font-medium text-gray-500">{t('name')}:</span>
                       <p className="text-gray-900">{selectedContact.clientName}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Email:</span>
+                      <span className="text-sm font-medium text-gray-500">{t('email')}:</span>
                       <p className="text-gray-900">{selectedContact.clientEmail}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Téléphone:</span>
+                      <span className="text-sm font-medium text-gray-500">{t('phone')}:</span>
                       <p className="text-gray-900">{selectedContact.clientPhone}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Statut:</span>
+                      <span className="text-sm font-medium text-gray-500">{t('status')}:</span>
                       <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(selectedContact.status)}`}>
                         {getStatusText(selectedContact.status)}
                       </span>
                     </div>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Adresse:</span>
+                    <span className="text-sm font-medium text-gray-500">{t('address')}:</span>
                     <p className="text-gray-900">
                       {selectedContact.clientAddress}, {selectedContact.clientCity} ({selectedContact.clientDepartment})
                     </p>
@@ -319,23 +321,23 @@ export default function ArtisanContacts() {
               {/* Demand Information */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Informations sur la demande
+                  {t('demandInfo')}
                 </h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Titre:</span>
+                    <span className="text-sm font-medium text-gray-500">{t('title')}:</span>
                     <p className="text-gray-900">{selectedContact.demandTitle}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Catégorie:</span>
+                    <span className="text-sm font-medium text-gray-500">{t('category')}:</span>
                     <p className="text-gray-900">{selectedContact.demandCategory}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Date du contact:</span>
+                    <span className="text-sm font-medium text-gray-500">{t('contactDate')}:</span>
                     <p className="text-gray-900">{selectedContact.contactDate}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Prix proposé:</span>
+                    <span className="text-sm font-medium text-gray-500">{t('proposedPrice')}:</span>
                     <p className="text-gray-900 font-semibold text-green-600">{selectedContact.proposedPrice}</p>
                   </div>
                 </div>
@@ -344,20 +346,20 @@ export default function ArtisanContacts() {
               {/* Communication */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Communication
+                  {t('communication')}
                 </h3>
                 <div className="space-y-4">
                   <div className="bg-blue-50 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-sm font-medium text-blue-800">Client</span>
+                      <span className="text-sm font-medium text-blue-800">{t('client')}</span>
                       <span className="text-xs text-blue-600">{selectedContact.contactDate}</span>
                     </div>
                     <p className="text-gray-700">{selectedContact.lastMessage}</p>
                   </div>
                   <div className="bg-green-50 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-sm font-medium text-green-800">Votre réponse</span>
-                      <span className="text-xs text-green-600">Réponse envoyée</span>
+                      <span className="text-sm font-medium text-green-800">{t('yourResponse')}</span>
+                      <span className="text-xs text-green-600">{t('responseSent')}</span>
                     </div>
                     <p className="text-gray-700">{selectedContact.artisanResponse}</p>
                   </div>
@@ -370,12 +372,12 @@ export default function ArtisanContacts() {
                   onClick={handleCloseDetails}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
-                  Fermer
+                  {t('close')}
                 </button>
                 <button
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                 >
-                  Contacter le client
+                  {t('contactClient')}
                 </button>
               </div>
             </div>

@@ -35,7 +35,7 @@ export default function CreateDemandPage() {
     setLoading(true)
 
     if (!user) {
-      setError('Not authenticated')
+      setError(t('form.notAuthenticated'))
       setLoading(false)
       return
     }
@@ -58,7 +58,7 @@ export default function CreateDemandPage() {
 
       router.push('/client-dashboard')
     } catch (err: any) {
-      setError(err.message || t('common.error'))
+      setError(err.message || t('error'))
     } finally {
       setLoading(false)
     }
@@ -67,7 +67,7 @@ export default function CreateDemandPage() {
   if (authLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-600">{t('common.loading')}</p>
+        <p className="text-gray-600">{t('loading')}</p>
       </main>
     )
   }
@@ -90,7 +90,7 @@ export default function CreateDemandPage() {
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
+              {t('form.title')} *
             </label>
             <input
               type="text"
@@ -105,7 +105,7 @@ export default function CreateDemandPage() {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description *
+              {t('form.description')} *
             </label>
             <textarea
               name="description"
@@ -153,7 +153,7 @@ export default function CreateDemandPage() {
             disabled={loading}
             className="btn-primary w-full"
           >
-            {loading ? t('common.loading') : 'Create demand'}
+            {loading ? t('loading') : t('form.createDemand')}
           </button>
         </form>
 
@@ -162,7 +162,7 @@ export default function CreateDemandPage() {
             onClick={() => router.push('/client-dashboard')}
             className="hover:text-gray-900"
           >
-            {t('app.back')}
+            {t('form.back')}
           </button>
         </div>
       </div>

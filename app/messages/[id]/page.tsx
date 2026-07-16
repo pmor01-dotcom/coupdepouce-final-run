@@ -101,7 +101,7 @@ const id = params?.id as string
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>{t('conversation')}</h2>
+      <h2>{t('messages.conversation')}</h2>
 
       <div
         style={{
@@ -144,7 +144,7 @@ const id = params?.id as string
                     rel="noopener noreferrer"
                     style={{ color: 'white', textDecoration: 'underline' }}
                   >
-                    📄 {t('download_file')}
+                    📄 {t('messages.downloadFile')}
                   </a>
                 )
               ) : (
@@ -180,7 +180,7 @@ const id = params?.id as string
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={t('type_message')}
+          placeholder={t('messages.typeMessage')}
           style={{
             flex: 1,
             padding: 10,
@@ -190,7 +190,7 @@ const id = params?.id as string
         />
 
         <button onClick={sendMessage} style={{ padding: '10px 20px' }}>
-          {t('send')}
+          {t('messages.send')}
         </button>
       </div>
     </div>

@@ -89,7 +89,7 @@ export default function ClientDashboard() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>{t('common.loading')}</p>
+        <p>{t('loading')}</p>
       </main>
     )
   }

@@ -12,7 +12,7 @@ export default function WelcomeUser() {
   return (
     <div className="flex items-baseline">
       <span className="text-7xl font-bold text-gray-900">
-        {firstName ? `${t('common.welcome')} ${firstName}` : t('common.welcome')}
+        {firstName ? `${t('welcome')} ${firstName}` : t('welcome')}
       </span>
     </div>
   )
