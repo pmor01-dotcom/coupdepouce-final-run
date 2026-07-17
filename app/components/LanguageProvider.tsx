@@ -184,7 +184,22 @@ const translations: Record<Language, Record<string, string>> = {
     "statusInitial": "Initial",
     "statusOngoing": "En cours",
     "statusCompleted": "Terminé",
-    "statusUnknown": "Inconnu"
+    "statusUnknown": "Inconnu",
+    /* ---------------- LOGIN ---------------- */
+    "login.title": "Connexion",
+    "login.email": "Email",
+    "login.password": "Mot de passe",
+    "login.button": "Se connecter",
+    "login.forgotPassword": "Mot de passe oublié ?",
+    "login.noAccount": "Pas encore de compte ? S'inscrire",
+    "login.incorrectCredentials": "Email ou mot de passe incorrect",
+    "login.noRole": "Rôle non défini",
+    "login.genericError": "Erreur lors de la connexion",
+    "common.loading": "Chargement...",
+    "home.artisanAlt": "Artisans qualifiés",
+    "home.clientAlt": "Clients satisfaits",
+    "home.qualifiedArtisans": "Artisans qualifiés",
+    "home.satisfiedClients": "Clients satisfaits"
   },
 
   en: {

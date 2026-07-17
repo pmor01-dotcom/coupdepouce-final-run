@@ -19,7 +19,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from("demands")
       .select("id, title, location")
-      .eq("status", "OPEN");
+      .eq("status", "open");
 
     if (error) {
       console.error("Supabase query error:", error);

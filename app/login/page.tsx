@@ -41,42 +41,11 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
-      <div className="container mx-auto px-4 py-16">
-
-        {/* Top Image Section */}
-        <section className="hero-grid grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12 px-2">
-
-          {/* Artisans */}
-          <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
-            <img
-              src="/images/artisan-photo-right.jpg"
-              alt={t('home.artisanAlt')}
-              className="hero-card-image w-full h-20 md:h-24 object-cover"
-              loading="lazy"
-            />
-            <div className="hero-card-content p-2 text-center md:text-left">
-              <h3 className="text-xs md:text-sm font-semibold mb-1">{t('home.qualifiedArtisans')}</h3>
-            </div>
-          </article>
-
-          {/* Clients */}
-          <article className="hero-card bg-white rounded-lg shadow overflow-hidden mx-auto w-full">
-            <img
-              src="/images/satisfied-clients.jpg"
-              alt={t('home.clientAlt')}
-              className="hero-card-image w-full h-20 md:h-24 object-cover"
-              loading="lazy"
-            />
-            <div className="hero-card-content p-2 text-center md:text-left">
-              <h3 className="text-xs md:text-sm font-semibold mb-1">{t('home.satisfiedClients')}</h3>
-            </div>
-          </article>
-
-        </section>
+    <main className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
+      <div className="w-full max-w-md px-4 py-16">
 
         {/* Login Form */}
-        <div className="max-w-md mx-auto bg-white p-6 md:p-8 rounded-lg shadow-lg">
+        <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg">
           <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">{t('login.title')}</h1>
 
           {error && (

@@ -17,6 +17,8 @@ export default function CreateDemandPage() {
     description: '',
     city: '',
     department: '',
+    category: '',
+    budget_range: '',
   })
 
   const [loading, setLoading] = useState(false)
@@ -41,17 +43,24 @@ export default function CreateDemandPage() {
     }
 
     try {
-      const { error: insertError } = await supabase.from('demands').insert({
-        client_id: user.id,
-        title: formData.title,
-        description: formData.description,
-        city: formData.city,
-        department: formData.department,
-        status: 'open',
+      const res = await fetch('/api/demands', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          location: formData.city,
+          department: formData.department,
+          budget_range: formData.budget_range,
+        }),
       })
 
-      if (insertError) {
-        setError(insertError.message)
+      if (!res.ok) {
+        const errorData = await res.json()
+        setError(errorData.error || t('error'))
         setLoading(false)
         return
       }
@@ -143,6 +152,38 @@ export default function CreateDemandPage() {
               onChange={handleChange}
               className="input-field"
               required
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Catégorie *
+            </label>
+            <input
+              type="text"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="input-field"
+              required
+              placeholder="Ex: Plomberie, Électricité, Menuiserie"
+            />
+          </div>
+
+          {/* Budget Range */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Budget estimé *
+            </label>
+            <input
+              type="text"
+              name="budget_range"
+              value={formData.budget_range}
+              onChange={handleChange}
+              className="input-field"
+              required
+              placeholder="Ex: 500-1000€"
             />
           </div>
 

@@ -3,9 +3,28 @@
 import Link from 'next/link'
 import { useLanguage } from './components/LanguageProvider'
 import ProposalsSlideshow from './components/ProposalsSlideshow'
+import { useEffect, useState } from 'react'
 
 export default function Home() {
   const { t } = useLanguage()
+  const [demands, setDemands] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchDemands = async () => {
+      try {
+        const res = await fetch('/api/public-offers')
+        if (res.ok) {
+          const data = await res.json()
+          setDemands(data)
+        }
+      } catch (err) {
+        console.error('Error fetching demands:', err)
+      }
+    }
+
+    fetchDemands()
+  }, [])
+
   return (
     <>
       <main className="min-h-screen home-page">
@@ -85,15 +104,6 @@ export default function Home() {
                 {t('createAccount')}
               </Link>
 
-              {/* Auto-scrolling offers (empty for now) */}
-              <div className="mt-10 overflow-hidden whitespace-nowrap border-t border-b border-gray-300 py-3 bg-white/70 backdrop-blur-sm">
-                <div
-                  className="inline-block text-gray-800 text-sm animate-scroll"
-                  style={{ animation: "scroll 25s linear infinite" }}
-                >
-                </div>
-              </div>
-
               {/* Login */}
               <Link
                 href="/login"
@@ -102,6 +112,24 @@ export default function Home() {
                 {t('login')}
               </Link>
 
+            </div>
+
+            {/* Auto-scrolling offers */}
+            <div className="mt-10 overflow-hidden whitespace-nowrap border-t border-b border-gray-300 py-3 bg-white/70 backdrop-blur-sm">
+              <div
+                className="inline-block text-gray-800 text-sm animate-scroll"
+                style={{ animation: "scroll 25s linear infinite" }}
+              >
+                {demands.length > 0 ? (
+                  demands.map((demand) => (
+                    <span key={demand.id} className="mx-8">
+                      📢 {demand.title} - {demand.location || 'Location non spécifiée'}
+                    </span>
+                  ))
+                ) : (
+                  <span className="mx-8">Aucune demande disponible pour le moment</span>
+                )}
+              </div>
             </div>
           </section>
 
