@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import { useLanguage } from './components/LanguageProvider'
-import ProposalsSlideshow from './components/ProposalsSlideshow'
+import ProposalsSlideshow from '@/app/components/ProposalsSlideshow'
+
+
 import { useEffect, useState } from 'react'
 
 export default function Home() {
