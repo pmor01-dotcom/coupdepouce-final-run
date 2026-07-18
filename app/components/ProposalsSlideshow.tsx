@@ -7,7 +7,6 @@ import Link from 'next/link'
 interface Demand {
   id: string
   title: string
-  description: string
   category: string
   location: string
 }
