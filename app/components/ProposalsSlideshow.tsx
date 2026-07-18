@@ -20,10 +20,9 @@ export default function ProposalsSlideshow() {
   useEffect(() => {
     const fetchDemands = async () => {
       try {
-        const response = await fetch('/api/demands')
+        const response = await fetch('/api/public-demands')
         if (response.ok) {
           const data = await response.json()
-          // Get only the most recent 5 demands
           setDemands(data.slice(0, 5))
         }
       } catch (error) {
@@ -43,7 +42,7 @@ export default function ProposalsSlideshow() {
   return (
     <div className="mt-10 overflow-hidden whitespace-nowrap border-t border-b border-gray-300 py-3 bg-white/70 backdrop-blur-sm">
       <div className="flex animate-scroll" style={{ animation: 'scroll 30s linear infinite' }}>
-        {demands.map((demand, index) => (
+        {demands.map((demand) => (
           <div key={demand.id} className="flex-shrink-0 px-6">
             <Link href={`/demands/${demand.id}`} className="text-gray-800 text-sm hover:text-green-700 transition-colors">
               <span className="font-medium">{demand.title}</span>
@@ -54,8 +53,9 @@ export default function ProposalsSlideshow() {
             </Link>
           </div>
         ))}
+
         {/* Duplicate for seamless scrolling */}
-        {demands.map((demand, index) => (
+        {demands.map((demand) => (
           <div key={`duplicate-${demand.id}`} className="flex-shrink-0 px-6">
             <Link href={`/demands/${demand.id}`} className="text-gray-800 text-sm hover:text-green-700 transition-colors">
               <span className="font-medium">{demand.title}</span>
@@ -67,14 +67,11 @@ export default function ProposalsSlideshow() {
           </div>
         ))}
       </div>
+
       <style jsx>{`
         @keyframes scroll {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
         }
       `}</style>
     </div>
