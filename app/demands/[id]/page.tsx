@@ -1,117 +1,65 @@
 'use client'
 
-import { useEffect, useState, FormEvent } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
-export default function ProposePage() {
-  const supabase = createClientComponentClient()
-  const router = useRouter()
-  const params = useParams() as { id: string }
+type Demand = {
+  id: string
+  title: string
+  category: string | null
+  location: string | null
+}
 
-  const [user, setUser] = useState<any>(null)
-  const [demand, setDemand] = useState<any>(null)
-  const [message, setMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+export default function DemandPage({ params }) {
+  const { id } = params
+  const [demand, setDemand] = useState<Demand | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Load auth user
   useEffect(() => {
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    loadUser()
-  }, [])
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
-  // Load demand
-  useEffect(() => {
-    const loadDemand = async () => {
-      const { data } = await supabase
+    async function fetchDemand() {
+      const { data, error } = await supabase
         .from('demands')
-        .select('id, title, description')
-        .eq('id', params.id)
+        .select('*')
+        .eq('id', id)
         .single()
 
-      setDemand(data)
-      setIsLoading(false)
+      if (!error) {
+        setDemand(data as Demand)
+      }
+
+      setLoading(false)
     }
 
-    loadDemand()
-  }, [params.id])
+    fetchDemand()
+  }, [id])
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!user || !demand || !message.trim()) return
-
-    setIsSubmitting(true)
-
-    await supabase.from('proposals').insert({
-      message: message.trim(),
-      demand_id: demand.id,
-      artisan_id: user.id
-    })
-
-    router.push('/artisan-dashboard')
-  }
-
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Chargement...</p>
-      </main>
-    )
+  if (loading) {
+    return <div className="p-6">Chargement...</div>
   }
 
   if (!demand) {
-    return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Demande introuvable.</p>
-      </main>
-    )
+    return <div className="p-6">Demande introuvable.</div>
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">{demand.title}</h1>
 
-        <button onClick={() => router.back()} className="text-sm text-gray-600 hover:text-gray-800 mb-4">
-          ← Retour
-        </button>
-
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Envoyer une proposition</h1>
-
-        <div className="card p-4 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900">{demand.title}</h2>
-          <p className="text-sm text-gray-700 mt-2">{demand.description}</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Message au client
-            </label>
-            <textarea
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-green-500"
-              rows={6}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Expliquez comment vous pouvez aider…"
-              required
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <button type="button" onClick={() => router.back()} className="btn-secondary">
-              Annuler
-            </button>
-            <button type="submit" disabled={isSubmitting || !message.trim()} className="btn-primary">
-              {isSubmitting ? 'Envoi…' : 'Envoyer la proposition'}
-            </button>
-          </div>
-        </form>
-
+      <div className="space-y-2 text-lg">
+        <p><strong>Catégorie :</strong> {demand.category || 'Non spécifié'}</p>
+        <p><strong>Lieu :</strong> {demand.location || 'Non spécifié'}</p>
       </div>
-    </main>
+
+      <div className="mt-6">
+        <a href="/" className="text-blue-600 hover:underline">
+          ← Retour à l'accueil
+        </a>
+      </div>
+    </div>
   )
 }
