@@ -9,8 +9,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('demands')
       .select('id, title, category, location')
-      .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(20)   // ← keep this
 
     if (error) {
       console.error('Error fetching public demands:', error)
