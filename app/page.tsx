@@ -14,8 +14,8 @@ export default function Home() {
   useEffect(() => {
     const fetchDemands = async () => {
       try {
-        const res = await fetch('/api/public-offers')
-        if (res.ok) {
+        const res = await fetch('/api/public-demands')
+if (res.ok) {
           const data = await res.json()
           setDemands(data)
         }
