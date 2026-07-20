@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('Missing STRIPE_SECRET_KEY')
-  return new Stripe(key, { apiVersion: '2026-04-22.dahlia' })
+  return new Stripe(key, { apiVersion: '2026-06-24.dahlia' })
 }
 
 export async function POST(request: NextRequest) {
