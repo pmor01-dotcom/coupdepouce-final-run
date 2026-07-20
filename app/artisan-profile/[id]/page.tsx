@@ -15,8 +15,8 @@ export default function ArtisanProfilePage({ params }: ArtisanProfilePageProps) 
           The artisan profile page for <strong>{params.id}</strong> is not implemented yet.
         </p>
         <div className="mt-8">
-          <Link href="/" className="rounded-md bg-green-600 px-5 py-3 text-white hover:bg-green-700">
-            Return to home
+          <Link href="/artisan-dashboard" className="rounded-md bg-green-600 px-5 py-3 text-white hover:bg-green-700">
+            Retour au tableau de bord
           </Link>
         </div>
       </div>

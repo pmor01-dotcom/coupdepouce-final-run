@@ -85,7 +85,7 @@ export default function ArtisanSignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
+    <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
       <div className="max-w-lg w-full bg-white p-6 md:p-8 rounded-lg shadow-md space-y-6">
 
         {/* Photo Section */}
@@ -93,7 +93,7 @@ export default function ArtisanSignupPage() {
           <div className="w-full md:w-1/2 bg-white rounded-lg shadow-lg p-4">
             <img
               src="/images/artisan-photo-right.jpg"
-              alt="Professional artisans"
+              alt={t('home.qualifiedArtisans')}
               className="w-full h-40 md:h-56 object-cover rounded-lg mb-4"
             />
             <h2 className="text-lg font-semibold mb-2 text-center">{t('home.qualifiedArtisans')}</h2>
@@ -235,8 +235,9 @@ export default function ArtisanSignupPage() {
         </form>
 
         <div className="text-center text-sm text-gray-600">
-          <Link href="/signup" className="hover:text-gray-900">
-            {t('signup.back')}
+          {t('signup.alreadyHaveAccount')}{' '}
+          <Link href="/login" className="hover:text-gray-900 font-medium">
+            {t('signup.goToLogin')}
           </Link>
         </div>
       </div>

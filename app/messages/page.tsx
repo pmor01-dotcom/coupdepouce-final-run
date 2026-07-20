@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import AuthProvider from '@/app/components/AuthProvider'
 import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider'
@@ -10,9 +11,10 @@ import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider
 
 
 export default function MessagesPage() {
-  
+  const router = useRouter()
   const supabase = createClientComponentClient()
-const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<any>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
 useEffect(() => {
   const loadUser = async () => {
@@ -20,6 +22,19 @@ useEffect(() => {
       data: { user },
     } = await supabase.auth.getUser()
     setUser(user)
+    
+    if (user) {
+      // Get user role from users table
+      const { data: userData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      
+      if (userData) {
+        setUserRole(userData.role?.toLowerCase())
+      }
+    }
   }
   loadUser()
 }, [])
@@ -46,8 +61,33 @@ useEffect(() => {
     loadConversations()
   }, [user])
 
+  const handleBack = () => {
+    if (userRole === 'client') {
+      router.push('/client-dashboard')
+    } else if (userRole === 'artisan') {
+      router.push('/artisan-dashboard')
+    } else {
+      router.push('/')
+    }
+  }
+
   return (
     <div style={{ padding: 20 }}>
+      <button
+        onClick={handleBack}
+        style={{
+          marginBottom: 20,
+          padding: '10px 20px',
+          backgroundColor: '#6b7280',
+          color: 'white',
+          border: 'none',
+          borderRadius: 8,
+          cursor: 'pointer',
+          fontSize: 14
+        }}
+      >
+        ← {t('form.back')}
+      </button>
       <h2>{t('messages')}</h2>
 
       {conversations.length === 0 && (

@@ -26,8 +26,6 @@ export default function EditProfile() {
   const [address, setAddress] = useState('')
 
   // Artisan-only fields
-  const [nom, setNom] = useState('')
-  const [prenom, setPrenom] = useState('')
   const [metier, setMetier] = useState('')
   const [description, setDescription] = useState('')
   const [experienceYears, setExperienceYears] = useState('')
@@ -85,8 +83,6 @@ export default function EditProfile() {
       setPhone(artisanProfile.phone || '')
       setAddress(artisanProfile.ville || '')
 
-      setNom(artisanProfile.nom || '')
-      setPrenom(artisanProfile.prenom || '')
       setMetier(artisanProfile.metier || '')
       setDescription(artisanProfile.description || '')
       setExperienceYears(artisanProfile.experience_years || '')
@@ -129,8 +125,6 @@ export default function EditProfile() {
         email,
         phone,
         ville: address,
-        nom,
-        prenom,
         metier,
         description,
         experience_years: experienceYears,
@@ -268,25 +262,6 @@ export default function EditProfile() {
 
             {profileType === 'artisan' && (
               <>
-                <div>
-                  <label className="block font-medium mb-1">{t('profileEdit.lastName')}</label>
-                  <input
-                    type="text"
-                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-medium mb-1">{t('profileEdit.firstName')}</label>
-                  <input
-                    type="text"
-                    className="w-full border rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-green-700"
-                    value={prenom}
-                    onChange={(e) => setPrenom(e.target.value)}
-                  />
-                </div>
 
                 <div className="md:col-span-2">
                   <label className="block font-medium mb-1">{t('profileEdit.trade')}</label>

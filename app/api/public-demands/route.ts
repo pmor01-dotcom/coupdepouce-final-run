@@ -10,17 +10,33 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('demands')
-      .select('id, title, category, location')
-      .limit(20)
+      .select('id, title, category, location, description, budget_range, urgency, client_id')
+      .limit(50)
 
     if (error) {
       console.error('Error fetching public demands:', error)
-      return NextResponse.json({ error: 'Failed to load demands' }, { status: 500 })
+      return NextResponse.json([], { status: 200 })
     }
 
-    return NextResponse.json(data)
+    // Fetch user information separately for each demand
+    const demandsWithUsers = await Promise.all(
+      (data || []).map(async (demand) => {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('email, name, phone')
+          .eq('id', demand.client_id)
+          .single()
+        
+        return {
+          ...demand,
+          users: userData || null
+        }
+      })
+    )
+
+    return NextResponse.json(demandsWithUsers)
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
+    return NextResponse.json([], { status: 200 })
   }
 }

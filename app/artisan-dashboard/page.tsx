@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useAuth } from '../components/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '../components/LanguageProvider'
+import DemandCarousel from '../components/DemandCarousel'
 
 export default function ArtisanDashboard() {
   const { logout } = useAuth()
@@ -147,6 +148,9 @@ export default function ArtisanDashboard() {
           <span className="text-sm font-medium">{t('unsubscribe')}</span>
         </button>
       </div>
+
+      {/* DEMAND CAROUSEL */}
+      <DemandCarousel />
 
     </main>
   )

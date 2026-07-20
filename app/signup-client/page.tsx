@@ -10,8 +10,7 @@ export default function ClientSignupPage() {
   const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
-    prenom: '',
-    nom: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -41,7 +40,7 @@ export default function ClientSignupPage() {
 
     try {
       console.log('Sending signup request with data:', {
-        name: `${formData.prenom} ${formData.nom}`,
+        name: formData.name,
         email: formData.email,
         role: 'client',
         ville: formData.ville || null,
@@ -53,7 +52,7 @@ export default function ClientSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: `${formData.prenom} ${formData.nom}`,
+          name: formData.name,
           email: formData.email,
           password: formData.password,
           role: 'client',
@@ -85,7 +84,7 @@ export default function ClientSignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4 bg-gradient-to-b from-green-700 to-green-200">
+    <main className="min-h-screen flex items-center justify-center py-8 md:py-12 px-4" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
       <div className="max-w-lg w-full bg-white p-6 md:p-8 rounded-lg shadow-md space-y-6">
 
         {/* Photo Section */}
@@ -108,26 +107,12 @@ export default function ClientSignupPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('clientSignup.firstName')} *
-            </label>
-            <input
-              type="text"
-              name="prenom"
-              value={formData.prenom}
-              onChange={handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('clientSignup.lastName')} *
             </label>
             <input
               type="text"
-              name="nom"
-              value={formData.nom}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               className="input-field"
               required
@@ -202,8 +187,9 @@ export default function ClientSignupPage() {
         </form>
 
         <div className="text-center text-sm text-gray-600">
-          <Link href="/signup" className="hover:text-gray-900">
-            {t('signup.back')}
+          {t('signup.alreadyHaveAccount')}{' '}
+          <Link href="/login" className="hover:text-gray-900 font-medium">
+            {t('signup.goToLogin')}
           </Link>
         </div>
       </div>

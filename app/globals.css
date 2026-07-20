@@ -95,11 +95,18 @@ body {
   border-radius: 0.375rem;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #4b5563;
+  color: white;
 }
 
 .input-field:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: #374151;
+}
+
+.input-field::placeholder {
+  color: #d1d5db;
 }
 
 /* Utility classes */
