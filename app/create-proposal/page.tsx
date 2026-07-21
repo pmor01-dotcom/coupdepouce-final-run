@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLanguage } from '../components/LanguageProvider'
 
 interface Demand {
   id: number
@@ -20,6 +21,7 @@ interface Demand {
 export default function CreateProposal() {
   const { user } = useAuth()
   const router = useRouter()
+  const { t } = useLanguage()
   const [demand, setDemand] = useState<Demand | null>(null)
   const [formData, setFormData] = useState({
     message: '',
@@ -57,7 +59,7 @@ export default function CreateProposal() {
     setError('')
 
     if (!formData.message || !formData.proposedPrice) {
-      setError('Please fill in all required fields')
+      setError(t('proposal.fillRequiredFields') || 'Please fill in all required fields')
       return
     }
 
@@ -84,7 +86,7 @@ export default function CreateProposal() {
       // Redirect to artisan dashboard
       router.push('/artisan-dashboard')
     } catch (err) {
-      setError('Error creating proposal')
+      setError(t('proposal.errorCreating') || 'Error creating proposal')
     } finally {
       setIsLoading(false)
     }
@@ -98,7 +100,7 @@ export default function CreateProposal() {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p>Loading demand...</p>
+          <p>{t('proposal.loadingDemand') || 'Loading demand...'}</p>
         </div>
       </main>
     )
@@ -112,10 +114,10 @@ export default function CreateProposal() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link href="/artisan-dashboard" className="text-gray-600 hover:text-gray-900 mr-4">
-                &larr; Back
+                ← {t('proposal.back') || 'Back'}
               </Link>
               <h1 className="text-xl font-semibold text-gray-900">
-                Offer my services
+                {t('proposal.title') || 'Offer my services'}
               </h1>
             </div>
           </div>
@@ -126,7 +128,7 @@ export default function CreateProposal() {
         {/* Demand Details */}
         <div className="card mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Demand details
+            {t('proposal.demandDetails') || 'Demand details'}
           </h2>
           
           <div className="space-y-3">
@@ -137,22 +139,22 @@ export default function CreateProposal() {
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="font-medium">Client:</span> {demand.clientName}
+                <span className="font-medium">{t('proposal.client') || 'Client'}:</span> {demand.clientName}
               </div>
               <div>
-                <span className="font-medium">Catégorie:</span> {demand.category}
+                <span className="font-medium">{t('category') || 'Catégorie'}:</span> {demand.category}
               </div>
               <div>
-                <span className="font-medium">Localisation:</span> {demand.location}
+                <span className="font-medium">{t('location') || 'Localisation'}:</span> {demand.location}
               </div>
               <div>
-                <span className="font-medium">Département:</span> {demand.department}
+                <span className="font-medium">{t('proposal.department') || 'Département'}:</span> {demand.department}
               </div>
               <div>
-                <span className="font-medium">Budget:</span> {demand.budget}
+                <span className="font-medium">{t('budget') || 'Budget'}:</span> {demand.budget}
               </div>
               <div>
-                <span className="font-medium">Publié le:</span> {demand.createdAt}
+                <span className="font-medium">{t('proposal.publishedOn') || 'Publié le'}:</span> {demand.createdAt}
               </div>
             </div>
           </div>
@@ -167,13 +169,13 @@ export default function CreateProposal() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="card">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Your proposal
+              {t('proposal.yourProposal') || 'Your proposal'}
             </h2>
             
             <div className="space-y-4">
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                  Message to client *
+                  {t('proposal.messageToClient') || 'Message to client'} *
                 </label>
                 <textarea
                   id="message"
@@ -182,13 +184,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.message}
                   onChange={(e) => handleInputChange('message', e.target.value)}
-                  placeholder="Describe your solution, your experience, and how you can help this client..."
+                  placeholder={t('proposal.messagePlaceholder') || 'Describe your solution, your experience, and how you can help this client...'}
                 />
               </div>
 
               <div>
                 <label htmlFor="proposedPrice" className="block text-sm font-medium text-gray-700">
-                  Proposed price *
+                  {t('proposal.proposedPrice') || 'Proposed price'} *
                 </label>
                 <input
                   type="text"
@@ -197,13 +199,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.proposedPrice}
                   onChange={(e) => handleInputChange('proposedPrice', e.target.value)}
-                  placeholder="Ex: 650, 700-800, on-site quote..."
+                  placeholder={t('proposal.pricePlaceholder') || 'Ex: 650, 700-800, on-site quote...'}
                 />
               </div>
 
               <div>
                 <label htmlFor="estimatedDuration" className="block text-sm font-medium text-gray-700">
-                  Estimated duration
+                  {t('proposal.estimatedDuration') || 'Estimated duration'}
                 </label>
                 <input
                   type="text"
@@ -211,13 +213,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.estimatedDuration}
                   onChange={(e) => handleInputChange('estimatedDuration', e.target.value)}
-                  placeholder="Ex: 2 days, 1 week, depending on quote..."
+                  placeholder={t('proposal.durationPlaceholder') || 'Ex: 2 days, 1 week, depending on quote...'}
                 />
               </div>
 
               <div>
                 <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
-                  Availability
+                  {t('proposal.availability') || 'Availability'}
                 </label>
                 <textarea
                   id="availability"
@@ -225,31 +227,31 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.availability}
                   onChange={(e) => handleInputChange('availability', e.target.value)}
-                  placeholder="When are you available for this work?"
+                  placeholder={t('proposal.availabilityPlaceholder') || 'When are you available for this work?'}
                 />
               </div>
             </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
-            <p className="font-medium mb-2">Important:</p>
+            <p className="font-medium mb-2">{t('proposal.important') || 'Important'}:</p>
             <ul className="text-sm space-y-1">
-              <li>The client will be able to see your proposal and contact you directly</li>
-              <li>You cannot contact the client directly before they contact you</li>
-              <li>Be clear and precise in your proposal to increase your chances</li>
+              <li>{t('proposal.note1') || 'The client will be able to see your proposal and contact you directly'}</li>
+              <li>{t('proposal.note2') || 'You cannot contact the client directly before they contact you'}</li>
+              <li>{t('proposal.note3') || 'Be clear and precise in your proposal to increase your chances'}</li>
             </ul>
           </div>
 
           <div className="flex justify-end space-x-4">
             <Link href="/artisan-dashboard" className="btn-secondary">
-              Cancel
+              {t('proposal.cancel') || 'Cancel'}
             </Link>
             <button
               type="submit"
               disabled={isLoading}
               className="btn-success disabled:opacity-50"
             >
-              {isLoading ? 'Sending...' : 'Send proposal'}
+              {isLoading ? t('proposal.sending') || 'Sending...' : t('proposal.sendProposal') || 'Send proposal'}
             </button>
           </div>
         </form>

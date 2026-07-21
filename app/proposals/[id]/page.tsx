@@ -23,11 +23,17 @@ export default function ProposePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  console.log('ProposePage rendered with params:', params)
+
   // Load auth user
   useEffect(() => {
     const loadUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      console.log('Auth user:', user)
       setUser(user)
+      
+      // Don't redirect - let user see the page even if not authenticated
+      // They'll need to auth to submit the proposal
     }
     loadUser()
   }, [])
@@ -36,6 +42,8 @@ export default function ProposePage() {
   useEffect(() => {
     const loadDemand = async () => {
       if (!params?.id) return
+
+      console.log('Loading demand with ID:', params.id, 'Type:', typeof params.id)
 
       const { data, error } = await supabase
         .from('demands')
@@ -47,6 +55,7 @@ export default function ProposePage() {
         console.error('Error loading demand:', error)
       }
 
+      console.log('Demand data:', data)
       setDemand(data)
       setIsLoading(false)
     }

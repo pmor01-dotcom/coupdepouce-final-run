@@ -5,7 +5,7 @@ import { useLanguage } from './LanguageProvider'
 import { useRouter } from 'next/navigation'
 
 interface Demand {
-  id: number
+  id: string | number
   title: string
   category: string
   location: string
@@ -67,24 +67,9 @@ export default function DemandCarousel() {
   }
 
   const handleContactClient = (demand: Demand) => {
-    console.log('Contact clicked for demand:', demand)
-    console.log('User data:', demand.users)
-    
-    const clientEmail = demand.users?.email
-    const clientName = demand.users?.name || 'Client'
-    const clientPhone = demand.users?.phone
-    
-    if (clientEmail) {
-      const subject = encodeURIComponent(`Re: ${demand.title}`)
-      const body = encodeURIComponent(`Bonjour ${clientName},\n\nJe suis intéressé par votre demande: ${demand.title}\n\nMerci de me contacter pour discuter des détails.\n\nCordialement,`)
-      window.open(`mailto:${clientEmail}?subject=${subject}&body=${body}`)
-    } else if (clientPhone) {
-      // Fallback to showing phone if email not available
-      alert(`Contact Information:\n\nName: ${clientName}\nPhone: ${clientPhone}\n\nEmail not available. Please contact via phone.`)
-    } else {
-      // Show modal with full details if contact info not available
-      setSelectedDemand(demand)
-    }
+    console.log('Contact clicked, demand ID:', demand.id, 'Type:', typeof demand.id)
+    // Navigate to create-proposal page with demand ID as query parameter
+    router.push(`/create-proposal?demand=${demand.id}`)
   }
 
   const handleViewDetails = (demand: Demand) => {
