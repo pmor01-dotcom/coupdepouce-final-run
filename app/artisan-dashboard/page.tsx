@@ -27,7 +27,7 @@ export default function ArtisanDashboard() {
         <div className="max-w-3xl mx-auto px-4">
           <div className="flex items-center justify-center h-16 md:h-20">
             <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t('artisanHeader')}
+              {t('availableDemands') || 'Available Demands'}
             </h1>
           </div>
         </div>

@@ -99,124 +99,38 @@ export default function DemandCarousel() {
     <>
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
         <div className="max-w-7xl mx-auto">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {t('artisanDashboard.availableDemands') || 'Demandes disponibles'}
-          </h3>
-          
-          <div className="flex items-center gap-3 hidden md:flex">
-            <button
-              onClick={scrollLeft}
-              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0"
-              aria-label="Scroll left"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <div
-              ref={scrollRef}
-              className="flex gap-6 overflow-x-auto scrollbar-hide pb-2"
-              style={{ scrollBehavior: 'smooth' }}
-            >
-              {demands.map((demand) => (
-                <div
-                  key={demand.id}
-                  onClick={() => handleViewDetails(demand)}
-                  className="flex-shrink-0 bg-white cursor-pointer hover:shadow-xl transition-all"
-                  style={{
-                    width: '320px',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    border: '2px solid #9ca3af'
-                  }}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
-                      {demand.title}
-                    </h4>
-                    {demand.urgency && demand.urgency !== 'NORMAL' && (
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getUrgencyColor(demand.urgency)}`}>
-                        {demand.urgency}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <p className="text-xs text-gray-600 mb-2">{demand.category}</p>
-                  <p className="text-xs text-gray-500 mb-2">
-                    📍 {demand.location}
-                  </p>
-                  {demand.budget_range && (
-                    <p className="text-xs text-green-600 font-medium">
-                      💰 {demand.budget_range}
-                    </p>
-                  )}
-                  
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleContactClient(demand)
-                    }}
-                    className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white transition-colors font-medium"
-                    style={{
-                      padding: '10px 16px',
-                      borderRadius: '12px',
-                      fontSize: '14px'
-                    }}
-                  >
-                    {t('contact') || 'Contacter'}
-                  </button>
-                </div>
-              ))}
-              
-              {demands.length === 0 && (
-                <p className="text-gray-500 text-sm">
-                  {t('no Demands') || 'Aucune demande disponible'}
-                </p>
-              )}
-            </div>
-            
-            <button
-              onClick={scrollRight}
-              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0"
-              aria-label="Scroll right"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Mobile vertical stack */}
-          <div className="flex flex-col gap-4 md:hidden max-h-[60vh] overflow-y-auto">
-            {demands.map((demand) => (
+          {/* Horizontal row of 6 demand cards */}
+          <div className="flex gap-3 overflow-x-auto">
+            {demands.slice(0, 6).map((demand) => (
               <div
                 key={demand.id}
                 onClick={() => handleViewDetails(demand)}
-                className="bg-white cursor-pointer hover:shadow-xl transition-all"
+                className="flex-shrink-0 bg-white cursor-pointer hover:shadow-xl transition-all"
                 style={{
-                  borderRadius: '16px',
-                  padding: '20px',
-                  border: '2px solid #9ca3af'
+                  width: 'calc(16.666% - 10px)',
+                  borderRadius: '12px',
+                  padding: '12px',
+                  border: '2px solid #9ca3af',
+                  minHeight: '140px'
                 }}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
+                  <h4 className="font-semibold text-gray-900 text-xs line-clamp-2">
                     {demand.title}
                   </h4>
                   {demand.urgency && demand.urgency !== 'NORMAL' && (
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getUrgencyColor(demand.urgency)}`}>
+                    <span className={`px-1 py-0.5 text-[10px] font-medium rounded-full ${getUrgencyColor(demand.urgency)}`}>
                       {demand.urgency}
                     </span>
                   )}
                 </div>
                 
-                <p className="text-xs text-gray-600 mb-2">{demand.category}</p>
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-[10px] text-gray-600 mb-1">{demand.category}</p>
+                <p className="text-[10px] text-gray-500 mb-1">
                   📍 {demand.location}
                 </p>
                 {demand.budget_range && (
-                  <p className="text-xs text-green-600 font-medium">
+                  <p className="text-[10px] text-green-600 font-medium">
                     💰 {demand.budget_range}
                   </p>
                 )}
@@ -226,11 +140,10 @@ export default function DemandCarousel() {
                     e.stopPropagation()
                     handleContactClient(demand)
                   }}
-                  className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white transition-colors font-medium"
+                  className="mt-2 w-full bg-green-600 hover:bg-green-700 text-white transition-colors font-medium text-xs"
                   style={{
-                    padding: '10px 16px',
-                    borderRadius: '12px',
-                    fontSize: '14px'
+                    padding: '6px 12px',
+                    borderRadius: '8px'
                   }}
                 >
                   {t('contact') || 'Contacter'}
@@ -239,7 +152,7 @@ export default function DemandCarousel() {
             ))}
             
             {demands.length === 0 && (
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-500 text-sm text-center w-full">
                 {t('no Demands') || 'Aucune demande disponible'}
               </p>
             )}
