@@ -114,7 +114,7 @@ export default function DemandCarousel() {
             {t('artisanDashboard.availableDemands') || 'Demandes disponibles'}
           </h3>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 hidden md:flex">
             <button
               onClick={scrollLeft}
               className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0"
@@ -196,6 +196,64 @@ export default function DemandCarousel() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
+          </div>
+
+          {/* Mobile vertical stack */}
+          <div className="flex flex-col gap-4 md:hidden max-h-[60vh] overflow-y-auto">
+            {demands.map((demand) => (
+              <div
+                key={demand.id}
+                onClick={() => handleViewDetails(demand)}
+                className="bg-white cursor-pointer hover:shadow-xl transition-all"
+                style={{
+                  borderRadius: '16px',
+                  padding: '20px',
+                  border: '2px solid #9ca3af'
+                }}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
+                    {demand.title}
+                  </h4>
+                  {demand.urgency && (
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getUrgencyColor(demand.urgency)}`}>
+                      {demand.urgency}
+                    </span>
+                  )}
+                </div>
+                
+                <p className="text-xs text-gray-600 mb-2">{demand.category}</p>
+                <p className="text-xs text-gray-500 mb-2">
+                  📍 {demand.location}
+                </p>
+                {demand.budget_range && (
+                  <p className="text-xs text-green-600 font-medium">
+                    💰 {demand.budget_range}
+                  </p>
+                )}
+                
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleContactClient(demand)
+                  }}
+                  className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white transition-colors font-medium"
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    fontSize: '14px'
+                  }}
+                >
+                  {t('contact') || 'Contacter'}
+                </button>
+              </div>
+            ))}
+            
+            {demands.length === 0 && (
+              <p className="text-gray-500 text-sm">
+                {t('artisanDashboard.noDemands') || 'Aucune demande disponible'}
+              </p>
+            )}
           </div>
         </div>
       </div>
