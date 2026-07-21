@@ -37,6 +37,8 @@ export default function DemandCarousel() {
       const response = await fetch('/api/public-demands')
       const data = await response.json()
       
+      console.log('Fetched demands data:', data)
+      
       // Ensure data is an array
       if (Array.isArray(data)) {
         setDemands(data)
@@ -65,6 +67,9 @@ export default function DemandCarousel() {
   }
 
   const handleContactClient = (demand: Demand) => {
+    console.log('Contact clicked for demand:', demand)
+    console.log('User data:', demand.users)
+    
     const clientEmail = demand.users?.email
     const clientName = demand.users?.name || 'Client'
     const clientPhone = demand.users?.phone
@@ -77,9 +82,8 @@ export default function DemandCarousel() {
       // Fallback to showing phone if email not available
       alert(`Contact Information:\n\nName: ${clientName}\nPhone: ${clientPhone}\n\nEmail not available. Please contact via phone.`)
     } else {
-      // Show modal with client info if neither email nor phone available
+      // Show modal with full details if contact info not available
       setSelectedDemand(demand)
-      alert('Client contact information not available. Please check the demand details.')
     }
   }
 
@@ -146,7 +150,7 @@ export default function DemandCarousel() {
                     <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
                       {demand.title}
                     </h4>
-                    {demand.urgency && (
+                    {demand.urgency && demand.urgency !== 'NORMAL' && (
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getUrgencyColor(demand.urgency)}`}>
                         {demand.urgency}
                       </span>
@@ -215,7 +219,7 @@ export default function DemandCarousel() {
                   <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
                     {demand.title}
                   </h4>
-                  {demand.urgency && (
+                  {demand.urgency && demand.urgency !== 'NORMAL' && (
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getUrgencyColor(demand.urgency)}`}>
                       {demand.urgency}
                     </span>

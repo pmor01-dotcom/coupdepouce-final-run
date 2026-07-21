@@ -21,11 +21,15 @@ export async function GET() {
     // Fetch user information separately for each demand
     const demandsWithUsers = await Promise.all(
       (data || []).map(async (demand) => {
-        const { data: userData } = await supabase
+        const { data: userData, error: userError } = await supabase
           .from('users')
           .select('email, name, phone')
           .eq('id', demand.client_id)
           .single()
+        
+        if (userError) {
+          console.error(`Error fetching user for demand ${demand.id}:`, userError)
+        }
         
         return {
           ...demand,
