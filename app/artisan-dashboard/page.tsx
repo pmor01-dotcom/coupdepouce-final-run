@@ -25,8 +25,8 @@ export default function ArtisanDashboard() {
       {/* HEADER — TRANSLATED */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-3xl mx-auto px-4">
-          <div className="flex items-center justify-center h-20">
-            <h1 className="text-4xl font-bold text-gray-900">
+          <div className="flex items-center justify-center h-16 md:h-20">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
               {t('artisanHeader')}
             </h1>
           </div>
@@ -34,9 +34,9 @@ export default function ArtisanDashboard() {
       </header>
 
       {/* BUTTONS ONLY */}
-      <div className="max-w-3xl mx-auto px-4 mt-10 w-full">
+      <div className="max-w-3xl mx-auto px-4 mt-6 md:mt-10 w-full">
 
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <button
             onClick={handleLogout}
             style={{
@@ -57,7 +57,7 @@ export default function ArtisanDashboard() {
           </button>
         </div>
 
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
             href="/proposals"
             style={{
@@ -81,7 +81,7 @@ export default function ArtisanDashboard() {
           </Link>
         </div>
 
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
             href="/messages"
             style={{
@@ -105,7 +105,7 @@ export default function ArtisanDashboard() {
           </Link>
         </div>
 
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
             href="/artisan-profile-editor"
             style={{
@@ -132,7 +132,7 @@ export default function ArtisanDashboard() {
       </div>
 
       {/* UNSUBSCRIBE BUTTON ONLY */}
-      <div className="max-w-3xl mx-auto px-4 pb-10 mt-10">
+      <div className="max-w-3xl mx-auto px-4 pb-6 md:pb-10 mt-6 md:mt-10 flex flex-col items-center">
         <button
           onClick={() => {
             if (confirm(t('unsubscribeConfirm'))) {
@@ -140,12 +140,12 @@ export default function ArtisanDashboard() {
               router.push('/')
             }
           }}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200 w-full"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 md:py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
-          <span className="text-sm font-medium">{t('unsubscribe')}</span>
+          <span className="text-xs md:text-sm font-medium">{t('unsubscribe')}</span>
         </button>
       </div>
 

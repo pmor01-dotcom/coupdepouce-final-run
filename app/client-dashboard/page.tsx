@@ -104,8 +104,8 @@ export default function ClientDashboard() {
         {/* HEADER AT TOP */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-3xl mx-auto px-4">
-            <div className="flex items-center justify-center h-20">
-              <h1 className="text-4xl font-bold text-gray-900">{t('clientDashboard.title')}</h1>
+            <div className="flex items-center justify-center h-16 md:h-20">
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900">{t('clientDashboard.title')}</h1>
             </div>
           </div>
         </header>
@@ -116,9 +116,9 @@ export default function ClientDashboard() {
         </div>
 
         {/* BUTTONS STACKED VERTICALLY */}
-        <div className="max-w-3xl mx-auto px-4 mt-6 w-full" style={{ display: 'block' }}>
+        <div className="max-w-3xl mx-auto px-4 mt-6 w-full">
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
               <button
                 onClick={handleLogout}
                 style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
@@ -129,7 +129,7 @@ export default function ClientDashboard() {
               </button>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
               <Link href="/client-dashboard/demandes" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
@@ -138,7 +138,7 @@ export default function ClientDashboard() {
               </Link>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
               <Link href="/create-demand" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
@@ -147,7 +147,7 @@ export default function ClientDashboard() {
               </Link>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
               <button
                 onClick={() => setActiveTab('proposals')}
                 style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
@@ -158,7 +158,7 @@ export default function ClientDashboard() {
               </button>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
               <button
                 onClick={() => setActiveTab('messages')}
                 style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
@@ -169,7 +169,7 @@ export default function ClientDashboard() {
               </button>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
               <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
@@ -189,7 +189,7 @@ export default function ClientDashboard() {
         <div className="max-w-3xl mx-auto px-4 py-8"></div>
 
         {/* UNSUBSCRIBE BUTTON */}
-        <div className="max-w-3xl mx-auto px-4 pb-10">
+        <div className="max-w-3xl mx-auto px-4 pb-10 flex flex-col items-center">
           <button
             onClick={() => {
               if (confirm(t('unsubscribe.confirm'))) {
@@ -197,13 +197,13 @@ export default function ClientDashboard() {
                 router.push('/')
               }
             }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200 w-full"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 md:py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200"
             title={t('unsubscribe.title')}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-            <span className="text-sm font-medium">{t('unsubscribe.title')}</span>
+            <span className="text-xs md:text-sm font-medium">{t('unsubscribe.title')}</span>
           </button>
         </div>
 

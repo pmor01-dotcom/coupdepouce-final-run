@@ -171,7 +171,7 @@ export default function DemandCarousel() {
               
               {demands.length === 0 && (
                 <p className="text-gray-500 text-sm">
-                  {t('artisanDashboard.noDemands') || 'Aucune demande disponible'}
+                  {t('no Demands') || 'Aucune demande disponible'}
                 </p>
               )}
             </div>
@@ -240,7 +240,7 @@ export default function DemandCarousel() {
             
             {demands.length === 0 && (
               <p className="text-gray-500 text-sm">
-                {t('artisanDashboard.noDemands') || 'Aucune demande disponible'}
+                {t('no Demands') || 'Aucune demande disponible'}
               </p>
             )}
           </div>
