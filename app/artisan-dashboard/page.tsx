@@ -27,7 +27,7 @@ export default function ArtisanDashboard() {
         <div className="max-w-3xl mx-auto px-4">
           <div className="flex items-center justify-center h-16 md:h-20">
             <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t('availableDemands') || 'Available Demands'}
+              {t('artisanHeader') || 'Artisan Tableau de bord'}
             </h1>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function ArtisanDashboard() {
 
         <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
-            href="/artisan-profile-editor"
+            href="/artisan-profile"
             style={{
               backgroundColor: '#6b7280',
               color: 'white',
