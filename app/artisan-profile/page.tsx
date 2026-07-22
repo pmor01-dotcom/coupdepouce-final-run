@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 
 interface ArtisanProfile {
   id: string
@@ -16,12 +17,20 @@ interface ArtisanProfile {
   description?: string
   experience_years?: number
   specialties?: string
+  photo_url?: string
 }
 
 export default function ArtisanProfilePage() {
   const router = useRouter()
   const { user } = useAuth()
   const { t } = useLanguage()
+
+  // ⭐ Supabase client (Step 2)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   const [profile, setProfile] = useState<ArtisanProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -69,29 +78,55 @@ export default function ArtisanProfilePage() {
         }
       }
     } catch (error) {
-      console.error('Error fetching profile:', error)
       setError(t('errorLoadingProfile'))
     } finally {
       setIsLoading(false)
     }
   }
 
+  // ⭐ Step 3 — Upload photo + update profile
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
     setError('')
     setSuccess(false)
 
+    let uploadedPhotoUrl = formData.photo_url
+
+    // Upload photo if a new file was selected
+    if (photoFile) {
+      const fileExt = photoFile.name.split('.').pop()
+      const fileName = `${profile?.id}.${fileExt}`
+      const filePath = `avatars/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, photoFile, { upsert: true })
+
+      if (uploadError) {
+        setError('Erreur lors de l’upload de la photo')
+        setIsSaving(false)
+        return
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      uploadedPhotoUrl = publicUrlData.publicUrl
+    }
+
     try {
       const response = await fetch('/api/artisan/get-profile/update-profile', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: profile?.id,
           ...formData,
-          experience_years: formData.experience_years ? parseInt(formData.experience_years) : null
+          photo_url: uploadedPhotoUrl,
+          experience_years: formData.experience_years
+            ? parseInt(formData.experience_years)
+            : null
         })
       })
 
@@ -100,7 +135,6 @@ export default function ArtisanProfilePage() {
       if (response.ok) {
         setSuccess(true)
         setTimeout(() => setSuccess(false), 3000)
-        // Update local profile data
         fetchProfile()
       } else {
         setError(data.error || t('errorUpdatingProfile'))
@@ -143,8 +177,8 @@ export default function ArtisanProfilePage() {
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{t('artisanProfile') || 'Profil Artisan'}</h1>
-              <p className="text-gray-600 mt-1">{t('profileSubtitle') || 'Gérez vos informations professionnelles'}</p>
+              <h1 className="text-3xl font-bold text-gray-900">{t('artisanProfile')}</h1>
+              <p className="text-gray-600 mt-1">{t('profileSubtitle')}</p>
             </div>
             <Link
               href="/artisan-dashboard"
@@ -153,7 +187,7 @@ export default function ArtisanProfilePage() {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              {t('backToDashboard') || 'Retour au tableau de bord'}
+              {t('backToDashboard')}
             </Link>
           </div>
         </div>
@@ -165,7 +199,7 @@ export default function ArtisanProfilePage() {
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            {t('profileUpdated') || 'Profil mis à jour avec succès'}
+            {t('profileUpdated')}
           </div>
         )}
 
@@ -181,12 +215,10 @@ export default function ArtisanProfilePage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Photo Upload Section */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('profilePhoto') || 'Photo de profil'}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('profilePhoto')}</h2>
             <div className="flex items-start gap-6">
               <div className="flex-shrink-0">
-                <div
-                  className="w-32 h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center"
-                >
+                <div className="w-32 h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center">
                   {photoPreview ? (
                     <img src={photoPreview} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -209,76 +241,63 @@ export default function ArtisanProfilePage() {
                     hover:file:bg-green-100
                   "
                 />
-                <p className="mt-2 text-sm text-gray-500">
-                  {t('photoHint') || 'Téléchargez une photo professionnelle (JPG, PNG, max 5 Mo)'}
-                </p>
               </div>
             </div>
           </div>
 
           {/* Personal Information */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('personalInfo') || 'Informations personnelles'}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('personalInfo')}</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('fullName') || 'Nom complet'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('fullName')}</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('phone') || 'Téléphone'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('phone')}</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleChange('phone', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('email') || 'Email'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('email')}</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('Town') || 'Ville'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('Town')}</label>
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => handleChange('location', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('yearsOfExperience') || 'Années d\'expérience'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('yearsOfExperience')}</label>
                 <input
                   type="number"
                   value={formData.experience_years}
                   onChange={(e) => handleChange('experience_years', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   min="0"
                 />
               </div>
@@ -287,44 +306,38 @@ export default function ArtisanProfilePage() {
 
           {/* Professional Information */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('professionalInfo') || 'Informations professionnelles'}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('professionalInfo')}</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('trade') || 'Métier'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('trade')}</label>
                 <input
                   type="text"
                   value={formData.metier}
                   onChange={(e) => handleChange('metier', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('description') || 'Description'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('description')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
-                  placeholder={t('descriptionPlaceholder') || 'Décrivez vos services et votre expertise...'}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                  placeholder={t('descriptionPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('specialties') || 'Spécialités'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('specialties')}</label>
                 <input
                   type="text"
                   value={formData.specialties}
                   onChange={(e) => handleChange('specialties', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  placeholder={t('specialtiesPlaceholder') || 'ex: Plomberie, Électricité, Chauffage...'}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder={t('specialtiesPlaceholder')}
                 />
               </div>
             </div>
@@ -335,7 +348,7 @@ export default function ArtisanProfilePage() {
             <button
               type="submit"
               disabled={isSaving}
-              className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg disabled:opacity-50 flex items-center"
             >
               {isSaving ? (
                 <>
@@ -343,14 +356,14 @@ export default function ArtisanProfilePage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  {t('saving') || 'Enregistrement...'}
+                  {t('saving')}
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  {t('saveChanges') || 'Enregistrer les modifications'}
+                  {t('saveChanges')}
                 </>
               )}
             </button>
