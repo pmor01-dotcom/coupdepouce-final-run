@@ -7,7 +7,7 @@ import {
   useState,
   ReactNode,
 } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getSupabaseClient } from '@/lib/supabase-client'
 
 interface UserProfile {
   id: string
@@ -30,7 +30,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -61,7 +61,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
       const { data: profile } = await supabase
         .from('users')
-        .select('*')
+        .select('id, name, email, phone, location, metier, role, isPaid')
         .eq('id', authUser.id)
         .single()
 
@@ -103,7 +103,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
         const { data: profile } = await supabase
           .from('users')
-          .select('*')
+          .select('id, name, email, phone, location, metier, role, isPaid')
           .eq('id', authUser.id)
           .single()
 
@@ -147,7 +147,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: profile } = await supabase
       .from('users')
-      .select('*')
+      .select('id, name, email, phone, location, metier, role, isPaid')
       .eq('id', authUser.id)
       .single()
 

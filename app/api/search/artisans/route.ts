@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // Build Supabase query
     let supabaseQuery = supabase
       .from('users')
-      .select('*', { count: 'exact' })
+      .select('id, name, email, phone, location, metier, department, experience_years, insurance_number, work_hours, business_address, company_name, created_at, role', { count: 'exact' })
       .eq('role', 'ARTISAN')
 
     // Text search

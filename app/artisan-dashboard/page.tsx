@@ -22,20 +22,21 @@ export default function ArtisanDashboard() {
       style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
     >
 
-      {/* HEADER — TRANSLATED */}
+      {/* HEADER */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-3xl mx-auto px-4">
           <div className="flex items-center justify-center h-16 md:h-20">
             <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t('artisanHeader') || 'Artisan Tableau de bord'}
+              {t('artisanHeader') || 'Artisan Dashboard'}
             </h1>
           </div>
         </div>
       </header>
 
-      {/* BUTTONS ONLY */}
+      {/* BUTTONS */}
       <div className="max-w-3xl mx-auto px-4 mt-6 md:mt-10 w-full">
 
+        {/* Logout */}
         <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <button
             onClick={handleLogout}
@@ -57,6 +58,7 @@ export default function ArtisanDashboard() {
           </button>
         </div>
 
+        {/* Proposals */}
         <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
             href="/proposals"
@@ -81,6 +83,7 @@ export default function ArtisanDashboard() {
           </Link>
         </div>
 
+        {/* Messages */}
         <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
             href="/messages"
@@ -105,6 +108,7 @@ export default function ArtisanDashboard() {
           </Link>
         </div>
 
+        {/* Edit Profile */}
         <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
             href="/artisan-profile"
@@ -131,7 +135,7 @@ export default function ArtisanDashboard() {
 
       </div>
 
-      {/* UNSUBSCRIBE BUTTON ONLY */}
+      {/* UNSUBSCRIBE BUTTON */}
       <div className="max-w-3xl mx-auto px-4 pb-6 md:pb-10 mt-6 md:mt-10 flex flex-col items-center">
         <button
           onClick={() => {

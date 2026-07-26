@@ -5,7 +5,7 @@ import LanguageToggle from './components/LanguageToggle'
 
 export const metadata: Metadata = {
   title: 'Coup de Pouce - Artisans & Clients',
-  description: 'Connectez-vous avec des artisans qualifiés pour vos projets',
+  description: 'Connectez-vous avec des artisans pour vos projets',
 }
 
 export const viewport = {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getSupabaseClient } from '@/lib/supabase-client'
 import AuthProvider from '@/app/components/AuthProvider'
 import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider'
 
@@ -12,7 +12,7 @@ import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider
 
 export default function MessagesPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
   const [user, setUser] = useState<any>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
 

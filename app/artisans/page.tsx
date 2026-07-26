@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getSupabaseClient } from '@/lib/supabase-client'
 
 export default function ArtisanListPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
   const { user, isLoading: authLoading } = useAuth()
   const { t } = useLanguage()
 

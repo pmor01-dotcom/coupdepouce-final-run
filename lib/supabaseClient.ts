@@ -1,16 +1,6 @@
 'use client';
 
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseClient } from './supabase-client';
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      flowType: "pkce",
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  }
-);
+// Re-export the singleton for backward compatibility
+export const supabase = getSupabaseClient();

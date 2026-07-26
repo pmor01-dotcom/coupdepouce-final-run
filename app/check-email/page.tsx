@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getSupabaseClient } from '@/lib/supabase-client'
 import { useAuth } from '../components/AuthProvider'
 
 export default function CheckEmailPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
   const { user, isLoading } = useAuth()
   const [checking, setChecking] = useState(true)
 

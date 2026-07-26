@@ -2,7 +2,7 @@
 
 import { useEffect, useState, FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getSupabaseClient } from '@/lib/supabase-client'
 import { useLanguage } from '../../components/LanguageProvider'
 
 type Demand = {
@@ -12,7 +12,7 @@ type Demand = {
 }
 
 export default function ProposePage() {
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
   const router = useRouter()
   const { t } = useLanguage()
   const params = useParams() as { id: string }

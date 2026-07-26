@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/app/components/AuthProvider'
 import { useLanguage } from '../../components/LanguageProvider'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
@@ -11,6 +11,7 @@ export default function EditProfile() {
   const { user } = useAuth()
   const { t } = useLanguage()
   const router = useRouter()
+  const supabase = getSupabaseClient()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -49,7 +50,7 @@ export default function EditProfile() {
       // First check users table
       const { data: userProfile } = await supabase
         .from('users')
-        .select('*')
+        .select('id, name, email, phone, location, role')
         .eq('id', user.id)
         .single()
 
