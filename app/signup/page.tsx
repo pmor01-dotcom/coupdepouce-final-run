@@ -28,6 +28,13 @@ export default function SignupPage() {
     setError('')
     setLoading(true)
 
+    // ⭐ FIX: Prevent submitting without selecting a role
+    if (!selectedRole) {
+      setError("Veuillez choisir un rôle avant de continuer.")
+      setLoading(false)
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError(t('signup.passwordMismatch'))
       setLoading(false)

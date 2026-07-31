@@ -44,6 +44,16 @@ export default function ArtisanSignupPage() {
 
     try {
       console.log('Sending signup request to /api/auth/signup')
+      console.log('Form data being sent:', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: 'ARTISAN',
+        ville: formData.ville,
+        metier: formData.metier,
+        phone: formData.phone,
+      })
+      
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -53,7 +63,7 @@ export default function ArtisanSignupPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: 'artisan',
+          role: 'ARTISAN',
           ville: formData.ville,
           metier: formData.metier,
           phone: formData.phone,
@@ -63,8 +73,10 @@ export default function ArtisanSignupPage() {
       console.log('Response received:', response.status, response.statusText)
       const data = await response.json()
       console.log('Response data:', data)
+      console.log('Full response:', JSON.stringify(data, null, 2))
 
       if (!response.ok) {
+        console.error('Signup failed with error:', data.error)
         setError(data.error || t('signup.signupError'))
         setLoading(false)
         return

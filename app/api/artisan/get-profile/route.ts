@@ -1,43 +1,58 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-export async function GET(request: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies });
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export async function GET(req: Request) {
+  try {
+    // 1. Read user ID from header (sent by frontend)
+    const userId = req.headers.get("x-user-id")
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    if (!userId) {
+      return NextResponse.json({ error: "Missing user ID" }, { status: 400 })
+    }
+
+    // 2. Fetch user basic info
+    const { data: userRow, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (userError) {
+      return NextResponse.json({ error: userError.message }, { status: 400 })
+    }
+
+    // 3. Fetch artisan profile info
+    const { data: profileRow, error: profileError } = await supabase
+      .from('artisan_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 400 })
+    }
+
+    // 4. Merge both tables
+    const merged = {
+      id: userRow.id,
+      name: userRow.name,
+      email: userRow.email,
+      phone: profileRow.phone,
+      location: profileRow.city,
+      metier: profileRow.trade,
+      description: profileRow.description,
+      experience_years: profileRow.experience_years,
+      specialties: profileRow.specialties,
+      photo_url: profileRow.photo_url
+    }
+
+    return NextResponse.json(merged)
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
-
-  const userId = session.user.id;
-  console.log("Fetching profile for user ID:", userId);
-
-  const { data, error } = await supabase
-    .from("users")
-    .select(
-      "id, name, email, phone, location, metier, role, photo_url, department"
-    )
-    .eq("id", userId)
-    .eq("role", "ARTISAN")
-    .single();
-
-  if (error) {
-    console.error("Profile fetch error:", error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-
-  if (!data) {
-    console.error("No profile found for user:", userId);
-    return NextResponse.json(
-      { error: "Artisan profile not found" },
-      { status: 404 }
-    );
-  }
-
-  console.log("Profile data:", data);
-  return NextResponse.json(data);
 }

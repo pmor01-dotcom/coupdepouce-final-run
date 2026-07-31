@@ -16,6 +16,7 @@ interface ArtisanProfile {
   description?: string
   experience_years?: number
   specialties?: string
+  photo_url?: string
 }
 
 export default function ArtisanProfilePage() {
@@ -37,19 +38,27 @@ export default function ArtisanProfilePage() {
     metier: '',
     description: '',
     experience_years: '',
-    specialties: ''
+    specialties: '',
+    photo_url: ''
   })
 
   useEffect(() => {
     fetchProfile()
   }, [])
 
+  // ⭐ FIXED fetchProfile — clean, correct, no duplicates
   const fetchProfile = async () => {
     try {
-      const response = await fetch('/api/artisan/get-profile')
+      const response = await fetch('/api/artisan/get-profile', {
+        headers: {
+          "x-user-id": user?.id || ""
+        }
+      })
+
       if (response.ok) {
         const data = await response.json()
         setProfile(data)
+
         setFormData({
           name: data.name || '',
           email: data.email || '',
@@ -58,8 +67,12 @@ export default function ArtisanProfilePage() {
           metier: data.metier || '',
           description: data.description || '',
           experience_years: data.experience_years?.toString() || '',
-          specialties: data.specialties || ''
+          specialties: data.specialties || '',
+          photo_url: data.photo_url || ''
         })
+      } else {
+        const err = await response.json()
+        setError(err.error || t('errorLoadingProfile'))
       }
     } catch {
       setError(t('errorLoadingProfile'))
@@ -68,8 +81,48 @@ export default function ArtisanProfilePage() {
     }
   }
 
+  // ⭐ PHOTO UPLOAD HANDLER
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !profile?.id) return
+
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${profile.id}.${fileExt}`
+      const filePath = `artisan_photos/${fileName}`
+
+      const uploadRes = await fetch('/api/artisan/upload-photo', {
+        method: 'POST',
+        headers: {
+          'x-file-name': filePath
+        },
+        body: file
+      })
+
+      const uploadData = await uploadRes.json()
+
+      if (!uploadRes.ok) {
+        console.error(uploadData.error)
+        return
+      }
+
+      const publicUrl =
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/artisan_photos/${fileName}`
+
+      setFormData(prev => ({ ...prev, photo_url: publicUrl }))
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!user?.id) {
+      setError('User not authenticated')
+      return
+    }
+
     setIsSaving(true)
     setError('')
     setSuccess(false)
@@ -77,11 +130,16 @@ export default function ArtisanProfilePage() {
     try {
       const response = await fetch('/api/artisan/get-profile/update-profile', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.id
+        },
         body: JSON.stringify({
-          id: profile?.id,
+          id: user.id,
           ...formData,
-          experience_years: formData.experience_years ? parseInt(formData.experience_years) : null
+          experience_years: formData.experience_years
+            ? parseInt(formData.experience_years)
+            : null
         })
       })
 
@@ -140,6 +198,28 @@ export default function ArtisanProfilePage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* ⭐ PHOTO UPLOAD SECTION */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('profilePhoto')}
+            </label>
+
+            {formData.photo_url && (
+              <img
+                src={formData.photo_url}
+                alt="Profile"
+                className="w-40 h-40 object-cover rounded-md mb-3 border"
+              />
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+            />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
