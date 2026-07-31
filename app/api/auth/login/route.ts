@@ -23,8 +23,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
-    // 2. Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash)
+    // 2. Verify password - handle both bcrypt hashes and plain text (legacy)
+    let isPasswordValid = false
+    const storedHash = user.password_hash
+
+    // Check if stored password is a bcrypt hash (starts with $2a$ or $2b$)
+    if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$')) {
+      isPasswordValid = await bcrypt.compare(password, storedHash)
+    } else {
+      // Legacy: plain text comparison
+      isPasswordValid = password === storedHash
+      
+      // If valid, upgrade to bcrypt hash
+      if (isPasswordValid) {
+        const newHash = await bcrypt.hash(password, 10)
+        await supabase
+          .from('users')
+          .update({ password_hash: newHash })
+          .eq('id', user.id)
+      }
+    }
+
     if (!isPasswordValid) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }

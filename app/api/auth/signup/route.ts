@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import bcrypt from 'bcryptjs'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,12 +14,15 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { name, email, password, role, ville, metier, phone } = body
 
+    // Hash password before storing
+    const password_hash = await bcrypt.hash(password, 10)
+
     const { data: user, error: userError } = await supabase
       .from('users')
       .insert({
         name,
         email,
-        password_hash: password,
+        password_hash,
         role
       })
       .select()
