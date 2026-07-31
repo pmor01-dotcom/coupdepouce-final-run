@@ -35,145 +35,53 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Restore user from localStorage FIRST
+  // Restore user from localStorage
   useEffect(() => {
     const stored = localStorage.getItem('user')
     if (stored) {
       setUser(JSON.parse(stored))
     }
+    setIsLoading(false)
   }, [])
 
-  // Load session + fetch profile
-  useEffect(() => {
-    const loadSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        setUser(null)
-        localStorage.removeItem('user')
-        setIsLoading(false)
-        return
-      }
-
-      const authUser = session.user
-
-      const { data: profile } = await supabase
-        .from('users')
-        .select('id, name, email, phone, location, metier, role, isPaid')
-        .eq('id', authUser.id)
-        .single()
-
-      if (profile) {
-        const role = profile.role?.toLowerCase() || 'client'
-        const userProfile: UserProfile = {
-          id: authUser.id,
-          email: authUser.email ?? '',
-          role: role as 'client' | 'artisan',
-          name: profile.name,
-          phone: profile.phone,
-          location: profile.location,
-          metier: profile.metier,
-          isPaid: profile.isPaid ?? false,
-        }
-
-        setUser(userProfile)
-        localStorage.setItem('user', JSON.stringify(userProfile))
-      } else {
-        setUser(null)
-        localStorage.removeItem('user')
-      }
-
-      setIsLoading(false)
-    }
-
-    loadSession()
-
-    // Auth listener
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!session?.user) {
-          setUser(null)
-          localStorage.removeItem('user')
-          return
-        }
-
-        const authUser = session.user
-
-        const { data: profile } = await supabase
-          .from('users')
-          .select('id, name, email, phone, location, metier, role, isPaid')
-          .eq('id', authUser.id)
-          .single()
-
-        if (profile) {
-          const role = profile.role?.toLowerCase() || 'client'
-          const userProfile: UserProfile = {
-            id: authUser.id,
-            email: authUser.email ?? '',
-            role: role as 'client' | 'artisan',
-            name: profile.name,
-            phone: profile.phone,
-            location: profile.location,
-            metier: profile.metier,
-            isPaid: profile.isPaid ?? false,
-          }
-
-          setUser(userProfile)
-          localStorage.setItem('user', JSON.stringify(userProfile))
-        } else {
-          setUser(null)
-          localStorage.removeItem('user')
-        }
-      }
-    )
-
-    return () => {
-      listener.subscription.unsubscribe()
-    }
-  }, [supabase])
-
-  // FIXED LOGIN
+  // CUSTOM LOGIN using password_hash
   const login = async (email: string, password: string): Promise<boolean | UserProfile> => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
 
-    if (error || !data.user) return false
+      const data = await response.json()
 
-    const authUser = data.user
+      if (!response.ok || !data.success) {
+        return false
+      }
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id, name, email, phone, location, metier, role, isPaid')
-      .eq('id', authUser.id)
-      .single()
+      const role = data.user.role?.toLowerCase() || 'client'
 
-    if (!profile) return false
+      const userProfile: UserProfile = {
+        id: data.user.id,
+        email: data.user.email,
+        role: role as 'client' | 'artisan',
+        name: data.user.name,
+        phone: data.user.phone,
+        location: data.user.location,
+        metier: data.user.metier,
+        isPaid: data.user.isPaid ?? false,
+      }
 
-    const role = profile.role?.toLowerCase() || 'client'
+      setUser(userProfile)
+      localStorage.setItem('user', JSON.stringify(userProfile))
 
-    const userProfile: UserProfile = {
-      id: authUser.id,
-      email: authUser.email ?? '',
-      role: role as 'client' | 'artisan',
-      name: profile.name,
-      phone: profile.phone,
-      location: profile.location,
-      metier: profile.metier,
-      isPaid: profile.isPaid ?? false,
+      return userProfile
+    } catch (err) {
+      return false
     }
-
-    setUser(userProfile)
-    localStorage.setItem('user', JSON.stringify(userProfile))
-
-    return userProfile
   }
 
   const logout = async () => {
-    await supabase.auth.signOut()
     setUser(null)
     localStorage.removeItem('user')
     window.location.href = '/'

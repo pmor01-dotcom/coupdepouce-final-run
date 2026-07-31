@@ -86,6 +86,12 @@ export default function CreateDemandPage() {
     return null
   }
 
+  // Check if user is a client
+  if (user.role !== 'client') {
+    router.push(user.role === 'artisan' ? '/artisan-dashboard' : '/login')
+    return null
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-200 px-4 py-12">
       <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-md space-y-6">
