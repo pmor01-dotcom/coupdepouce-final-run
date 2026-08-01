@@ -36,11 +36,15 @@ export default function CreateDemandPage() {
     setError('')
     setLoading(true)
 
-    if (!user || !user.id) {
+    console.log("User object:", user)
+
+    if (!user || !user.email) {
       setError('User not authenticated. Please login again.')
       setLoading(false)
       return
     }
+
+    console.log("Submitting demand for user:", user.email, "ID:", user.id)
 
     try {
       const res = await fetch('/api/demands', {
