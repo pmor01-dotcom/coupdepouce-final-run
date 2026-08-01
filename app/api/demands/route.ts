@@ -8,16 +8,41 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const { data, error } = await supabase
+    // Check if user email is provided for filtering
+    const userEmail = req.headers.get("x-user-email");
+
+    let query = supabase
       .from("demands")
-      .select("id, title, category, location")
-      .order("created_at", { ascending: false })
-      .limit(10);
+      .select("id, title, category, location, description, department, budget_range, status, created_at, users(name, email, phone)")
+      .order("created_at", { ascending: false });
+
+    // If user email is provided, filter by that user
+    if (userEmail) {
+      // Look up user by email to get their ID
+      const { data: userCheck, error: userCheckError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", userEmail)
+        .single();
+
+      if (userCheckError || !userCheck) {
+        console.error("User not found:", userEmail, userCheckError);
+        return NextResponse.json([], { status: 404 });
+      }
+
+      // Filter demands by user ID
+      query = query.eq("client_id", userCheck.id);
+    } else {
+      // Limit to 10 for public view
+      query = query.limit(10);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching public demands:", error);
+      console.error("Error fetching demands:", error);
       return NextResponse.json([], { status: 500 });
     }
 

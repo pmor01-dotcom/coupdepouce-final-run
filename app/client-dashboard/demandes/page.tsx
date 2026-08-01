@@ -2,15 +2,26 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../components/AuthProvider'
 
 export default function MesDemandes() {
   const [demands, setDemands] = useState([])
   const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
 
   useEffect(() => {
     const loadDemands = async () => {
+      if (!user || !user.email) {
+        setLoading(false)
+        return
+      }
+
       try {
-        const res = await fetch('/api/demands')
+        const res = await fetch('/api/demands', {
+          headers: {
+            'x-user-email': user.email
+          }
+        })
         if (res.ok) {
           const data = await res.json()
           setDemands(data)
@@ -23,7 +34,7 @@ export default function MesDemandes() {
     }
 
     loadDemands()
-  }, [])
+  }, [user])
 
   if (loading) {
     return (
