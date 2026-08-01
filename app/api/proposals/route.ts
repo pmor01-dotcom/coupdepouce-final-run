@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import EmailService from '@/lib/email';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     const { searchParams } = new URL(request.url);
     const artisanId = searchParams.get('artisanId');
     const demandId = searchParams.get('demandId');
@@ -66,7 +69,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     const {
       message,
       proposed_price,
@@ -115,6 +117,8 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    console.log('Proposal created successfully, full data:', JSON.stringify(proposal, null, 2));
+
     // Send email notification to the client
     try {
       const clientEmail = proposal.demand?.client?.email;
@@ -123,8 +127,19 @@ export async function POST(request: NextRequest) {
       const artisanMetier = proposal.artisan?.metier;
       const demandTitle = proposal.demand?.title;
 
+      console.log('Email notification data:', {
+        clientEmail,
+        clientName,
+        artisanName,
+        artisanMetier,
+        demandTitle,
+        proposed_price,
+        message
+      });
+
       if (clientEmail && clientName && artisanName && demandTitle) {
-        await EmailService.sendNewProposalEmail(
+        console.log('Attempting to send email to:', clientEmail);
+        const emailResult = await EmailService.sendNewProposalEmail(
           clientEmail,
           clientName,
           artisanName,
@@ -133,7 +148,7 @@ export async function POST(request: NextRequest) {
           proposed_price,
           message
         );
-        console.log('Email notification sent to client:', clientEmail);
+        console.log('Email notification result:', emailResult);
       } else {
         console.log('Missing data for email notification:', {
           clientEmail,
