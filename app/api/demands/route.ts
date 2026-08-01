@@ -56,7 +56,6 @@ export async function POST(req: Request) {
 
     console.log("User found in database:", userCheck.id, "type:", typeof userCheck.id)
 
-    // Try to insert with the ID as-is
     const { data, error } = await supabase
       .from("demands")
       .insert({
@@ -75,36 +74,6 @@ export async function POST(req: Request) {
     if (error) {
       console.error("Error creating demand:", error)
       console.error("Error details:", JSON.stringify(error, null, 2))
-
-      // If it's a type mismatch, try converting to integer
-      if (error.message.includes('foreign key')) {
-        console.log("Attempting to convert ID to integer...")
-        const clientIdInt = parseInt(String(userCheck.id), 10)
-        console.log("Converted ID:", clientIdInt, "type:", typeof clientIdInt)
-
-        const { data: data2, error: error2 } = await supabase
-          .from("demands")
-          .insert({
-            client_id: clientIdInt,
-            title,
-            description,
-            category,
-            location,
-            department,
-            budget_range,
-            status: 'OPEN'
-          })
-          .select()
-          .single()
-
-        if (error2) {
-          console.error("Error with integer conversion:", error2)
-          return NextResponse.json({ error: error2.message }, { status: 500 })
-        }
-
-        return NextResponse.json({ success: true, demand: data2 })
-      }
-
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
