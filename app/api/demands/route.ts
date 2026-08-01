@@ -40,10 +40,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not authenticated" }, { status: 401 })
     }
 
+    // Convert userId to integer for foreign key constraint
+    const clientId = parseInt(userId, 10)
+
+    if (isNaN(clientId)) {
+      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 })
+    }
+
     const { data, error } = await supabase
       .from("demands")
       .insert({
-        client_id: userId,
+        client_id: clientId,
         title,
         description,
         category,
