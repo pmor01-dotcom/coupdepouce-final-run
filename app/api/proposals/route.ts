@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import EmailService from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,6 +114,38 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    // Send email notification to the client
+    try {
+      const clientEmail = proposal.demand?.client?.email;
+      const clientName = proposal.demand?.client?.name;
+      const artisanName = proposal.artisan?.name;
+      const artisanMetier = proposal.artisan?.metier;
+      const demandTitle = proposal.demand?.title;
+
+      if (clientEmail && clientName && artisanName && demandTitle) {
+        await EmailService.sendNewProposalEmail(
+          clientEmail,
+          clientName,
+          artisanName,
+          artisanMetier || 'Artisan',
+          demandTitle,
+          proposed_price,
+          message
+        );
+        console.log('Email notification sent to client:', clientEmail);
+      } else {
+        console.log('Missing data for email notification:', {
+          clientEmail,
+          clientName,
+          artisanName,
+          demandTitle
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the request if email fails
+    }
 
     return NextResponse.json({
       proposal,
