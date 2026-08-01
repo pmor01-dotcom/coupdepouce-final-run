@@ -33,17 +33,33 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { title, description, category, location, department, budget_range } = body
 
-    // Get user from header (sent by frontend)
-    const userId = req.headers.get("x-user-id")
+    // Get user email from header (sent by frontend)
+    const userEmail = req.headers.get("x-user-email")
 
-    if (!userId) {
+    if (!userEmail) {
       return NextResponse.json({ error: "User not authenticated" }, { status: 401 })
     }
+
+    console.log("Creating demand for user email:", userEmail)
+
+    // Look up user by email to get their ID
+    const { data: userCheck, error: userCheckError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", userEmail)
+      .single()
+
+    if (userCheckError || !userCheck) {
+      console.error("User not found in database:", userEmail, userCheckError)
+      return NextResponse.json({ error: "User not found in database" }, { status: 404 })
+    }
+
+    console.log("User found in database:", userCheck.id, "type:", typeof userCheck.id)
 
     const { data, error } = await supabase
       .from("demands")
       .insert({
-        client_id: userId,
+        client_id: userCheck.id,
         title,
         description,
         category,

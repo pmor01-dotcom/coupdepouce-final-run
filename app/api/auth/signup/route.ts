@@ -32,6 +32,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: userError.message }, { status: 400 })
     }
 
+    console.log("Signup successful - User ID:", user.id, "Type:", typeof user.id)
+
     if (role === 'artisan' || role === 'ARTISAN') {
       const profileData = {
         id: user.id,

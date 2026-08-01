@@ -51,6 +51,8 @@ export async function POST(req: Request) {
     // 3. Return user data (without password hash)
     const { password_hash, ...userWithoutPassword } = user
 
+    console.log("Login successful - User ID:", user.id, "Type:", typeof user.id)
+
     return NextResponse.json({ 
       user: userWithoutPassword,
       success: true 
