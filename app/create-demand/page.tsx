@@ -36,8 +36,8 @@ export default function CreateDemandPage() {
     setError('')
     setLoading(true)
 
-    if (!user) {
-      setError(t('form.notAuthenticated'))
+    if (!user || !user.id) {
+      setError('User not authenticated. Please login again.')
       setLoading(false)
       return
     }

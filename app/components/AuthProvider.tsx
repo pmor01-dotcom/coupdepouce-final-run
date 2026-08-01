@@ -39,7 +39,17 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem('user')
     if (stored) {
-      setUser(JSON.parse(stored))
+      try {
+        const parsedUser = JSON.parse(stored)
+        // Validate that the user object has required fields
+        if (parsedUser && parsedUser.id && parsedUser.email) {
+          setUser(parsedUser)
+        } else {
+          localStorage.removeItem('user')
+        }
+      } catch (e) {
+        localStorage.removeItem('user')
+      }
     }
     setIsLoading(false)
   }, [])

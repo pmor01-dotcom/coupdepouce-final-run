@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     // Get user from header (sent by frontend)
     const userId = req.headers.get("x-user-id")
-    
+
     if (!userId) {
       return NextResponse.json({ error: "User not authenticated" }, { status: 401 })
     }
@@ -43,14 +43,14 @@ export async function POST(req: Request) {
     const { data, error } = await supabase
       .from("demands")
       .insert({
-        user_id: userId,
+        client_id: userId,
         title,
         description,
         category,
         location,
         department,
         budget_range,
-        status: 'open'
+        status: 'OPEN'
       })
       .select()
       .single()
