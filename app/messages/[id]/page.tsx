@@ -1,49 +1,68 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { getSupabaseClient } from '@/lib/supabase-client'
-import AuthProvider, { useAuth } from '@/app/components/AuthProvider'
-import { LanguageProvider, useLanguage } from '@/app/components/LanguageProvider'
-
-
+import { useAuth } from '@/app/components/AuthProvider'
+import { useLanguage } from '@/app/components/LanguageProvider'
 
 export default function ConversationPage() {
-
-
   const supabase = getSupabaseClient()
   const { user } = useAuth()
   const { t } = useLanguage()
-const params = useParams()
-const id = params?.id as string
+  const router = useRouter()
+  const params = useParams()
+  const otherUserId = params?.id as string
 
   const [messages, setMessages] = useState<any[]>([])
-
-  
+  const [otherUser, setOtherUser] = useState<any>(null)
   const [text, setText] = useState('')
   const bottomRef = useRef<HTMLDivElement | null>(null)
 
-
   useEffect(() => {
-    if (!id) return
+    if (!otherUserId || !user?.id) return
 
     const loadMessages = async () => {
+      // Load messages between current user and other user
       const { data, error } = await supabase
         .from('messages')
-        .select('*')
-        .eq('conversation_id', id)
+        .select(`
+          *,
+          sender:users!messages_sender_id_fkey(id, name),
+          receiver:users!messages_receiver_id_fkey(id, name)
+        `)
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
         .order('created_at', { ascending: true })
 
-      if (!error) setMessages(data)
+      if (!error && data) {
+        setMessages(data)
+      }
+
+      // Get other user info
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id, name, role')
+        .eq('id', otherUserId)
+        .single()
+
+      if (userData) {
+        setOtherUser(userData)
+      }
     }
 
     loadMessages()
 
+    // Real-time subscription for new messages
     const channel = supabase
-      .channel(`conversation_${id}`)
+      .channel(`messages_${user.id}_${otherUserId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${id}` },
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `or(and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id}))`
+        },
         (payload) => {
           setMessages((prev) => [...prev, payload.new])
         }
@@ -53,146 +72,155 @@ const id = params?.id as string
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [id])
+  }, [otherUserId, user?.id])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const sendMessage = async () => {
-    if (!text.trim()) return
+    if (!text.trim() || !user?.id || !otherUserId) return
 
-    await supabase.from('messages').insert({
-      conversation_id: id,
-      sender_id: user?.id,
-      content: text,
-      attachment_url: null
+    const { error } = await supabase.from('messages').insert({
+      sender_id: user.id,
+      receiver_id: otherUserId,
+      content: text
     })
-
-    setText('')
-  }
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    const filePath = `${id}/${Date.now()}-${file.name}`
-
-    const { data, error } = await supabase.storage
-      .from('message-attachments')
-      .upload(filePath, file)
 
     if (error) {
-      console.error(error)
-      return
+      console.error('Error sending message:', error)
+    } else {
+      setText('')
     }
+  }
 
-    const { data: urlData } = supabase.storage
-      .from('message-attachments')
-      .getPublicUrl(filePath)
+  const handleBack = () => {
+    router.push('/messages')
+  }
 
-    await supabase.from('messages').insert({
-      conversation_id: id,
-      sender_id: user?.id,
-      content: null,
-      attachment_url: urlData.publicUrl
-    })
+  if (!user || !otherUser) {
+    return (
+      <main
+        className="min-h-screen overflow-x-hidden"
+        style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <p>Chargement...</p>
+        </div>
+      </main>
+    )
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>{t('messages.conversation')}</h2>
-
-      <div
-        style={{
-          height: '70vh',
-          overflowY: 'auto',
-          border: '1px solid #ccc',
-          padding: 10,
-          borderRadius: 8,
-          marginBottom: 20
-        }}
-      >
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            style={{
-              marginBottom: 12,
-              textAlign: msg.sender_id === user?.id ? 'right' : 'left'
-            }}
-          >
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '8px 12px',
-                borderRadius: 12,
-                background: msg.sender_id === user?.id ? '#0070f3' : '#eee',
-                color: msg.sender_id === user?.id ? 'white' : 'black',
-                maxWidth: '70%'
-              }}
-            >
-              {msg.attachment_url ? (
-                msg.attachment_url.match(/\.(jpg|jpeg|png|webp)$/i) ? (
-                  <img
-                    src={msg.attachment_url}
-                    style={{ maxWidth: '200px', borderRadius: 8 }}
-                  />
-                ) : (
-                  <a
-                    href={msg.attachment_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: 'white', textDecoration: 'underline' }}
-                  >
-                    📄 {t('messages.downloadFile')}
-                  </a>
-                )
-              ) : (
-                msg.content
-              )}
-            </div>
-          </div>
-        ))}
-
-        <div ref={bottomRef} />
-      </div>
-
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <input
-          type="file"
-          accept="image/*,application/pdf"
-          onChange={handleFileUpload}
-          id="fileInput"
-          style={{ display: 'none' }}
-        />
-
-        <label
-          htmlFor="fileInput"
+    <main
+      className="min-h-screen overflow-x-hidden"
+      style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+    >
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <button
+          onClick={handleBack}
           style={{
+            marginBottom: 20,
+            padding: '10px 20px',
+            backgroundColor: '#6b7280',
+            color: 'white',
+            border: 'none',
+            borderRadius: 8,
             cursor: 'pointer',
-            fontSize: 24,
-            padding: '0 10px'
+            fontSize: 14
           }}
         >
-          📎
-        </label>
-
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t('messages.typeMessage')}
-          style={{
-            flex: 1,
-            padding: 10,
-            borderRadius: 8,
-            border: '1px solid #ccc'
-          }}
-        />
-
-        <button onClick={sendMessage} style={{ padding: '10px 20px' }}>
-          {t('messages.send')}
+          ← {t('form.back')}
         </button>
+
+        <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            {otherUser.name} ({otherUser.role === 'client' ? 'Client' : 'Artisan'})
+          </h2>
+
+          <div
+            style={{
+              height: '60vh',
+              overflowY: 'auto',
+              border: '1px solid #e5e7eb',
+              padding: 16,
+              borderRadius: 8,
+              marginBottom: 20,
+              backgroundColor: '#f9fafb'
+            }}
+          >
+            {messages.length === 0 && (
+              <p className="text-gray-500 text-center py-8">
+                Aucun message. Envoyez le premier message !
+              </p>
+            )}
+
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                style={{
+                  marginBottom: 12,
+                  textAlign: msg.sender_id === user.id ? 'right' : 'left'
+                }}
+              >
+                <div
+                  style={{
+                    display: 'inline-block',
+                    padding: '12px 16px',
+                    borderRadius: 12,
+                    background: msg.sender_id === user.id ? '#6B8E23' : '#e5e7eb',
+                    color: msg.sender_id === user.id ? 'white' : 'black',
+                    maxWidth: '70%'
+                  }}
+                >
+                  <p className="text-sm">{msg.content}</p>
+                  <p className="text-xs mt-1 opacity-75">
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            <div ref={bottomRef} />
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={t('messages.typeMessage') || 'Tapez votre message...'}
+              style={{
+                flex: 1,
+                padding: 12,
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                fontSize: 14
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  sendMessage()
+                }
+              }}
+            />
+
+            <button
+              onClick={sendMessage}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#6B8E23',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 500
+              }}
+            >
+              {t('messages.send') || 'Envoyer'}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }

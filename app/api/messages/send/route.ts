@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
     const body = await request.json()
 
     const { senderId, receiverId, content, demandId } = body
@@ -16,7 +19,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if previous messages exist between these users for this demand
+    // Verify both users exist
+    const { data: sender } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('id', senderId)
+      .single()
+
+    const { data: receiver } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('id', receiverId)
+      .single()
+
+    if (!sender || !receiver) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    // If this is the first message and there's a demand, verify the relationship
     const { data: existingMessages } = await supabase
       .from('messages')
       .select('*')
@@ -25,22 +48,7 @@ export async function POST(request: NextRequest) {
       )
       .limit(1)
 
-    // Business rule: only clients can initiate contact
     if (!existingMessages || existingMessages.length === 0) {
-      const { data: sender } = await supabase
-        .from('users')
-        .select('id, role')
-        .eq('id', senderId)
-        .single()
-
-      if (!sender || sender.role !== 'client') {
-        return NextResponse.json(
-          { error: 'Only clients can initiate contact with artisans' },
-          { status: 403 }
-        )
-      }
-
-      // Verify demand belongs to the client
       if (demandId) {
         const { data: demand } = await supabase
           .from('demands')
@@ -48,7 +56,17 @@ export async function POST(request: NextRequest) {
           .eq('id', demandId)
           .single()
 
-        if (!demand || demand.client_id !== senderId) {
+        if (!demand) {
+          return NextResponse.json(
+            { error: 'Demand not found' },
+            { status: 404 }
+          )
+        }
+
+        // Allow both clients and artisans to initiate contact
+        // Clients can message about their own demands
+        // Artisans can message about any demand they're responding to
+        if (sender.role === 'client' && demand.client_id !== senderId) {
           return NextResponse.json(
             { error: 'You can only message about your own demands' },
             { status: 403 }
@@ -71,7 +89,7 @@ export async function POST(request: NextRequest) {
         id,
         content,
         sender:users!messages_sender_id_fkey(id, name, role)
-      `
+        `
       )
       .single()
 

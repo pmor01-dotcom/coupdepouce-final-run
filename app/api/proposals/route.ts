@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import EmailService from '@/lib/email';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -117,61 +116,9 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    console.log('Proposal created successfully, full data:', JSON.stringify(proposal, null, 2));
-
-    // Send email notification to the client
-    let emailSent = false;
-    let emailError: string | null = null;
-
-    try {
-      const clientEmail = proposal.demand?.client?.email;
-      const clientName = proposal.demand?.client?.name;
-      const artisanName = proposal.artisan?.name;
-      const artisanMetier = proposal.artisan?.metier;
-      const demandTitle = proposal.demand?.title;
-
-      console.log('Email notification data:', {
-        clientEmail,
-        clientName,
-        artisanName,
-        artisanMetier,
-        demandTitle,
-        proposed_price,
-        message
-      });
-
-      if (clientEmail && clientName && artisanName && demandTitle) {
-        console.log('Attempting to send email to:', clientEmail);
-        emailSent = await EmailService.sendNewProposalEmail(
-          clientEmail,
-          clientName,
-          artisanName,
-          artisanMetier || 'Artisan',
-          demandTitle,
-          proposed_price,
-          message
-        );
-        console.log('Email notification result:', emailSent);
-      } else {
-        emailError = 'Missing data for email notification';
-        console.log('Missing data for email notification:', {
-          clientEmail,
-          clientName,
-          artisanName,
-          demandTitle
-        });
-      }
-    } catch (emailError) {
-      emailError = emailError instanceof Error ? emailError.message : String(emailError);
-      console.error('Failed to send email notification:', emailError);
-      // Don't fail the request if email fails
-    }
-
     return NextResponse.json({
       proposal,
-      message: 'Proposal created successfully',
-      emailSent,
-      emailError
+      message: 'Proposal created successfully'
     });
 
   } catch (error) {
