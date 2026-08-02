@@ -120,6 +120,9 @@ export async function POST(request: NextRequest) {
     console.log('Proposal created successfully, full data:', JSON.stringify(proposal, null, 2));
 
     // Send email notification to the client
+    let emailSent = false;
+    let emailError: string | null = null;
+
     try {
       const clientEmail = proposal.demand?.client?.email;
       const clientName = proposal.demand?.client?.name;
@@ -139,7 +142,7 @@ export async function POST(request: NextRequest) {
 
       if (clientEmail && clientName && artisanName && demandTitle) {
         console.log('Attempting to send email to:', clientEmail);
-        const emailResult = await EmailService.sendNewProposalEmail(
+        emailSent = await EmailService.sendNewProposalEmail(
           clientEmail,
           clientName,
           artisanName,
@@ -148,8 +151,9 @@ export async function POST(request: NextRequest) {
           proposed_price,
           message
         );
-        console.log('Email notification result:', emailResult);
+        console.log('Email notification result:', emailSent);
       } else {
+        emailError = 'Missing data for email notification';
         console.log('Missing data for email notification:', {
           clientEmail,
           clientName,
@@ -158,13 +162,16 @@ export async function POST(request: NextRequest) {
         });
       }
     } catch (emailError) {
+      emailError = emailError instanceof Error ? emailError.message : String(emailError);
       console.error('Failed to send email notification:', emailError);
       // Don't fail the request if email fails
     }
 
     return NextResponse.json({
       proposal,
-      message: 'Proposal created successfully'
+      message: 'Proposal created successfully',
+      emailSent,
+      emailError
     });
 
   } catch (error) {
