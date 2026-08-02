@@ -87,13 +87,13 @@ export default function CreateDemandPage() {
   }
 
   if (!user) {
-    router.push('/login')
+    router.push('/client-dashboard')
     return null
   }
 
   // Check if user is a client
   if (user.role !== 'client') {
-    router.push(user.role === 'artisan' ? '/artisan-dashboard' : '/login')
+    router.push(user.role === 'artisan' ? '/artisan-dashboard' : '/client-dashboard')
     return null
   }
 
