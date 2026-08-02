@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { useLanguage } from "../components/LanguageProvider";
 
 export default function ResetPasswordPage() {
   const { t } = useLanguage();
+  const router = useRouter();
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -35,6 +37,26 @@ export default function ResetPasswordPage() {
       setMessage(t('common.error'));
     } else {
       setMessage(t('forgotPassword.passwordUpdated'));
+
+      // Get user's role to redirect to correct dashboard
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('role')
+          .eq('email', user.email)
+          .single();
+
+        if (userData?.role === 'client') {
+          router.push('/client-dashboard');
+        } else if (userData?.role === 'artisan') {
+          router.push('/artisan-dashboard');
+        } else {
+          router.push('/');
+        }
+      } else {
+        router.push('/');
+      }
     }
   }
 
