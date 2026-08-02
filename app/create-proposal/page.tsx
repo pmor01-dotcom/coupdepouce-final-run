@@ -125,41 +125,6 @@ export default function CreateProposal() {
       </header>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Demand Details */}
-        <div className="card mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            {t('proposal.demandDetails') || 'Demand details'}
-          </h2>
-          
-          <div className="space-y-3">
-            <div>
-              <h3 className="text-md font-medium text-gray-900">{demand.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">{demand.description}</p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="font-medium">{t('proposal.client') || 'Client'}:</span> {demand.clientName}
-              </div>
-              <div>
-                <span className="font-medium">{t('category') || 'Catégorie'}:</span> {demand.category}
-              </div>
-              <div>
-                <span className="font-medium">{t('location') || 'Localisation'}:</span> {demand.location}
-              </div>
-              <div>
-                <span className="font-medium">{t('proposal.department') || 'Département'}:</span> {demand.department}
-              </div>
-              <div>
-                <span className="font-medium">{t('budget') || 'Budget'}:</span> {demand.budget}
-              </div>
-              <div>
-                <span className="font-medium">{t('proposal.publishedOn') || 'Publié le'}:</span> {demand.createdAt}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
             {error}
