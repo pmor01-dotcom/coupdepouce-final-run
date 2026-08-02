@@ -116,6 +116,28 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    // Send a message to the client about the new proposal
+    try {
+      const clientId = proposal.demand?.client?.id;
+      const demandTitle = proposal.demand?.title;
+
+      if (clientId && demandTitle) {
+        const messageContent = `Nouvelle proposition pour "${demandTitle}": ${message}\n\nPrix proposé: ${proposed_price}`;
+
+        await supabase.from('messages').insert({
+          sender_id: artisan_id,
+          receiver_id: clientId,
+          content: messageContent,
+          demand_id: parseInt(demand_id)
+        });
+
+        console.log('Message sent to client:', clientId);
+      }
+    } catch (messageError) {
+      console.error('Failed to send message to client:', messageError);
+      // Don't fail the request if message fails
+    }
+
     return NextResponse.json({
       proposal,
       message: 'Proposal created successfully'
