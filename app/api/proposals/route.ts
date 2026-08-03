@@ -94,44 +94,31 @@ export async function POST(request: NextRequest) {
         demand_id: demand_id,
         artisan_id: artisan_id
       })
-      .select(`
-        *,
-        artisan:users!proposals_artisan_id_fkey (
-          id,
-          name,
-          metier,
-          location,
-          phone
-        ),
-        demand:demands (
-          *,
-          client:users!demands_client_id_fkey (
-            id,
-            name,
-            location
-          )
-        )
-      `)
+      .select()
       .single();
 
     if (error) throw error;
 
     // Send a message to the client about the new proposal
     try {
-      const clientId = proposal.demand?.client?.id;
-      const demandTitle = proposal.demand?.title;
+      // Fetch demand to get client_id and title
+      const { data: demand } = await supabase
+        .from('demands')
+        .select('id, title, client_id')
+        .eq('id', demand_id)
+        .single();
 
-      if (clientId && demandTitle) {
-        const messageContent = `Nouvelle proposition pour "${demandTitle}": ${message}\n\nPrix proposé: ${proposed_price}`;
+      if (demand && demand.client_id) {
+        const messageContent = `Nouvelle proposition pour "${demand.title}": ${message}\n\nPrix proposé: ${proposed_price}`;
 
         await supabase.from('messages').insert({
           sender_id: artisan_id,
-          receiver_id: clientId,
+          receiver_id: demand.client_id,
           content: messageContent,
           demand_id: demand_id
         });
 
-        console.log('Message sent to client:', clientId);
+        console.log('Message sent to client:', demand.client_id);
       }
     } catch (messageError) {
       console.error('Failed to send message to client:', messageError);
