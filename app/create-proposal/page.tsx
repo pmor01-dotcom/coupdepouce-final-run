@@ -64,8 +64,14 @@ export default function CreateProposal() {
       return
     }
 
-    if (!user?.id) {
+    if (!user) {
       setError('You must be logged in to submit a proposal')
+      return
+    }
+
+    if (!user.id) {
+      console.error('User object missing id:', user)
+      setError('User ID not found. Please try logging in again.')
       return
     }
 

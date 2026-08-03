@@ -37,67 +37,47 @@ export default function ArtisanContacts() {
   const [showDetails, setShowDetails] = useState(false)
 
   useEffect(() => {
-    // Load contacts from localStorage or create mock data
-    const savedContacts = localStorage.getItem('artisanContacts')
-    if (savedContacts) {
-      setContacts(JSON.parse(savedContacts))
-    } else {
-      // Create mock contacts for demonstration
-      const mockContacts: Contact[] = [
-        {
-          id: 1,
-          clientName: 'Jean Dupont',
-          clientEmail: 'jean.dupont@email.com',
-          clientPhone: '06 12 34 56 78',
-          clientAddress: '15 Rue de la République',
-          clientCity: 'Toulouse',
-          clientDepartment: '31 - Haute-Garonne',
-          demandTitle: 'Installation plomberie cuisine',
-          demandCategory: 'Plomberie',
-          contactDate: '2024-04-20',
-          status: 'ongoing',
-          lastMessage: 'Bonjour, je suis disponible pour venir faire un devis la semaine prochaine.',
-          artisanResponse: 'Merci pour votre réponse. Pouvons-nous fixer un rendez-vous pour jeudi ?',
-          proposedPrice: '450 EUR'
-        },
-        {
-          id: 2,
-          clientName: 'Marie Martin',
-          clientEmail: 'marie.martin@email.com',
-          clientPhone: '06 23 45 67 89',
-          clientAddress: '8 Avenue Victor Hugo',
-          clientCity: 'Paris',
-          clientDepartment: '75 - Paris',
-          demandTitle: 'Réparation toiture',
-          demandCategory: 'Couverture',
-          contactDate: '2024-04-18',
-          status: 'initial',
-          lastMessage: 'Bonjour, je suis intéressé par votre proposition pour la réparation de toiture.',
-          artisanResponse: 'Bonjour, je vous enverrai un devis détaillé d\'ici 48 heures.',
-          proposedPrice: '1200 EUR'
-        },
-        {
-          id: 3,
-          clientName: 'Pierre Bernard',
-          clientEmail: 'pierre.bernard@email.com',
-          clientPhone: '06 34 56 78 90',
-          clientAddress: '23 Boulevard du Maréchal Foch',
-          clientCity: 'Lyon',
-          clientDepartment: '69 - Rhône',
-          demandTitle: 'Peinture salon et chambres',
-          demandCategory: 'Peinture',
-          contactDate: '2024-04-15',
-          status: 'completed',
-          lastMessage: 'Très satisfait du travail effectué. Merci beaucoup !',
-          artisanResponse: 'Merci pour votre confiance. N\'hésitez pas à me recommander.',
-          proposedPrice: '800 EUR'
+    const loadContacts = async () => {
+      if (!user?.id) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        // Load proposals for this artisan (these represent contacts)
+        const response = await fetch(`/api/proposals?artisanId=${user.id}`)
+        if (response.ok) {
+          const proposals = await response.json()
+
+          // Transform proposals into contact format
+          const contactList = proposals.map((proposal: any) => ({
+            id: proposal.id,
+            clientName: proposal.demand?.client?.name || 'Unknown',
+            clientEmail: proposal.demand?.client?.email || '',
+            clientPhone: proposal.demand?.client?.phone || '',
+            clientAddress: '',
+            clientCity: proposal.demand?.location || '',
+            clientDepartment: proposal.demand?.department || '',
+            demandTitle: proposal.demand?.title || 'Unknown',
+            demandCategory: proposal.demand?.category || '',
+            contactDate: proposal.created_at,
+            status: proposal.status.toLowerCase(),
+            lastMessage: proposal.message,
+            artisanResponse: '',
+            proposedPrice: `${proposal.proposed_price} EUR`
+          }))
+
+          setContacts(contactList)
         }
-      ]
-      setContacts(mockContacts)
-      localStorage.setItem('artisanContacts', JSON.stringify(mockContacts))
+      } catch (err) {
+        console.error('Error loading contacts:', err)
+      } finally {
+        setIsLoading(false)
+      }
     }
-    setIsLoading(false)
-  }, [])
+
+    loadContacts()
+  }, [user?.id])
 
   const getStatusColor = (status: Contact['status']) => {
     switch (status) {
@@ -139,9 +119,6 @@ export default function ArtisanContacts() {
     e.stopPropagation() // Prevent opening details modal
     if (window.confirm(t('deleteContactConfirm'))) {
       setContacts(prev => prev.filter(contact => contact.id !== contactId))
-      // Update localStorage
-      const updatedContacts = contacts.filter(contact => contact.id !== contactId)
-      localStorage.setItem('artisanContacts', JSON.stringify(updatedContacts))
     }
   }
 

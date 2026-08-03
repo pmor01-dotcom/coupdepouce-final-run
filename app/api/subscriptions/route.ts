@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export const dynamic = 'force-dynamic'
 
@@ -14,12 +20,22 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Mock subscription lookup - in production, query database
-    const subscription = await getUserSubscription(userId)
+    const { data: subscription, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      throw error
+    }
 
     return NextResponse.json({
       success: true,
-      subscription
+      subscription: subscription || null
     })
 
   } catch (error) {
@@ -35,7 +51,6 @@ export async function POST(request: NextRequest) {
   try {
     const subscriptionData = await request.json()
 
-    // Validate required fields
     const { userId, plan, paymentId } = subscriptionData
 
     if (!userId || !plan || !paymentId) {
@@ -45,8 +60,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create subscription - in production, save to database
-    const subscription = await createSubscription(subscriptionData)
+    const now = new Date()
+    const endDate = new Date(now.getTime() + (plan === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000)
+    const amount = plan === 'yearly' ? 299.99 : 29.99
+
+    const { data: subscription, error } = await supabase
+      .from('subscriptions')
+      .insert({
+        user_id: userId,
+        plan,
+        status: 'active',
+        start_date: now.toISOString(),
+        end_date: endDate.toISOString(),
+        amount,
+        currency: 'EUR',
+        auto_renew: true,
+        payment_method: 'card',
+        payment_id: paymentId
+      })
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -76,8 +111,17 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Update subscription - in production, update database
-    const subscription = await updateSubscription(subscriptionId, updateData)
+    const { data: subscription, error } = await supabase
+      .from('subscriptions')
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', subscriptionId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -91,51 +135,5 @@ export async function PUT(request: NextRequest) {
       { success: false, message: 'Erreur lors de la mise à jour de l\'abonnement' },
       { status: 500 }
     )
-  }
-}
-
-async function getUserSubscription(userId: string) {
-  // Mock implementation - in production, query database
-  return {
-    id: 'sub_' + Math.random().toString(36).substr(2, 9),
-    userId,
-    plan: 'monthly',
-    status: 'active',
-    startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    amount: 29.99,
-    currency: 'EUR',
-    autoRenew: true,
-    paymentMethod: 'card'
-  }
-}
-
-async function createSubscription(data: any) {
-  // Mock implementation - in production, save to database
-  const now = new Date()
-  const endDate = new Date(now.getTime() + (data.plan === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000)
-
-  return {
-    id: 'sub_' + Math.random().toString(36).substr(2, 9),
-    userId: data.userId,
-    plan: data.plan,
-    status: 'active',
-    startDate: now.toISOString(),
-    endDate: endDate.toISOString(),
-    amount: data.plan === 'yearly' ? 299.99 : 29.99,
-    currency: 'EUR',
-    autoRenew: true,
-    paymentMethod: 'card',
-    paymentId: data.paymentId,
-    createdAt: now.toISOString()
-  }
-}
-
-async function updateSubscription(subscriptionId: string, updateData: any) {
-  // Mock implementation - in production, update database
-  return {
-    id: subscriptionId,
-    ...updateData,
-    updatedAt: new Date().toISOString()
   }
 }
