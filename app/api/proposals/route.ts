@@ -92,7 +92,8 @@ export async function POST(request: NextRequest) {
         estimated_duration: estimated_duration || null,
         availability: availability || null,
         demand_id: demand_id,
-        artisan_id: artisan_id
+        artisan_id: artisan_id,
+        updated_at: new Date().toISOString()
       })
       .select()
       .single();
