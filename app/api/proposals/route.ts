@@ -130,10 +130,11 @@ export async function POST(request: NextRequest) {
       message: 'Proposal created successfully'
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create proposal error:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error.message || 'Internal server error', details: error },
       { status: 500 }
     );
   }
