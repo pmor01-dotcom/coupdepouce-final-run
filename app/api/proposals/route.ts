@@ -20,12 +20,10 @@ export async function GET(request: NextRequest) {
         .select(`
           *,
           demand:demands (
-            *,
-            client:users!demands_client_id_fkey (
-              id,
-              name,
-              location
-            )
+            id,
+            title,
+            location,
+            department
           )
         `)
         .eq('artisan_id', artisanId)
@@ -40,7 +38,7 @@ export async function GET(request: NextRequest) {
         .from('proposals')
         .select(`
           *,
-          artisan:users!proposals_artisan_id_fkey (
+          artisan:users (
             id,
             name,
             metier,
