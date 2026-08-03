@@ -27,12 +27,7 @@ export async function GET(
         budget_range,
         status,
         created_at,
-        client_id,
-        users!demands_client_id_fkey (
-          id,
-          name,
-          email
-        )
+        client_id
       `)
       .eq('id', demandId)
       .single()
