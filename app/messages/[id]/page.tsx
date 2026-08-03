@@ -22,6 +22,10 @@ export default function ConversationPage() {
   useEffect(() => {
     if (!otherUserId || !user?.id) return
 
+    // Get name from URL parameter if available
+    const urlParams = new URLSearchParams(window.location.search)
+    const nameFromUrl = urlParams.get('name')
+
     const loadMessages = async () => {
       // Load messages between current user and other user
       const { data, error } = await supabase
@@ -43,6 +47,9 @@ export default function ConversationPage() {
 
       if (userData && userData.length > 0) {
         setOtherUser(userData[0])
+      } else if (nameFromUrl) {
+        // Use name from URL parameter if user not found in database
+        setOtherUser({ id: otherUserId, name: decodeURIComponent(nameFromUrl) })
       } else {
         console.error('User not found:', otherUserId)
         setOtherUser({ id: otherUserId, name: 'Unknown User' })
@@ -80,16 +87,28 @@ export default function ConversationPage() {
   const sendMessage = async () => {
     if (!text.trim() || !user?.id || !otherUserId) return
 
-    const { error } = await supabase.from('messages').insert({
-      sender_id: user.id,
-      receiver_id: otherUserId,
-      content: text
-    })
+    try {
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          senderId: user.id,
+          receiverId: otherUserId,
+          content: text
+        })
+      })
 
-    if (error) {
-      console.error('Error sending message:', error)
-    } else {
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send message')
+      }
+
       setText('')
+    } catch (error: any) {
+      console.error('Error sending message:', error)
     }
   }
 
