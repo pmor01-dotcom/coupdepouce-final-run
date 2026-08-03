@@ -80,66 +80,99 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
-    const socketInstance = io(process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000', {
-      path: '/api/socket/io'
-    })
+    let socketInstance: Socket | null = null
 
-    socketInstance.on('connect', () => {
-      setIsConnected(true)
-      console.log('Connected to messaging server')
-    })
+    // Only initialize socket if we're on a page that needs messaging
+    const needsMessaging = typeof window !== 'undefined' && (
+      window.location.pathname.startsWith('/messages') ||
+      window.location.pathname.startsWith('/artisan-dashboard') ||
+      window.location.pathname.startsWith('/client-dashboard')
+    )
 
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false)
-      console.log('Disconnected from messaging server')
-    })
-
-    if (typeof window !== 'undefined') {
-      ;(window as any).socket = socketInstance
+    if (!needsMessaging) {
+      console.log('Messaging not needed for this page, skipping socket init')
+      return
     }
 
-    socketInstance.on('new-message', (message: Message) => {
-      setMessages(prev => [...prev, message])
-      
-      // Update conversations list
-      setConversations(prev => prev.map(conv => 
-        conv.conversationId === message.senderId + '-' + message.receiverId + '-' || 
-        conv.conversationId === message.receiverId + '-' + message.senderId + '-'
-          ? { ...conv, lastMessage: message, unreadCount: conv.unreadCount + 1 }
-          : conv
-      ))
-    })
+    try {
+      socketInstance = io(process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000', {
+        path: '/api/socket/io',
+        reconnectionAttempts: 2,
+        reconnectionDelay: 2000,
+        timeout: 5000,
+        transports: ['polling', 'websocket']
+      })
 
-    socketInstance.on('new-message-notification', (notification) => {
-      // Handle new message notification
-      setUnreadCount(prev => prev + 1)
-    })
+      socketInstance.on('connect', () => {
+        setIsConnected(true)
+        console.log('Connected to messaging server')
+      })
 
-    socketInstance.on('messages-read', (data) => {
-      // Update messages as read
-      setMessages(prev => prev.map(msg => 
-        msg.senderId === data.readBy ? { ...msg, readAt: data.readAt } : msg
-      ))
-    })
+      socketInstance.on('disconnect', () => {
+        setIsConnected(false)
+        console.log('Disconnected from messaging server')
+      })
 
-    socketInstance.on('user-typing', (data) => {
-      // Handle typing indicator
-      console.log('User is typing:', data)
-    })
+      socketInstance.on('connect_error', (error) => {
+        // Silently handle connection errors - messaging is optional
+        console.log('Socket connection unavailable - messaging disabled')
+        setIsConnected(false)
+      })
 
-    socketInstance.on('user-stop-typing', (data) => {
-      // Handle stop typing indicator
-      console.log('User stopped typing:', data)
-    })
+      if (typeof window !== 'undefined') {
+        ;(window as any).socket = socketInstance
+      }
+    } catch (error) {
+      console.log('Socket initialization failed - messaging disabled')
+      setIsConnected(false)
+    }
 
-    socketInstance.on('message-error', (error) => {
-      console.error('Message error:', error)
-    })
+    if (socketInstance) {
+      socketInstance.on('new-message', (message: Message) => {
+        setMessages(prev => [...prev, message])
+
+        // Update conversations list
+        setConversations(prev => prev.map(conv =>
+          conv.conversationId === message.senderId + '-' + message.receiverId + '-' ||
+          conv.conversationId === message.receiverId + '-' + message.senderId + '-'
+            ? { ...conv, lastMessage: message, unreadCount: conv.unreadCount + 1 }
+            : conv
+        ))
+      })
+
+      socketInstance.on('new-message-notification', (notification) => {
+        // Handle new message notification
+        setUnreadCount(prev => prev + 1)
+      })
+
+      socketInstance.on('messages-read', (data) => {
+        // Update messages as read
+        setMessages(prev => prev.map(msg =>
+          msg.senderId === data.readBy ? { ...msg, readAt: data.readAt } : msg
+        ))
+      })
+
+      socketInstance.on('user-typing', (data) => {
+        // Handle typing indicator
+        console.log('User is typing:', data)
+      })
+
+      socketInstance.on('user-stop-typing', (data) => {
+        // Handle stop typing indicator
+        console.log('User stopped typing:', data)
+      })
+
+      socketInstance.on('message-error', (error) => {
+        console.error('Message error:', error)
+      })
+    }
 
     setSocket(socketInstance)
 
     return () => {
-      socketInstance.disconnect()
+      if (socketInstance) {
+        socketInstance.disconnect()
+      }
     }
   }, [])
 
