@@ -14,11 +14,13 @@ export default function ClientProposalsPage() {
   useEffect(() => {
     const loadAllProposals = async () => {
       if (!user || !user.email) {
+        console.log('No user or email')
         setLoading(false)
         return
       }
 
       try {
+        console.log('Loading demands for user:', user.email)
         // First get all demands for this user
         const demandsRes = await fetch('/api/demands', {
           headers: {
@@ -28,17 +30,35 @@ export default function ClientProposalsPage() {
 
         if (demandsRes.ok) {
           const demands = await demandsRes.json()
+          console.log('Demands found:', demands.length, demands)
+
+          if (demands.length === 0) {
+            console.log('No demands found for this user')
+            setAllProposals([])
+            setLoading(false)
+            return
+          }
 
           // Load proposals for each demand
           const proposalsPromises = demands.map((demand: any) =>
             fetch(`/api/proposals?demandId=${demand.id}`)
-              .then(res => res.ok ? res.json() : [])
+              .then(res => {
+                console.log('Proposals response for demand', demand.id, ':', res.status)
+                return res.ok ? res.json() : []
+              })
+              .then(data => {
+                console.log('Proposals for demand', demand.id, ':', data.length)
+                return data
+              })
           )
 
           const allProposalsData = await Promise.all(proposalsPromises)
           const flattenedProposals = allProposalsData.flat()
 
+          console.log('Total proposals:', flattenedProposals.length)
           setAllProposals(flattenedProposals)
+        } else {
+          console.error('Failed to load demands:', demandsRes.status)
         }
       } catch (err) {
         console.error('Erreur lors du chargement des propositions :', err)
