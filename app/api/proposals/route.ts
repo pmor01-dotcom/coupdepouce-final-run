@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
             phone
           )
         `)
-        .eq('demand_id', parseInt(demandId))
+        .eq('demand_id', demandId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         proposed_price,
         estimated_duration: estimated_duration || null,
         availability: availability || null,
-        demand_id: parseInt(demand_id),
+        demand_id: demand_id,
         artisan_id: artisan_id
       })
       .select(`
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
           sender_id: artisan_id,
           receiver_id: clientId,
           content: messageContent,
-          demand_id: parseInt(demand_id)
+          demand_id: demand_id
         });
 
         console.log('Message sent to client:', clientId);
