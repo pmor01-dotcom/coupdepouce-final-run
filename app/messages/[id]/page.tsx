@@ -42,10 +42,21 @@ function ConversationPageContent() {
       joinUserRoom(Number(user.id))
     }
 
+    // Create consistent conversation ID (smaller ID first)
+    const userIdNum = Number(user.id)
+    const otherUserIdNum = parseInt(otherUserId)
+    const conversationId = userIdNum < otherUserIdNum
+      ? `${userIdNum}-${otherUserIdNum}`
+      : `${otherUserIdNum}-${userIdNum}`
+
     // Load conversation via API
-    const conversationId = `${user.id}-${otherUserId}`
-    loadConversation(conversationId, Number(user.id))
-  }, [otherUserId, user?.id, isConnected, joinUserRoom, loadConversation])
+    loadConversation(conversationId, userIdNum)
+
+    // Join conversation room for real-time messages
+    if (isConnected) {
+      joinConversation(conversationId)
+    }
+  }, [otherUserId, user?.id, isConnected, joinUserRoom, loadConversation, joinConversation])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -54,12 +65,17 @@ function ConversationPageContent() {
   const sendMessage = () => {
     if (!text.trim() || !user?.id || !otherUserId) return
 
-    const conversationId = `${user.id}-${otherUserId}`
+    // Create consistent conversation ID (smaller ID first)
+    const userIdNum = Number(user.id)
+    const otherUserIdNum = parseInt(otherUserId)
+    const conversationId = userIdNum < otherUserIdNum
+      ? `${userIdNum}-${otherUserIdNum}`
+      : `${otherUserIdNum}-${userIdNum}`
 
     socketSendMessage({
       conversationId,
-      senderId: Number(user.id),
-      receiverId: parseInt(otherUserId),
+      senderId: userIdNum,
+      receiverId: otherUserIdNum,
       content: text,
       demandId: 0
     })

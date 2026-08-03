@@ -44,36 +44,12 @@ export async function POST(request: NextRequest) {
       .from('messages')
       .select('*')
       .or(
-        `and(sender_id.eq.${senderId},receiver_id.eq.${receiverId},demand_id.eq.${demandId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId},demand_id.eq.${demandId})`
+        `and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`
       )
       .limit(1)
 
-    if (!existingMessages || existingMessages.length === 0) {
-      if (demandId) {
-        const { data: demand } = await supabase
-          .from('demands')
-          .select('id, client_id')
-          .eq('id', demandId)
-          .single()
-
-        if (!demand) {
-          return NextResponse.json(
-            { error: 'Demand not found' },
-            { status: 404 }
-          )
-        }
-
-        // Allow both clients and artisans to initiate contact
-        // Clients can message about their own demands
-        // Artisans can message about any demand they're responding to
-        if (sender.role === 'client' && demand.client_id !== senderId) {
-          return NextResponse.json(
-            { error: 'You can only message about your own demands' },
-            { status: 403 }
-          )
-        }
-      }
-    }
+    // No business rule restrictions - allow any user to message any other user
+    // This enables artisans to message clients and vice versa
 
     // Create the message
     const { data: message, error: messageError } = await supabase
