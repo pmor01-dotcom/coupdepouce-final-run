@@ -122,7 +122,7 @@ export default function ConversationPage() {
     router.push('/messages')
   }
 
-  if (!user || !otherUser) {
+  if (!user) {
     return (
       <main
         className="min-h-screen overflow-x-hidden"
@@ -134,6 +134,9 @@ export default function ConversationPage() {
       </main>
     )
   }
+
+  // Set fallback for otherUser if not loaded yet
+  const displayUser = otherUser || { id: otherUserId, name: 'Utilisateur' }
 
   return (
     <main
@@ -159,7 +162,7 @@ export default function ConversationPage() {
 
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            {otherUser.name} ({otherUser.role === 'client' ? 'Client' : 'Artisan'})
+            {displayUser.name}
           </h2>
 
           <div
