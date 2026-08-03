@@ -20,8 +20,11 @@ export async function GET(
 
     const userIdNum = parseInt(userId)
 
-    // Parse conversation ID: "id1-id2-demandId"
-    const [id1, id2, demandId] = conversationId.split('-').map(Number)
+    // Parse conversation ID: "id1-id2" or "id1-id2-demandId"
+    const parts = conversationId.split('-').map(Number)
+    const id1 = parts[0]
+    const id2 = parts[1]
+    const demandId = parts[2] || null
 
     // Verify user is part of this conversation
     if (userIdNum !== id1 && userIdNum !== id2) {
@@ -52,7 +55,6 @@ export async function GET(
           role
         )
       `)
-      .eq('demand_id', demandId || null)
       .or(`and(sender_id.eq.${id1},receiver_id.eq.${id2}),and(sender_id.eq.${id2},receiver_id.eq.${id1})`)
       .order('created_at', { ascending: true })
 
