@@ -57,16 +57,9 @@ export async function POST(request: NextRequest) {
       .insert({
         content,
         sender_id: senderId,
-        receiver_id: receiverId,
-        demand_id: demandId || null
+        receiver_id: receiverId
       })
-      .select(
-        `
-        id,
-        content,
-        sender:users!messages_sender_id_fkey(id, name, role)
-        `
-      )
+      .select()
       .single()
 
     if (messageError) {
@@ -76,24 +69,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch demand title if needed
-    let demandTitle = null
-    if (demandId) {
-      const { data: demand } = await supabase
-        .from('demands')
-        .select('title')
-        .eq('id', demandId)
-        .single()
-
-      demandTitle = demand?.title || null
-    }
-
     return NextResponse.json({
       success: true,
       messageId: message.id,
-      message,
-      sender: message.sender,
-      demandTitle
+      message
     })
   } catch (error) {
     console.error('Error sending message:', error)

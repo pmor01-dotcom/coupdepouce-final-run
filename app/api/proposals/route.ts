@@ -113,8 +113,7 @@ export async function POST(request: NextRequest) {
         await supabase.from('messages').insert({
           sender_id: artisan_id,
           receiver_id: demand.client_id,
-          content: messageContent,
-          demand_id: demand_id
+          content: messageContent
         });
 
         console.log('Message sent to client:', demand.client_id);
