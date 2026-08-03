@@ -26,11 +26,7 @@ export default function ConversationPage() {
       // Load messages between current user and other user
       const { data, error } = await supabase
         .from('messages')
-        .select(`
-          *,
-          sender:users!messages_sender_id_fkey(id, name),
-          receiver:users!messages_receiver_id_fkey(id, name)
-        `)
+        .select('*')
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
         .order('created_at', { ascending: true })
 
@@ -41,7 +37,7 @@ export default function ConversationPage() {
       // Get other user info
       const { data: userData } = await supabase
         .from('users')
-        .select('id, name, role')
+        .select('id, name')
         .eq('id', otherUserId)
         .single()
 
