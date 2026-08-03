@@ -39,10 +39,13 @@ export default function ConversationPage() {
         .from('users')
         .select('id, name')
         .eq('id', otherUserId)
-        .single()
+        .limit(1)
 
-      if (userData) {
-        setOtherUser(userData)
+      if (userData && userData.length > 0) {
+        setOtherUser(userData[0])
+      } else {
+        console.error('User not found:', otherUserId)
+        setOtherUser({ id: otherUserId, name: 'Unknown User' })
       }
     }
 

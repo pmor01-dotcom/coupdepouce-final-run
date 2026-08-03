@@ -56,6 +56,7 @@ export default function ClientProposalsPage() {
           const flattenedProposals = allProposalsData.flat()
 
           console.log('Total proposals:', flattenedProposals.length)
+          console.log('Proposals data:', flattenedProposals)
           setAllProposals(flattenedProposals)
         } else {
           console.error('Failed to load demands:', demandsRes.status)
