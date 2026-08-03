@@ -70,10 +70,13 @@ export default function ConversationPage() {
           filter: `or(and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id}))`
         },
         (payload) => {
+          console.log('New message received via real-time:', payload.new)
           setMessages((prev) => [...prev, payload.new])
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Real-time subscription status:', status)
+      })
 
     return () => {
       supabase.removeChannel(channel)
@@ -86,6 +89,8 @@ export default function ConversationPage() {
 
   const sendMessage = async () => {
     if (!text.trim() || !user?.id || !otherUserId) return
+
+    console.log('Sending message:', { senderId: user.id, receiverId: otherUserId, content: text })
 
     try {
       const response = await fetch('/api/messages/send', {
@@ -101,6 +106,7 @@ export default function ConversationPage() {
       })
 
       const result = await response.json()
+      console.log('Message send response:', result)
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to send message')
