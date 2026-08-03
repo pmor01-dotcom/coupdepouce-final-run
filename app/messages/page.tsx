@@ -18,13 +18,26 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!user || !user.id) return
 
+    console.log('Loading conversations for user:', user.id, user.name)
+
     const loadConversations = async () => {
+      // First, check all messages in the table to debug
+      const { data: allMessages, error: allError } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      console.log('All messages in database:', allMessages?.length, allMessages)
+
       // Load messages where user is sender or receiver
       const { data: messages, error } = await supabase
         .from('messages')
         .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
+
+      console.log('Query result for user', user.id, ':', messages?.length, messages, 'Error:', error)
 
       if (!error && messages) {
         console.log('Messages loaded:', messages.length, messages)
@@ -34,6 +47,7 @@ export default function MessagesPage() {
 
         for (const msg of messages) {
           const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
+          console.log('Processing message:', msg.sender_id, '->', msg.receiver_id, 'Other user:', otherUserId)
 
           if (!conversationMap.has(otherUserId)) {
             // Fetch other user info
@@ -51,6 +65,7 @@ export default function MessagesPage() {
           }
         }
 
+        console.log('Conversations:', Array.from(conversationMap.values()))
         setConversations(Array.from(conversationMap.values()))
       } else {
         console.error('Error loading conversations:', error)
