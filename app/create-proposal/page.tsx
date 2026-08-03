@@ -7,15 +7,15 @@ import Link from 'next/link'
 import { useLanguage } from '../components/LanguageProvider'
 
 interface Demand {
-  id: number
+  id: string
   title: string
   description: string
   category: string
   location: string
   department: string
-  budget: string
-  clientName: string
-  createdAt: string
+  budget_range: string
+  client_id: string
+  created_at: string
 }
 
 export default function CreateProposal() {
@@ -36,21 +36,22 @@ export default function CreateProposal() {
     // Get demand ID from URL
     const urlParams = new URLSearchParams(window.location.search)
     const demandId = urlParams.get('demand')
-    
+
     if (demandId) {
-      // Mock demand data - in real app, fetch from API
-      const mockDemand: Demand = {
-        id: parseInt(demandId),
-        title: 'Installation plomberie cuisine',
-        description: 'Besoin d\'installer un nouveau évier et robinetterie dans la cuisine. Ancienne installation à démonter.',
-        category: 'Plomberie',
-        location: 'Toulouse',
-        department: '31',
-        budget: '500-800',
-        clientName: 'Jean Dupont',
-        createdAt: '2024-01-15'
-      }
-      setDemand(mockDemand)
+      // Fetch real demand data from API
+      fetch(`/api/demands/${demandId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data) {
+            setDemand(data)
+          } else {
+            setError('Demand not found')
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching demand:', err)
+          setError('Failed to load demand')
+        })
     }
   }, [])
 
@@ -63,30 +64,42 @@ export default function CreateProposal() {
       return
     }
 
+    if (!user?.id) {
+      setError('You must be logged in to submit a proposal')
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      // Mock proposal creation - in real app, call API
-      const newProposal = {
-        id: Math.floor(Math.random() * 1000),
-        demandId: demand?.id,
-        demandTitle: demand?.title,
-        message: formData.message,
-        proposedPrice: formData.proposedPrice,
-        estimatedDuration: formData.estimatedDuration,
-        availability: formData.availability,
-        artisanName: user?.name || '',
-        artisanEmail: user?.email || '',
-        status: 'pending',
-        createdAt: new Date().toISOString().split('T')[0]
+      const response = await fetch('/api/proposals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: formData.message,
+          proposed_price: formData.proposedPrice,
+          estimated_duration: formData.estimatedDuration || null,
+          availability: formData.availability || null,
+          demand_id: demand?.id,
+          artisan_id: user.id
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create proposal')
       }
 
-      console.log('Proposal created:', newProposal)
-      
+      console.log('Proposal created:', result)
+
       // Redirect to artisan dashboard
       router.push('/artisan-dashboard')
-    } catch (err) {
-      setError(t('proposal.errorCreating') || 'Error creating proposal')
+    } catch (err: any) {
+      console.error('Error creating proposal:', err)
+      setError(err.message || t('proposal.errorCreating') || 'Error creating proposal')
     } finally {
       setIsLoading(false)
     }
