@@ -22,34 +22,38 @@ export default function MessagesPage() {
       // Load messages where user is sender or receiver
       const { data: messages, error } = await supabase
         .from('messages')
-        .select(`
-          *,
-          sender:users!messages_sender_id_fkey(id, name, role),
-          receiver:users!messages_receiver_id_fkey(id, name, role),
-          demand:demands(id, title)
-        `)
+        .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
 
       if (!error && messages) {
+        console.log('Messages loaded:', messages.length, messages)
+
         // Group messages by conversation (unique sender-receiver pairs)
         const conversationMap = new Map()
 
-        messages.forEach((msg: any) => {
+        for (const msg of messages) {
           const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
-          const otherUser = msg.sender_id === user.id ? msg.receiver : msg.sender
 
           if (!conversationMap.has(otherUserId)) {
+            // Fetch other user info
+            const { data: otherUser } = await supabase
+              .from('users')
+              .select('id, name')
+              .eq('id', otherUserId)
+              .limit(1)
+
             conversationMap.set(otherUserId, {
               id: otherUserId,
-              otherUser,
-              lastMessage: msg,
-              demand: msg.demand
+              otherUser: otherUser && otherUser.length > 0 ? otherUser[0] : { id: otherUserId, name: 'Unknown User' },
+              lastMessage: msg
             })
           }
-        })
+        }
 
         setConversations(Array.from(conversationMap.values()))
+      } else {
+        console.error('Error loading conversations:', error)
       }
     }
 
@@ -123,14 +127,6 @@ export default function MessagesPage() {
                   <h3 className="text-lg font-semibold text-gray-900">
                     {conv.otherUser?.name || 'Utilisateur'}
                   </h3>
-                  <p className="text-sm text-gray-600">
-                    {conv.otherUser?.role === 'client' ? 'Client' : 'Artisan'}
-                  </p>
-                  {conv.demand && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Demande: {conv.demand.title}
-                    </p>
-                  )}
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600 line-clamp-2 max-w-xs">
