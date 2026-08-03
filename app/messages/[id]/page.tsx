@@ -5,17 +5,16 @@ import { useParams, useRouter } from 'next/navigation'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { useAuth } from '@/app/components/AuthProvider'
 import { useLanguage } from '@/app/components/LanguageProvider'
-import { useMessaging, MessagingProvider } from '@/app/components/MessagingProvider'
 
-function ConversationPageContent() {
+export default function ConversationPage() {
   const supabase = getSupabaseClient()
   const { user } = useAuth()
   const { t } = useLanguage()
   const router = useRouter()
   const params = useParams()
   const otherUserId = params?.id as string
-  const { socket, isConnected, messages, sendMessage: socketSendMessage, joinConversation, joinUserRoom, loadConversation } = useMessaging()
 
+  const [messages, setMessages] = useState<any[]>([])
   const [otherUser, setOtherUser] = useState<any>(null)
   const [text, setText] = useState('')
   const bottomRef = useRef<HTMLDivElement | null>(null)
@@ -23,7 +22,23 @@ function ConversationPageContent() {
   useEffect(() => {
     if (!otherUserId || !user?.id) return
 
-    const loadOtherUser = async () => {
+    const loadMessages = async () => {
+      // Load messages between current user and other user
+      const { data, error } = await supabase
+        .from('messages')
+        .select(`
+          *,
+          sender:users!messages_sender_id_fkey(id, name),
+          receiver:users!messages_receiver_id_fkey(id, name)
+        `)
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
+        .order('created_at', { ascending: true })
+
+      if (!error && data) {
+        setMessages(data)
+      }
+
+      // Get other user info
       const { data: userData } = await supabase
         .from('users')
         .select('id, name, role')
@@ -35,52 +50,48 @@ function ConversationPageContent() {
       }
     }
 
-    loadOtherUser()
+    loadMessages()
 
-    // Join user room for notifications
-    if (isConnected) {
-      joinUserRoom(Number(user.id))
+    // Real-time subscription for new messages
+    const channel = supabase
+      .channel(`messages_${user.id}_${otherUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `or(and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id}))`
+        },
+        (payload) => {
+          setMessages((prev) => [...prev, payload.new])
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
     }
-
-    // Create consistent conversation ID (smaller ID first)
-    const userIdNum = Number(user.id)
-    const otherUserIdNum = parseInt(otherUserId)
-    const conversationId = userIdNum < otherUserIdNum
-      ? `${userIdNum}-${otherUserIdNum}`
-      : `${otherUserIdNum}-${userIdNum}`
-
-    // Load conversation via API
-    loadConversation(conversationId, userIdNum)
-
-    // Join conversation room for real-time messages
-    if (isConnected) {
-      joinConversation(conversationId)
-    }
-  }, [otherUserId, user?.id, isConnected, joinUserRoom, loadConversation, joinConversation])
+  }, [otherUserId, user?.id])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!text.trim() || !user?.id || !otherUserId) return
 
-    // Create consistent conversation ID (smaller ID first)
-    const userIdNum = Number(user.id)
-    const otherUserIdNum = parseInt(otherUserId)
-    const conversationId = userIdNum < otherUserIdNum
-      ? `${userIdNum}-${otherUserIdNum}`
-      : `${otherUserIdNum}-${userIdNum}`
-
-    socketSendMessage({
-      conversationId,
-      senderId: userIdNum,
-      receiverId: otherUserIdNum,
-      content: text,
-      demandId: 0
+    const { error } = await supabase.from('messages').insert({
+      sender_id: user.id,
+      receiver_id: otherUserId,
+      content: text
     })
 
-    setText('')
+    if (error) {
+      console.error('Error sending message:', error)
+    } else {
+      setText('')
+    }
   }
 
   const handleBack = () => {
@@ -149,7 +160,7 @@ function ConversationPageContent() {
                 key={msg.id}
                 style={{
                   marginBottom: 12,
-                  textAlign: msg.senderId === Number(user.id) ? 'right' : 'left'
+                  textAlign: msg.sender_id === user.id ? 'right' : 'left'
                 }}
               >
                 <div
@@ -157,14 +168,14 @@ function ConversationPageContent() {
                     display: 'inline-block',
                     padding: '12px 16px',
                     borderRadius: 12,
-                    background: msg.senderId === Number(user.id) ? '#6B8E23' : '#e5e7eb',
-                    color: msg.senderId === Number(user.id) ? 'white' : 'black',
+                    background: msg.sender_id === user.id ? '#6B8E23' : '#e5e7eb',
+                    color: msg.sender_id === user.id ? 'white' : 'black',
                     maxWidth: '70%'
                   }}
                 >
                   <p className="text-sm">{msg.content}</p>
                   <p className="text-xs mt-1 opacity-75">
-                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
@@ -211,13 +222,5 @@ function ConversationPageContent() {
         </div>
       </div>
     </main>
-  )
-}
-
-export default function ConversationPage() {
-  return (
-    <MessagingProvider>
-      <ConversationPageContent />
-    </MessagingProvider>
   )
 }
