@@ -24,15 +24,15 @@ export async function POST(request: NextRequest) {
       .from('users')
       .select('id, role')
       .eq('id', senderId)
-      .single()
+      .limit(1)
 
     const { data: receiver } = await supabase
       .from('users')
       .select('id, role')
       .eq('id', receiverId)
-      .single()
+      .limit(1)
 
-    if (!sender || !receiver) {
+    if (!sender || sender.length === 0 || !receiver || receiver.length === 0) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     // This enables artisans to message clients and vice versa
 
     // Create the message
+    console.log('Inserting message:', { senderId, receiverId, content })
     const { data: message, error: messageError } = await supabase
       .from('messages')
       .insert({
@@ -60,19 +61,30 @@ export async function POST(request: NextRequest) {
         receiver_id: receiverId
       })
       .select()
-      .single()
+      .limit(1)
+
+    console.log('Message insert result:', message, messageError)
 
     if (messageError) {
+      console.error('Message insert error:', messageError)
       return NextResponse.json(
         { error: messageError.message },
         { status: 400 }
       )
     }
 
+    if (!message || message.length === 0) {
+      console.error('No message returned from insert')
+      return NextResponse.json(
+        { error: 'Failed to create message' },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
-      messageId: message.id,
-      message
+      messageId: message[0].id,
+      message: message[0]
     })
   } catch (error) {
     console.error('Error sending message:', error)

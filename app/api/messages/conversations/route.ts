@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get("userId");
 
@@ -16,26 +18,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userIdNum = parseInt(userId);
-
     // Fetch all messages where user is sender or receiver
     const { data: messages, error: messagesError } = await supabase
       .from("messages")
-      .select(
-        `
-        id,
-        content,
-        sender_id,
-        receiver_id,
-        demand_id,
-        created_at,
-        read_at,
-        sender:users!messages_sender_id_fkey(id, name, role, metier, location),
-        receiver:users!messages_receiver_id_fkey(id, name, role, metier, location),
-        demand:demands!messages_demand_id_fkey(id, title, description, category, budget_range, location, department, status)
-      `
-      )
-      .or(`sender_id.eq.${userIdNum},receiver_id.eq.${userIdNum}`)
+      .select('*')
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
       .order("created_at", { ascending: false });
 
     if (messagesError) {
@@ -46,65 +33,38 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log('Messages fetched for user', userId, ':', messages?.length);
+
     // Group messages into conversations
     const conversationMap = new Map();
 
-    messages.forEach((message) => {
+    for (const message of messages) {
       const otherUserId =
-        message.sender_id === userIdNum
+        message.sender_id === userId
           ? message.receiver_id
           : message.sender_id;
 
-      const demandId = message.demand_id || 0;
+      if (!conversationMap.has(otherUserId)) {
+        // Fetch other user info
+        const { data: otherUser } = await supabase
+          .from('users')
+          .select('id, name')
+          .eq('id', otherUserId)
+          .limit(1);
 
-      const conversationKey = `${Math.min(
-        userIdNum,
-        otherUserId
-      )}-${Math.max(userIdNum, otherUserId)}-${demandId}`;
-
-      const otherUser =
-        message.sender_id === userIdNum
-          ? message.receiver
-          : message.sender;
-
-      if (!conversationMap.has(conversationKey)) {
-        conversationMap.set(conversationKey, {
-          conversationId: conversationKey,
-          otherUser,
-          demand: message.demand,
-          lastMessage: {
-            id: message.id,
-            content: message.content,
-            senderId: message.sender_id,
-            createdAt: message.created_at,
-          },
-          unreadCount:
-            message.read_at === null && message.receiver_id === userIdNum
-              ? 1
-              : 0,
+        conversationMap.set(otherUserId, {
+          id: otherUserId,
+          otherUser: otherUser && otherUser.length > 0 ? otherUser[0] : { id: otherUserId, name: 'Unknown User' },
+          lastMessage: message
         });
       } else {
-        const conv = conversationMap.get(conversationKey);
-
+        const conv = conversationMap.get(otherUserId);
         // Update last message if newer
-        if (
-          new Date(message.created_at) >
-          new Date(conv.lastMessage.createdAt)
-        ) {
-          conv.lastMessage = {
-            id: message.id,
-            content: message.content,
-            senderId: message.sender_id,
-            createdAt: message.created_at,
-          };
-        }
-
-        // Update unread count
-        if (message.read_at === null && message.receiver_id === userIdNum) {
-          conv.unreadCount++;
+        if (new Date(message.created_at) > new Date(conv.lastMessage.created_at)) {
+          conv.lastMessage = message;
         }
       }
-    });
+    }
 
     const conversations = Array.from(conversationMap.values());
 

@@ -21,53 +21,19 @@ export default function MessagesPage() {
     console.log('Loading conversations for user:', user.id, user.name)
 
     const loadConversations = async () => {
-      // First, check all messages in the table to debug
-      const { data: allMessages, error: allError } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10)
+      try {
+        // Use API endpoint with service role to bypass RLS
+        const response = await fetch(`/api/messages/conversations?userId=${user.id}`)
+        const result = await response.json()
 
-      console.log('All messages in database:', allMessages?.length, allMessages)
+        console.log('Conversations API response:', result)
 
-      // Load messages where user is sender or receiver
-      const { data: messages, error } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-        .order('created_at', { ascending: false })
-
-      console.log('Query result for user', user.id, ':', messages?.length, messages, 'Error:', error)
-
-      if (!error && messages) {
-        console.log('Messages loaded:', messages.length, messages)
-
-        // Group messages by conversation (unique sender-receiver pairs)
-        const conversationMap = new Map()
-
-        for (const msg of messages) {
-          const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
-          console.log('Processing message:', msg.sender_id, '->', msg.receiver_id, 'Other user:', otherUserId)
-
-          if (!conversationMap.has(otherUserId)) {
-            // Fetch other user info
-            const { data: otherUser } = await supabase
-              .from('users')
-              .select('id, name')
-              .eq('id', otherUserId)
-              .limit(1)
-
-            conversationMap.set(otherUserId, {
-              id: otherUserId,
-              otherUser: otherUser && otherUser.length > 0 ? otherUser[0] : { id: otherUserId, name: 'Unknown User' },
-              lastMessage: msg
-            })
-          }
+        if (result.success && result.conversations) {
+          setConversations(result.conversations)
+        } else {
+          console.error('Failed to load conversations:', result.error)
         }
-
-        console.log('Conversations:', Array.from(conversationMap.values()))
-        setConversations(Array.from(conversationMap.values()))
-      } else {
+      } catch (error) {
         console.error('Error loading conversations:', error)
       }
     }
