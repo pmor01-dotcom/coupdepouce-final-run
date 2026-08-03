@@ -82,15 +82,11 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let socketInstance: Socket | null = null
 
-    // Only initialize socket if we're on a page that needs messaging
-    const needsMessaging = typeof window !== 'undefined' && (
-      window.location.pathname.startsWith('/messages') ||
-      window.location.pathname.startsWith('/artisan-dashboard') ||
-      window.location.pathname.startsWith('/client-dashboard')
-    )
+    // Only initialize socket if we're on the messages page
+    const needsMessaging = typeof window !== 'undefined' &&
+      window.location.pathname.startsWith('/messages')
 
     if (!needsMessaging) {
-      console.log('Messaging not needed for this page, skipping socket init')
       return
     }
 
@@ -114,7 +110,6 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
       })
 
       socketInstance.on('connect_error', (error) => {
-        // Silently handle connection errors - messaging is optional
         console.log('Socket connection unavailable - messaging disabled')
         setIsConnected(false)
       })
