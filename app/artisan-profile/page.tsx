@@ -330,7 +330,10 @@ export default function ArtisanProfilePage() {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full bg-green-600 text-white py-3 rounded-md font-semibold hover:bg-green-700 transition disabled:opacity-50"
+            className="w-full text-white py-3 rounded-md font-semibold transition disabled:opacity-50"
+            style={{ backgroundColor: '#6B8E23' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#556B2F')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6B8E23')}
           >
             {isSaving ? t('saving') : t('saveChanges')}
           </button>
