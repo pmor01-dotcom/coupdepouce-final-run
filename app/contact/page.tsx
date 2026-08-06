@@ -54,13 +54,13 @@ export default function ContactPage() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Message sent successfully!
+              {t('contact.successTitle')}
             </h2>
             <p className="text-gray-600 mb-8">
-              We will respond to you as soon as possible.
+              {t('contact.successMessage')}
             </p>
             <Link href="/" className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-              Back to home
+              {t('contact.backHome')}
             </Link>
           </div>
         </div>
@@ -68,10 +68,10 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Contact us
+              {t('contact.title')}
             </h1>
             <p className="text-xl text-gray-600">
-              Our team is here to help and answer all your questions
+              {t('contact.subtitle')}
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export default function ContactPage() {
             <div>
               <div className="bg-white shadow-lg rounded-lg p-8 mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  Contact information
+                  {t('contact.info')}
                 </h2>
                 
                 <div className="space-y-6">
@@ -92,9 +92,9 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
+                      <h3 className="font-semibold text-gray-900 mb-1">{t('contact.email')}</h3>
                       <p className="text-gray-700">
-                        contact@coupdepouce.fr
+                        {t('contact.emailValue')}
                       </p>
                     </div>
                   </div>
@@ -114,14 +114,14 @@ export default function ContactPage() {
             <div>
               <div className="bg-white shadow-lg rounded-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  Contact form
+                  {t('contact.form')}
                 </h2>
                 
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-6">
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="name">
-                        Name
+                        {t('contact.name')}
                       </label>
                       <input
                         id="name"
@@ -135,7 +135,7 @@ export default function ContactPage() {
 
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="email">
-                        Email
+                        {t('contact.emailLabel')}
                       </label>
                       <input
                         id="email"
@@ -149,7 +149,7 @@ export default function ContactPage() {
 
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="subject">
-                        Subject
+                        {t('contact.subject')}
                       </label>
                       <input
                         id="subject"
@@ -163,7 +163,7 @@ export default function ContactPage() {
 
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="message">
-                        Message
+                        {t('contact.message')}
                       </label>
                       <textarea
                         id="message"
@@ -176,7 +176,7 @@ export default function ContactPage() {
 
                     <div>
                       <label className="block text-gray-900 mb-2" htmlFor="userType">
-                        User type
+                        {t('contact.userType')}
                       </label>
                       <select
                         id="userType"
@@ -185,8 +185,8 @@ export default function ContactPage() {
                         onChange={handleInputChange}
                         className="block w-full p-4 text-gray-900 border border-gray-200 rounded-lg"
                       >
-                        <option value="client">Client</option>
-                        <option value="entreprise">Company</option>
+                        <option value="client">{t('contact.client')}</option>
+                        <option value="entreprise">{t('contact.company')}</option>
                       </select>
                     </div>
 
@@ -195,7 +195,7 @@ export default function ContactPage() {
                       disabled={isSubmitting}
                       className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
                     >
-                      Send
+                      {t('contact.send')}
                     </button>
                   </div>
                 </form>

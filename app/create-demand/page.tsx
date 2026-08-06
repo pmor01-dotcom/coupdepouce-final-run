@@ -169,7 +169,7 @@ export default function CreateDemandPage() {
           {/* Category */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Catégorie *
+              {t('form.category')} *
             </label>
             <input
               type="text"
@@ -178,14 +178,14 @@ export default function CreateDemandPage() {
               onChange={handleChange}
               className="input-field"
               required
-              placeholder="Ex: Plomberie, Électricité, Menuiserie"
+              placeholder={t('form.categoryPlaceholder')}
             />
           </div>
 
           {/* Budget Range */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Budget estimé *
+              {t('form.budget')} *
             </label>
             <input
               type="text"
@@ -194,7 +194,7 @@ export default function CreateDemandPage() {
               onChange={handleChange}
               className="input-field"
               required
-              placeholder="Ex: 500-1000€"
+              placeholder={t('form.budgetPlaceholder')}
             />
           </div>
 

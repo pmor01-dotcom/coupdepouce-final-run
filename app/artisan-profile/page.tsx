@@ -172,7 +172,10 @@ export default function ArtisanProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-green-700 to-green-300 py-10 px-4">
+    <main
+      className="min-h-screen py-10 px-4"
+      style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
+    >
 
       <aside className="fixed top-24 right-4 z-50 flex flex-col gap-3 w-40 sm:w-48">
         <Link href="/artisan-dashboard" className="btn-secondary text-sm w-full text-right">
@@ -330,10 +333,7 @@ export default function ArtisanProfilePage() {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full text-white py-3 rounded-md font-semibold transition disabled:opacity-50"
-            style={{ backgroundColor: '#6B8E23' }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#556B2F')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6B8E23')}
+            className="w-full bg-green-600 text-white py-3 rounded-md font-semibold hover:bg-green-700 transition disabled:opacity-50"
           >
             {isSaving ? t('saving') : t('saveChanges')}
           </button>

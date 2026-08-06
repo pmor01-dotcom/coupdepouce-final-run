@@ -64,7 +64,7 @@ export default function Home() {
                   {t('qualifiedArtisans')}
                 </h3>
                 <p className="text-sm md:text-base text-gray-700">
-                  {t('Artisans')}
+                  {t('artisans')}
                 </p>
               </div>
             </article>
@@ -134,11 +134,11 @@ export default function Home() {
                 {demands.length > 0 ? (
                   demands.map((demand) => (
                     <span key={demand.id} className="mx-8">
-                      📢 {demand.title} - {demand.location || "Location not specified"}
+                      📢 {demand.title} - {demand.location || t('locationNotSpecified')}
                     </span>
                   ))
                 ) : (
-                  <span className="mx-8">No offers available at the moment</span>
+                  <span className="mx-8">{t('noOffersAvailable')}</span>
                 )}
               </div>
             </div>

@@ -74,7 +74,7 @@ export default function ClientProposalsPage() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-lg">Chargement…</p>
+        <p className="text-lg">{t('clientDashboard.loading')}</p>
       </main>
     )
   }
@@ -87,20 +87,20 @@ export default function ClientProposalsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-semibold text-gray-900">
-            {t('clientDashboard.proposals') || 'Propositions reçues'}
+            {t('clientDashboard.proposals')}
           </h1>
           <Link
             href="/client-dashboard"
             className="inline-block bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition"
           >
-            ← Retour au tableau de bord
+            ← {t('clientDashboard.backToDashboard')}
           </Link>
         </div>
 
         {allProposals.length === 0 ? (
           <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
             <p className="text-gray-700 text-lg">
-              {t('clientDashboard.noProposals') || 'Aucune proposition reçue.'}
+              {t('clientDashboard.noProposals')}
             </p>
           </div>
         ) : (
@@ -114,10 +114,10 @@ export default function ClientProposalsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-xl font-semibold text-white">
-                      {proposal.artisan?.name || 'Artisan inconnu'}
+                      {proposal.artisan?.name || t('clientDashboard.unknownArtisan')}
                     </h2>
                     <p className="text-sm text-white opacity-90">
-                      {proposal.artisan?.metier || 'Métier non spécifié'}
+                      {proposal.artisan?.metier || t('clientDashboard.unspecifiedTrade')}
                     </p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -161,7 +161,7 @@ export default function ClientProposalsPage() {
                     href={`/messages/${proposal.artisan?.id}?name=${encodeURIComponent(proposal.artisan?.name || 'Artisan')}`}
                     className="px-4 py-2 bg-white text-green-700 rounded-lg hover:bg-gray-100 text-sm font-medium"
                   >
-                    {t('clientDashboard.contactArtisan') || 'Contacter'}
+                    {t('clientDashboard.contactArtisan')}
                   </Link>
                 </div>
               </div>

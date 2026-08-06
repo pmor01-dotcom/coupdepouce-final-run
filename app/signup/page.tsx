@@ -30,7 +30,7 @@ export default function SignupPage() {
 
     // ⭐ FIX: Prevent submitting without selecting a role
     if (!selectedRole) {
-      setError("Veuillez choisir un rôle avant de continuer.")
+      setError(t('signup.selectRole'))
       setLoading(false)
       return
     }

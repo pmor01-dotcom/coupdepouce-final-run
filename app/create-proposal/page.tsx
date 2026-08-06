@@ -45,12 +45,12 @@ export default function CreateProposal() {
           if (data) {
             setDemand(data)
           } else {
-            setError('Demand not found')
+            setError(t('proposal.demandNotFound'))
           }
         })
         .catch(err => {
           console.error('Error fetching demand:', err)
-          setError('Failed to load demand')
+          setError(t('proposal.failedToLoad'))
         })
     }
   }, [])
@@ -65,13 +65,13 @@ export default function CreateProposal() {
     }
 
     if (!user) {
-      setError('You must be logged in to submit a proposal')
+      setError(t('proposal.mustBeLoggedIn'))
       return
     }
 
     if (!user.id) {
       console.error('User object missing id:', user)
-      setError('User ID not found. Please try logging in again.')
+      setError(t('proposal.userIdNotFound'))
       return
     }
 
@@ -96,7 +96,7 @@ export default function CreateProposal() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to create proposal')
+        throw new Error(result.error || t('proposal.errorCreating'))
       }
 
       console.log('Proposal created:', result)
@@ -105,7 +105,7 @@ export default function CreateProposal() {
       router.push('/artisan-dashboard')
     } catch (err: any) {
       console.error('Error creating proposal:', err)
-      setError(err.message || t('proposal.errorCreating') || 'Error creating proposal')
+      setError(err.message || t('proposal.errorCreating'))
     } finally {
       setIsLoading(false)
     }
@@ -119,7 +119,7 @@ export default function CreateProposal() {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p>{t('proposal.loadingDemand') || 'Loading demand...'}</p>
+          <p>{t('proposal.loadingDemand')}</p>
         </div>
       </main>
     )
@@ -133,10 +133,10 @@ export default function CreateProposal() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link href="/artisan-dashboard" className="text-gray-600 hover:text-gray-900 mr-4">
-                ← {t('proposal.back') || 'Back'}
+                ← {t('proposal.back')}
               </Link>
               <h1 className="text-xl font-semibold text-gray-900">
-                {t('proposal.title') || 'Offer my services'}
+                {t('proposal.title')}
               </h1>
             </div>
           </div>
@@ -153,13 +153,13 @@ export default function CreateProposal() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="card">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {t('proposal.yourProposal') || 'Your proposal'}
+              {t('proposal.yourProposal')}
             </h2>
             
             <div className="space-y-4">
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                  {t('proposal.messageToClient') || 'Message to client'} *
+                  {t('proposal.messageToClient')} *
                 </label>
                 <textarea
                   id="message"
@@ -168,13 +168,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.message}
                   onChange={(e) => handleInputChange('message', e.target.value)}
-                  placeholder={t('proposal.messagePlaceholder') || 'Describe your solution, your experience, and how you can help this client...'}
+                  placeholder={t('proposal.messagePlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="proposedPrice" className="block text-sm font-medium text-gray-700">
-                  {t('proposal.proposedPrice') || 'Proposed price'} *
+                  {t('proposal.proposedPrice')} *
                 </label>
                 <input
                   type="text"
@@ -183,13 +183,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.proposedPrice}
                   onChange={(e) => handleInputChange('proposedPrice', e.target.value)}
-                  placeholder={t('proposal.pricePlaceholder') || 'Ex: 650, 700-800, on-site quote...'}
+                  placeholder={t('proposal.pricePlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="estimatedDuration" className="block text-sm font-medium text-gray-700">
-                  {t('proposal.estimatedDuration') || 'Estimated duration'}
+                  {t('proposal.estimatedDuration')}
                 </label>
                 <input
                   type="text"
@@ -197,13 +197,13 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.estimatedDuration}
                   onChange={(e) => handleInputChange('estimatedDuration', e.target.value)}
-                  placeholder={t('proposal.durationPlaceholder') || 'Ex: 2 days, 1 week, depending on quote...'}
+                  placeholder={t('proposal.durationPlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
-                  {t('proposal.availability') || 'Availability'}
+                  {t('proposal.availability')}
                 </label>
                 <textarea
                   id="availability"
@@ -211,31 +211,31 @@ export default function CreateProposal() {
                   className="input-field mt-1"
                   value={formData.availability}
                   onChange={(e) => handleInputChange('availability', e.target.value)}
-                  placeholder={t('proposal.availabilityPlaceholder') || 'When are you available for this work?'}
+                  placeholder={t('proposal.availabilityPlaceholder')}
                 />
               </div>
             </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
-            <p className="font-medium mb-2">{t('proposal.important') || 'Important'}:</p>
+            <p className="font-medium mb-2">{t('proposal.important')}:</p>
             <ul className="text-sm space-y-1">
-              <li>{t('proposal.note1') || 'The client will be able to see your proposal and contact you directly'}</li>
-              <li>{t('proposal.note2') || 'You cannot contact the client directly before they contact you'}</li>
-              <li>{t('proposal.note3') || 'Be clear and precise in your proposal to increase your chances'}</li>
+              <li>{t('proposal.note1')}</li>
+              <li>{t('proposal.note2')}</li>
+              <li>{t('proposal.note3')}</li>
             </ul>
           </div>
 
           <div className="flex justify-end space-x-4">
             <Link href="/artisan-dashboard" className="btn-secondary">
-              {t('proposal.cancel') || 'Cancel'}
+              {t('proposal.cancel')}
             </Link>
             <button
               type="submit"
               disabled={isLoading}
               className="btn-success disabled:opacity-50"
             >
-              {isLoading ? t('proposal.sending') || 'Sending...' : t('proposal.sendProposal') || 'Send proposal'}
+              {isLoading ? t('proposal.sending') : t('proposal.sendProposal')}
             </button>
           </div>
         </form>
