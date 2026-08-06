@@ -113,7 +113,7 @@ export default function ArtisanDashboard() {
           <Link
             href="/artisan-profile"
             style={{
-              backgroundColor: '#6b7280',
+              backgroundColor: '#6B8E23',
               color: 'white',
               padding: '12px 16px',
               borderRadius: '8px',
@@ -126,8 +126,8 @@ export default function ArtisanDashboard() {
               textAlign: 'center',
               textDecoration: 'none'
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#556B2F')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6B8E23')}
           >
             {t('editProfile')}
           </Link>

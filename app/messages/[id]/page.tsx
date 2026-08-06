@@ -177,9 +177,20 @@ export default function ConversationPage() {
             }}
           >
             {messages.length === 0 && (
-              <p className="text-gray-500 text-center py-8">
-                Aucun message. Envoyez le premier message !
-              </p>
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">
+                  Aucun message. Envoyez le premier message !
+                </p>
+                <button
+                  onClick={() => {
+                    const input = document.querySelector('input[type="text"]') as HTMLInputElement
+                    if (input) input.focus()
+                  }}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                >
+                  {t('clickToReply') || 'Cliquez pour répondre'}
+                </button>
+              </div>
             )}
 
             {messages.map((msg) => (

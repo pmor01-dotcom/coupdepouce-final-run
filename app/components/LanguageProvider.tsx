@@ -113,6 +113,7 @@ const translations: Record<Language, Record<string, string>> = {
     "messages.send": "Envoyer",
     "messages.downloadFile": "Télécharger le fichier",
     "no_conversations": "Aucune conversation",
+    "clickToReply": "Cliquez pour répondre",
     /* ---------------- HOME SLIDESHOW ---------------- */
     "slideshow.title": "Dernières demandes",
     "slideshow.noProposals": "Aucune proposition disponible",
@@ -371,6 +372,7 @@ const translations: Record<Language, Record<string, string>> = {
     "messages.send": "Send",
     "messages.downloadFile": "Download file",
     "no_conversations": "No conversations",
+    "clickToReply": "Click to reply",
     /* ---------------- HOME SLIDESHOW ---------------- */
     "slideshow.title": "Latest Demands",
     "slideshow.noProposals": "No proposals available",
