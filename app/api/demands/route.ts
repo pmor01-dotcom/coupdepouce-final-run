@@ -108,3 +108,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const demandId = searchParams.get('id')
+
+    if (!demandId) {
+      return NextResponse.json(
+        { error: 'Missing demand id' },
+        { status: 400 }
+      )
+    }
+
+    const { error } = await supabase
+      .from('demands')
+      .delete()
+      .eq('id', demandId)
+
+    if (error) throw error
+
+    return NextResponse.json({
+      message: 'Demand deleted successfully'
+    })
+
+  } catch (error: any) {
+    console.error('Delete demand error:', error)
+    return NextResponse.json(
+      { error: error.message || 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

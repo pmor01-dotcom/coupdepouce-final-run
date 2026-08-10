@@ -137,3 +137,35 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const proposalId = searchParams.get('id');
+
+    if (!proposalId) {
+      return NextResponse.json(
+        { error: 'Missing proposal id' },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabase
+      .from('proposals')
+      .delete()
+      .eq('id', proposalId);
+
+    if (error) throw error;
+
+    return NextResponse.json({
+      message: 'Proposal deleted successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Delete proposal error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

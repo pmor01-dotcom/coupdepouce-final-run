@@ -11,6 +11,26 @@ export default function ClientProposalsPage() {
   const { user } = useAuth()
   const { t } = useLanguage()
 
+  const handleDeleteProposal = async (proposalId: number) => {
+    if (!confirm(t('clientDashboard.confirmDelete'))) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/proposals?id=${proposalId}`, {
+        method: 'DELETE'
+      })
+
+      if (res.ok) {
+        setAllProposals(allProposals.filter(p => p.id !== proposalId))
+      } else {
+        console.error('Failed to delete proposal')
+      }
+    } catch (err) {
+      console.error('Error deleting proposal:', err)
+    }
+  }
+
   useEffect(() => {
     const loadAllProposals = async () => {
       if (!user || !user.email) {
@@ -157,12 +177,20 @@ export default function ClientProposalsPage() {
                       </span>
                     )}
                   </div>
-                  <Link
-                    href={`/messages/${proposal.artisan?.id}?name=${encodeURIComponent(proposal.artisan?.name || 'Artisan')}`}
-                    className="px-4 py-2 bg-white text-green-700 rounded-lg hover:bg-gray-100 text-sm font-medium"
-                  >
-                    {t('clientDashboard.contactArtisan')}
-                  </Link>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleDeleteProposal(proposal.id)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-medium"
+                    >
+                      {t('clientDashboard.delete')}
+                    </button>
+                    <Link
+                      href={`/messages/${proposal.artisan?.id}?name=${encodeURIComponent(proposal.artisan?.name || 'Artisan')}`}
+                      className="px-4 py-2 bg-white text-green-700 rounded-lg hover:bg-gray-100 text-sm font-medium"
+                    >
+                      {t('clientDashboard.contactArtisan')}
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}

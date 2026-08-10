@@ -19,6 +19,7 @@ export default function ClientSignupPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -31,6 +32,12 @@ export default function ClientSignupPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    if (!termsAccepted) {
+      setError(t('signup.acceptTermsRequired'))
+      setLoading(false)
+      return
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError(t('signup.passwordMismatch'))
@@ -173,6 +180,23 @@ export default function ClientSignupPage() {
               className="input-field"
               required
             />
+          </div>
+
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              required
+            />
+            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+              {t('signup.acceptTerms')}{' '}
+              <Link href="/terms" className="text-blue-600 hover:text-blue-800">
+                {t('signup.termsOfService')}
+              </Link>
+            </label>
           </div>
 
           {error && <p className="text-red-600 text-sm">{error}</p>}

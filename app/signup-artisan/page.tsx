@@ -21,6 +21,7 @@ export default function ArtisanSignupPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({
@@ -35,6 +36,12 @@ export default function ArtisanSignupPage() {
     setLoading(true)
 
     console.log('Form submitted with data:', formData)
+
+    if (!termsAccepted) {
+      setError(t('signup.acceptTermsRequired'))
+      setLoading(false)
+      return
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError(t('signup.passwordMismatch'))
@@ -233,6 +240,23 @@ export default function ArtisanSignupPage() {
               onChange={handleChange}
               className="input-field"
             />
+          </div>
+
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              required
+            />
+            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+              {t('signup.acceptTerms')}{' '}
+              <Link href="/terms-artisan" className="text-blue-600 hover:text-blue-800">
+                {t('signup.termsOfService')}
+              </Link>
+            </label>
           </div>
 
           {error && <p className="text-red-600 text-sm">{error}</p>}

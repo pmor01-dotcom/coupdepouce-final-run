@@ -61,7 +61,7 @@ export default function ArtisanDashboard() {
         {/* Proposals */}
         <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
-            href="/proposals"
+            href="/artisan-proposals"
             style={{
               backgroundColor: '#6b7280',
               color: 'white',
@@ -86,7 +86,7 @@ export default function ArtisanDashboard() {
         {/* Messages */}
         <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
           <Link
-            href="/messages"
+            href="/artisan-messages"
             style={{
               backgroundColor: '#6b7280',
               color: 'white',

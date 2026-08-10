@@ -80,3 +80,42 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Delete all messages between current user and other user
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+
+    if (error) {
+      console.error("Error deleting conversation:", error);
+      return NextResponse.json(
+        { error: "Failed to delete conversation" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Conversation deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting conversation:", error);
+    return NextResponse.json(
+      { error: "Failed to delete conversation" },
+      { status: 500 }
+    );
+  }
+}
