@@ -121,8 +121,10 @@ export async function DELETE(req: Request) {
       )
     }
 
+    console.log('Deleting demand:', demandId)
+
     // First, delete all proposals related to this demand
-    const { error: proposalsError } = await supabase
+    const { error: proposalsError, count: proposalsCount } = await supabase
       .from('proposals')
       .delete()
       .eq('demand_id', demandId)
@@ -130,6 +132,8 @@ export async function DELETE(req: Request) {
     if (proposalsError) {
       console.error('Error deleting proposals:', proposalsError)
       // Continue with demand deletion even if proposals deletion fails
+    } else {
+      console.log('Deleted proposals for demand:', demandId, 'Count:', proposalsCount)
     }
 
     // Then delete the demand
@@ -138,7 +142,12 @@ export async function DELETE(req: Request) {
       .delete()
       .eq('id', demandId)
 
-    if (error) throw error
+    if (error) {
+      console.error('Error deleting demand:', error)
+      throw error
+    }
+
+    console.log('Successfully deleted demand:', demandId)
 
     return NextResponse.json({
       message: 'Demand and related proposals deleted successfully'

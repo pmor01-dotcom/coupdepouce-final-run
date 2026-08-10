@@ -10,7 +10,8 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('demands')
-      .select('id, title, category, location, description, budget_range, urgency, client_id')
+      .select('id, title, category, location, description, budget_range, urgency, client_id, status')
+      .eq('status', 'OPEN')
       .order('created_at', { ascending: false })
       .limit(50)
 
