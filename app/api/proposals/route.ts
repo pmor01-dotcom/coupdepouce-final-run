@@ -23,7 +23,12 @@ export async function GET(request: NextRequest) {
             id,
             title,
             location,
-            department
+            department,
+            client_id,
+            client:users (
+              id,
+              name
+            )
           )
         `)
         .eq('artisan_id', artisanId)
