@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, startTransition } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
 
 export default function ArtisanProposalsPage() {
   const [proposals, setProposals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const { user } = useAuth()
   const { t } = useLanguage()
 
@@ -16,18 +17,24 @@ export default function ArtisanProposalsPage() {
       return
     }
 
+    setDeletingId(proposalId)
+
     try {
       const res = await fetch(`/api/proposals?id=${proposalId}`, {
         method: 'DELETE'
       })
 
       if (res.ok) {
-        setProposals(proposals.filter(p => p.id !== proposalId))
+        startTransition(() => {
+          setProposals(proposals.filter(p => p.id !== proposalId))
+        })
       } else {
         console.error('Failed to delete proposal')
       }
     } catch (err) {
       console.error('Error deleting proposal:', err)
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -145,9 +152,10 @@ export default function ArtisanProposalsPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleDeleteProposal(proposal.id)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-medium"
+                      disabled={deletingId === proposal.id}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {t('clientDashboard.delete')}
+                      {deletingId === proposal.id ? t('clientDashboard.deleting') : t('clientDashboard.delete')}
                     </button>
                     <Link
                       href={`/messages/${proposal.demand?.client_id}?name=${encodeURIComponent(proposal.demand?.client?.name || 'Client')}`}
