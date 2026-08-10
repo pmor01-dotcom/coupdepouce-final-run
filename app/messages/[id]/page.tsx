@@ -167,7 +167,7 @@ export default function ConversationPage() {
 
           <div
             style={{
-              height: '60vh',
+              height: '24vh',
               overflowY: 'auto',
               border: '1px solid #e5e7eb',
               padding: 16,
@@ -177,19 +177,10 @@ export default function ConversationPage() {
             }}
           >
             {messages.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">
+              <div className="text-center py-4">
+                <p className="text-gray-500">
                   Aucun message. Envoyez le premier message !
                 </p>
-                <button
-                  onClick={() => {
-                    const input = document.querySelector('input[type="text"]') as HTMLInputElement
-                    if (input) input.focus()
-                  }}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                >
-                  {t('clickToReply') || 'Cliquez pour répondre'}
-                </button>
               </div>
             )}
 

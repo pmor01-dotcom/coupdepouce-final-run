@@ -7,7 +7,7 @@ import { useLanguage } from '../components/LanguageProvider'
 import DemandCarousel from '../components/DemandCarousel'
 
 export default function ArtisanDashboard() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const router = useRouter()
   const { t } = useLanguage()
 
@@ -26,9 +26,14 @@ export default function ArtisanDashboard() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-3xl mx-auto px-4">
           <div className="flex items-center justify-center h-16 md:h-20">
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t('artisanHeader') || 'Artisan Dashboard'}
-            </h1>
+            <div className="text-center">
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
+                {t('artisanHeader') || 'Artisan Dashboard'}
+              </h1>
+              <p className="text-sm md:text-base text-gray-600 mt-1">
+                {t('welcome')}, {user?.name || 'Artisan'}
+              </p>
+            </div>
           </div>
         </div>
       </header>
