@@ -5,7 +5,6 @@ import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import PaymentStatus from '../components/PaymentStatus'
 import WelcomeUser from '@/app/components/WelcomeUser'
 
 interface Demand {
@@ -47,6 +46,7 @@ export default function ClientDashboard() {
   const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
   const [demands, setDemands] = useState<Demand[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const handleLogout = () => {
     logout()
@@ -55,7 +55,10 @@ export default function ClientDashboard() {
 
   useEffect(() => {
     fetchDemands()
-  }, [])
+    if (user?.id) {
+      fetchUnreadCount()
+    }
+  }, [user?.id])
 
   const fetchDemands = async () => {
     try {
@@ -68,6 +71,16 @@ export default function ClientDashboard() {
       console.error('Error fetching demands:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await fetch(`/api/messages/unread-count?userId=${user?.id}`)
+      const data = await response.json()
+      setUnreadCount(data.count || 0)
+    } catch (error) {
+      console.error('Error fetching unread count:', error)
     }
   }
 
@@ -96,7 +109,25 @@ export default function ClientDashboard() {
 
       {/* WELCOME */}
       <div className="max-w-3xl mx-auto px-4 pt-6">
-        <WelcomeUser />
+        <div className="flex items-center">
+          <WelcomeUser />
+          <div className="flex items-center ml-5">
+            <Link
+              href="/messages"
+              className="flex items-center hover:bg-gray-100 transition-colors rounded-full p-4"
+              title={t('messages') || 'Messages'}
+            >
+              <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-2xl font-bold rounded-full h-12 w-12 flex items-center justify-center border-4 border-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* BUTTONS STACKED VERTICALLY */}
@@ -171,11 +202,6 @@ export default function ClientDashboard() {
             </Link>
           </div>
 
-      </div>
-
-      {/* PAYMENT STATUS */}
-      <div className="max-w-3xl mx-auto px-4 mt-6">
-        <PaymentStatus />
       </div>
 
       {/* SPACING */}

@@ -5,11 +5,29 @@ import { useAuth } from '../components/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '../components/LanguageProvider'
 import DemandCarousel from '../components/DemandCarousel'
+import { useState, useEffect } from 'react'
 
 export default function ArtisanDashboard() {
   const { logout, user } = useAuth()
   const router = useRouter()
   const { t } = useLanguage()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUnreadCount()
+    }
+  }, [user?.id])
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await fetch(`/api/messages/unread-count?userId=${user?.id}`)
+      const data = await response.json()
+      setUnreadCount(data.count || 0)
+    } catch (error) {
+      console.error('Error fetching unread count:', error)
+    }
+  }
 
   const handleLogout = () => {
     logout()
@@ -26,17 +44,37 @@ export default function ArtisanDashboard() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-3xl mx-auto px-4">
           <div className="flex items-center justify-center h-16 md:h-20">
-            <div className="text-center">
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
-                {t('artisanHeader') || 'Artisan Dashboard'}
-              </h1>
-              <p className="text-sm md:text-base text-gray-600 mt-1">
-                {t('welcome')}, {user?.name || 'Artisan'}
-              </p>
-            </div>
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
+              {t('artisanHeader') || 'Artisan Dashboard'}
+            </h1>
           </div>
         </div>
       </header>
+
+      {/* WELCOME WITH NOTIFICATION */}
+      <div className="max-w-3xl mx-auto px-4 pt-6">
+        <div className="flex items-center">
+          <p className="text-sm md:text-base text-gray-900">
+            {t('welcome')}, {user?.name || 'Artisan'}
+          </p>
+          <div className="flex items-center ml-5">
+            <Link
+              href="/artisan-messages"
+              className="flex items-center hover:bg-gray-100 transition-colors rounded-full p-4"
+              title={t('messages') || 'Messages'}
+            >
+              <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-2xl font-bold rounded-full h-12 w-12 flex items-center justify-center border-4 border-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* BUTTONS */}
       <div className="max-w-3xl mx-auto px-4 mt-6 md:mt-10 w-full">
