@@ -179,7 +179,7 @@ export default function Home() {
                         {artisans.map((artisan) => (
                           <div
                             key={artisan.id}
-                            className="bg-gray-800 rounded-lg p-4 border border-gray-700"
+                            className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm"
                           >
                             <div className="flex items-center mb-3">
                               {artisan.photo_url ? (
@@ -189,32 +189,32 @@ export default function Home() {
                                   className="w-12 h-12 rounded-full object-cover mr-3 border-2 border-green-600"
                                 />
                               ) : (
-                                <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center mr-3 border-2 border-green-600">
-                                  <span className="text-gray-400 text-lg">👷</span>
+                                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-3 border-2 border-green-600">
+                                  <span className="text-gray-500 text-lg">👷</span>
                                 </div>
                               )}
                               <div>
-                                <h5 className="text-sm font-semibold text-white">
+                                <h5 className="text-sm font-semibold text-gray-900">
                                   {artisan.name}
                                 </h5>
-                                <p className="text-xs text-green-400">
+                                <p className="text-xs text-green-600">
                                   {artisan.trade}
                                 </p>
                               </div>
                             </div>
                             <div className="space-y-1">
-                              <div className="flex items-center text-xs text-gray-400">
+                              <div className="flex items-center text-xs text-gray-600">
                                 <span className="mr-2">📍</span>
                                 <span>{artisan.city}</span>
                               </div>
                               {artisan.experience_years && (
-                                <div className="flex items-center text-xs text-gray-400">
+                                <div className="flex items-center text-xs text-gray-600">
                                   <span className="mr-2">⏱️</span>
                                   <span>{artisan.experience_years} {t('artisanDirectory.years') || 'ans'}</span>
                                 </div>
                               )}
                               {artisan.description && (
-                                <p className="text-xs text-gray-400 line-clamp-2 mt-2">
+                                <p className="text-xs text-gray-600 line-clamp-2 mt-2">
                                   {artisan.description}
                                 </p>
                               )}
