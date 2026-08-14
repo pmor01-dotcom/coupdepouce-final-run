@@ -71,6 +71,7 @@ export async function POST(req: Request) {
     console.log('=== EMAIL SENDING DEBUG ===')
     console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY)
     console.log('RESEND_API_KEY length:', process.env.RESEND_API_KEY?.length)
+    console.log('RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL)
     console.log('Recipient email:', email)
     console.log('Verification URL:', verificationUrl)
 
@@ -81,8 +82,14 @@ export async function POST(req: Request) {
     } else {
       try {
         console.log('Attempting to send email via Resend...')
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+        const fromName = process.env.RESEND_FROM_NAME || 'Coup de Pouce'
+        
+        console.log('From email:', fromEmail)
+        console.log('From name:', fromName)
+        
         const emailResult = await resend.emails.send({
-          from: 'Coup de Pouce <onboarding@resend.dev>',
+          from: `${fromName} <${fromEmail}>`,
           to: email,
           subject: 'Vérifiez votre adresse email',
           html: `
@@ -115,7 +122,8 @@ export async function POST(req: Request) {
             </html>
           `,
         })
-        console.log('Email sent successfully:', emailResult)
+        console.log('Email sent successfully')
+        console.log('Resend response:', JSON.stringify(emailResult, null, 2))
         console.log('Verification email sent to:', email)
         emailSent = true
       } catch (emailError: any) {
