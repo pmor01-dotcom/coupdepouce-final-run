@@ -118,7 +118,12 @@ export default function ArtisanProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!user?.id) {
+    // Check localStorage directly as fallback
+    const storedUser = localStorage.getItem('user')
+    const userId = user?.id || (storedUser ? JSON.parse(storedUser).id : null)
+
+    if (!userId) {
+      console.error('User not authenticated - user:', user, 'storedUser:', storedUser)
       setError('User not authenticated')
       return
     }
@@ -132,10 +137,10 @@ export default function ArtisanProfilePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': user.id
+          'x-user-id': userId
         },
         body: JSON.stringify({
-          id: user.id,
+          id: userId,
           ...formData,
           experience_years: formData.experience_years
             ? parseInt(formData.experience_years)
