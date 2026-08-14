@@ -66,9 +66,13 @@ export default function SignupPage() {
         return
       }
 
-      if (data.needsEmailVerification) {
-        router.push('/check-email')
+      console.log('Signup successful, requiresVerification:', data.requiresVerification)
+
+      if (data.requiresVerification) {
+        console.log('Redirecting to check-email with token:', data.verificationUrl)
+        router.push(`/check-email?token=${encodeURIComponent(data.verificationUrl)}`)
       } else {
+        console.log('No verification required, redirecting to dashboard')
         router.push(selectedRole === 'client' ? '/client-dashboard' : '/artisan-dashboard')
       }
     } catch (err: any) {

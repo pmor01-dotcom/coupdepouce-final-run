@@ -89,10 +89,14 @@ export default function ArtisanSignupPage() {
         return
       }
 
+      console.log('Signup successful, requiresVerification:', data.requiresVerification)
+
       // If email verification is needed, redirect to check-email page
       if (data.requiresVerification) {
-        router.push(`/check-email?token=${data.verificationUrl}`)
+        console.log('Redirecting to check-email with token:', data.verificationUrl)
+        router.push(`/check-email?token=${encodeURIComponent(data.verificationUrl)}`)
       } else {
+        console.log('No verification required, redirecting to dashboard')
         router.push('/artisan-dashboard')
       }
     } catch (err: any) {
