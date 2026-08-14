@@ -65,7 +65,8 @@ export async function POST(req: Request) {
       }
     }
 
-    const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (req.headers.get('host')?.includes('localhost') ? 'http://localhost:3000' : `https://${req.headers.get('host')}`)
+    const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`
 
     // Send verification email using Resend
     try {
