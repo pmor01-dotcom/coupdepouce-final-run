@@ -1,71 +1,30 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { getSupabaseClient } from '@/lib/supabase-client'
-import { useAuth } from '../components/AuthProvider'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useLanguage } from '../components/LanguageProvider'
 
 export default function CheckEmailPage() {
   const router = useRouter()
-  const supabase = getSupabaseClient()
-  const { user, isLoading } = useAuth()
-  const [checking, setChecking] = useState(true)
+  const searchParams = useSearchParams()
+  const { t } = useLanguage()
+  const [verificationUrl, setVerificationUrl] = useState('')
 
   useEffect(() => {
-    const checkEmailVerification = async () => {
-      // Wait for auth state to load
-      if (isLoading) {
-        return
-      }
-
-      // If user is already verified and logged in, redirect to appropriate dashboard
-      if (user) {
-        if (user.role === 'client') {
-          router.push('/client-dashboard')
-        } else if (user.role === 'artisan') {
-          router.push('/artisan-dashboard')
-        } else {
-          // Default to client dashboard if role is not set
-          router.push('/client-dashboard')
-        }
-        return
-      }
-
-      // If no user session, they need to verify their email first
-      // Poll for session changes (user clicking email verification link)
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Get role from users table
-          const { data: profile } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', session.user.id)
-            .single()
-
-          const role = profile?.role?.toLowerCase()
-
-          if (role === 'client') {
-            router.push('/client-dashboard')
-          } else if (role === 'artisan') {
-            router.push('/artisan-dashboard')
-          } else {
-            router.push('/client-dashboard')
-          }
-        }
-      })
-
-      setChecking(false)
-
-      return () => {
-        subscription.unsubscribe()
-      }
+    const url = searchParams.get('token')
+    if (url) {
+      setVerificationUrl(url)
     }
+  }, [searchParams])
 
-    checkEmailVerification()
-  }, [user, isLoading, router, supabase])
+  const handleVerifyClick = () => {
+    if (verificationUrl) {
+      window.location.href = verificationUrl
+    }
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-200 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}>
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
         <div className="mb-6">
           <svg
@@ -84,34 +43,42 @@ export default function CheckEmailPage() {
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Check your email
+          {t('verification.checkEmail') || 'Check your email'}
         </h1>
 
         <p className="text-gray-600 mb-6">
-          We have sent a confirmation link to your email address. 
-          Click the link to activate your account.
+          {t('verification.emailSent') || 'A verification email has been sent to your address.'}
         </p>
 
         <p className="text-sm text-gray-500 mb-6">
-          After verifying your email, you will be automatically redirected to your dashboard.
+          {t('verification.required') || 'Please verify your email before logging in.'}
         </p>
 
-        {checking && (
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        {/* Development: Show verification URL for testing */}
+        {verificationUrl && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-xs text-yellow-800 mb-2 font-semibold">
+              Development Mode - Manual Verification
+            </p>
+            <p className="text-xs text-gray-600 mb-2 break-all">
+              {verificationUrl}
+            </p>
+            <button
+              onClick={handleVerifyClick}
+              className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+            >
+              Click to verify (dev mode)
+            </button>
           </div>
         )}
 
         <div className="mt-8 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-500">
-            Didn't receive an email? Check your spam folder or{' '}
-            <button
-              onClick={() => router.back()}
-              className="text-green-600 hover:text-green-700 font-medium"
-            >
-              try again
-            </button>
-          </p>
+          <button
+            onClick={() => router.push('/login')}
+            className="text-green-600 hover:text-green-700 font-medium"
+          >
+            {t('login') || 'Back to Login'}
+          </button>
         </div>
       </div>
     </div>

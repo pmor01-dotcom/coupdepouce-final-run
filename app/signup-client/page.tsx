@@ -77,8 +77,8 @@ export default function ClientSignupPage() {
       }
 
       // If email verification is needed, redirect to check-email page
-      if (data.needsEmailVerification) {
-        router.push('/check-email')
+      if (data.requiresVerification) {
+        router.push(`/check-email?token=${data.verificationUrl}`)
       } else {
         router.push('/client-dashboard')
       }

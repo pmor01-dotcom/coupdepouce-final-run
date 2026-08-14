@@ -193,6 +193,13 @@ const translations: Record<Language, Record<string, string>> = {
     "messages.downloadFile": "Télécharger le fichier",
     "no_conversations": "Aucune conversation",
     "clickToReply": "Cliquez pour répondre",
+    /* ---------------- EMAIL VERIFICATION ---------------- */
+    "verification.success": "Email vérifié",
+    "verification.failed": "Échec de la vérification",
+    "verification.required": "Veuillez vérifier votre email avant de vous connecter",
+    "verification.emailSent": "Un email de vérification a été envoyé à votre adresse",
+    "verification.checkEmail": "Veuillez vérifier votre email pour le lien de vérification",
+    "verification.resend": "Renvoyer l'email de vérification",
     /* ---------------- ARTISAN DIRECTORY ---------------- */
     "artisanDirectory.title": "Nos Artisans",
     "artisanDirectory.subtitle": "Découvrez nos artisans qualifiés",
@@ -549,6 +556,13 @@ const translations: Record<Language, Record<string, string>> = {
     "messages.downloadFile": "Download file",
     "no_conversations": "No conversations",
     "clickToReply": "Click to reply",
+    /* ---------------- EMAIL VERIFICATION ---------------- */
+    "verification.success": "Email Verified",
+    "verification.failed": "Verification Failed",
+    "verification.required": "Please verify your email before logging in",
+    "verification.emailSent": "A verification email has been sent to your address",
+    "verification.checkEmail": "Please check your email for the verification link",
+    "verification.resend": "Resend verification email",
     /* ---------------- ARTISAN DIRECTORY ---------------- */
     "artisanDirectory.title": "Our Artisans",
     "artisanDirectory.subtitle": "Discover our qualified artisans",

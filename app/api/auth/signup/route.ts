@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,13 +18,20 @@ export async function POST(req: Request) {
     // Hash password before storing
     const password_hash = await bcrypt.hash(password, 10)
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex')
+    const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+
     const { data: user, error: userError } = await supabase
       .from('users')
       .insert({
         name,
         email,
         password_hash,
-        role
+        role,
+        email_verified: false,
+        verification_token: verificationToken,
+        verification_token_expires: tokenExpires.toISOString()
       })
       .select()
       .single()
@@ -54,7 +62,15 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ success: true })
+    // In a real implementation, you would send an email here
+    // For now, we'll return the verification URL so the user can manually verify
+    const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`
+
+    return NextResponse.json({
+      success: true,
+      requiresVerification: true,
+      verificationUrl // Remove this in production when email is implemented
+    })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }

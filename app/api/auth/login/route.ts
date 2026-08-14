@@ -48,14 +48,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
-    // 3. Return user data (without password hash)
+    // 3. Check if email is verified
+    if (!user.email_verified) {
+      return NextResponse.json({ 
+        error: 'Please verify your email before logging in',
+        requiresVerification: true
+      }, { status: 403 })
+    }
+
+    // 4. Return user data (without password hash)
     const { password_hash, ...userWithoutPassword } = user
 
     console.log("Login successful - User ID:", user.id, "Type:", typeof user.id)
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       user: userWithoutPassword,
-      success: true 
+      success: true
     })
 
   } catch (err: any) {

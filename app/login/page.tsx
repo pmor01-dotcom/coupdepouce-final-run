@@ -20,19 +20,36 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      const result = await login(formData.email, formData.password)
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
 
-      if (result && typeof result !== 'boolean') {
-        // result is the user profile
-        const role = result.role
+      const data = await response.json()
 
-        if (role === 'client') window.location.href = '/client-dashboard'
-        else if (role === 'artisan') window.location.href = '/artisan-dashboard'
-        else setError(t('login.noRole'))
-
-      } else {
-        setError(t('login.incorrectCredentials'))
+      if (!response.ok) {
+        if (data.requiresVerification) {
+          setError(t('verification.required'))
+        } else {
+          setError(data.error || t('login.incorrectCredentials'))
+        }
+        setIsLoading(false)
+        return
       }
+
+      // Login successful - store user data and redirect
+      const role = data.user.role
+
+      if (role === 'client') window.location.href = '/client-dashboard'
+      else if (role === 'artisan') window.location.href = '/artisan-dashboard'
+      else setError(t('login.noRole'))
+
     } catch {
       setError(t('login.genericError'))
     } finally {
