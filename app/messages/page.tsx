@@ -139,12 +139,24 @@ export default function MessagesPage() {
                     {new Date(conv.lastMessage?.created_at).toLocaleDateString()}
                   </p>
                 </Link>
-                <button
-                  onClick={(e) => handleDeleteConversation(conv.id, e)}
-                  className="ml-4 px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-medium"
-                >
-                  {t('clientDashboard.delete')}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      router.push(`/messages/${conv.id}`)
+                    }}
+                    className="ml-4 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+                  >
+                    {t('clickToReply')}
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteConversation(conv.id, e)}
+                    className="ml-4 px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-medium"
+                  >
+                    {t('clientDashboard.delete')}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
