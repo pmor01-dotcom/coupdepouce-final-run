@@ -19,7 +19,8 @@ export async function GET() {
         specialties,
         description,
         photo_url,
-        users (
+        users!inner (
+          id,
           name
         )
       `)
