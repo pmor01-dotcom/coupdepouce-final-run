@@ -56,8 +56,8 @@ function CheckEmailContent() {
           {t('verification.required') || 'Please verify your email before logging in.'}
         </p>
 
-        {/* Development: Show verification URL for testing */}
-        {verificationUrl && (
+        {/* Development: Show verification URL for testing only on localhost */}
+        {verificationUrl && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-xs text-yellow-800 mb-2 font-semibold">
               Development Mode - Manual Verification
