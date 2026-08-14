@@ -33,19 +33,14 @@ function VerifyEmailContent() {
           setStatus('success')
           setMessage(data.message || 'Email verified successfully')
           
-          // Redirect to appropriate dashboard based on role
-          const dashboard = data.role === 'artisan' || data.role === 'ARTISAN' 
-            ? '/artisan-dashboard' 
-            : '/client-dashboard'
-          
-          // Countdown before redirect
+          // Redirect to login page with success message
           let count = 3
           const interval = setInterval(() => {
             count -= 1
             setCountdown(count)
             if (count <= 0) {
               clearInterval(interval)
-              router.push(dashboard)
+              router.push('/login?verified=true')
             }
           }, 1000)
         } else {

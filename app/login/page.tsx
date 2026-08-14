@@ -1,22 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import Link from 'next/link'
 import { useLanguage } from '../components/LanguageProvider'
+import { useSearchParams } from 'next/navigation'
 
-export default function Login() {
+function LoginContent() {
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
 
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   const { login } = useAuth()
+
+  useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      setSuccessMessage(t('verification.emailVerified') || 'Email verified successfully. Please log in.')
+    }
+  }, [searchParams, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccessMessage('')
     setIsLoading(true)
 
     try {
@@ -69,6 +79,10 @@ export default function Login() {
             <p className="text-red-600 text-center mb-4">{error}</p>
           )}
 
+          {successMessage && (
+            <p className="text-green-600 text-center mb-4">{successMessage}</p>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block mb-2 font-medium">{t('login.email')}</label>
@@ -116,5 +130,13 @@ export default function Login() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}><p>Loading...</p></div>}>
+      <LoginContent />
+    </Suspense>
   )
 }
