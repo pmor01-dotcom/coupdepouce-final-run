@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
 
-export default function VerifyEmailPage() {
+export const dynamic = 'force-dynamic'
+
+function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { t } = useLanguage()
@@ -96,5 +98,13 @@ export default function VerifyEmailPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}><p>Loading...</p></div>}>
+      <VerifyEmailContent />
+    </Suspense>
   )
 }
