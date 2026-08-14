@@ -13,6 +13,7 @@ function VerifyEmailContent() {
   const { t } = useLanguage()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
+  const [countdown, setCountdown] = useState(3)
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -31,6 +32,22 @@ function VerifyEmailContent() {
         if (response.ok) {
           setStatus('success')
           setMessage(data.message || 'Email verified successfully')
+          
+          // Redirect to appropriate dashboard based on role
+          const dashboard = data.role === 'artisan' || data.role === 'ARTISAN' 
+            ? '/artisan-dashboard' 
+            : '/client-dashboard'
+          
+          // Countdown before redirect
+          let count = 3
+          const interval = setInterval(() => {
+            count -= 1
+            setCountdown(count)
+            if (count <= 0) {
+              clearInterval(interval)
+              router.push(dashboard)
+            }
+          }, 1000)
         } else {
           setStatus('error')
           setMessage(data.error || 'Verification failed')
@@ -42,7 +59,7 @@ function VerifyEmailContent() {
     }
 
     verifyEmail()
-  }, [searchParams])
+  }, [searchParams, router])
 
   return (
     <main
@@ -67,12 +84,15 @@ function VerifyEmailContent() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {t('verification.success') || 'Email Verified'}
             </h2>
-            <p className="text-gray-600 mb-6">{message}</p>
+            <p className="text-gray-600 mb-2">{message}</p>
+            <p className="text-gray-500 mb-6">
+              {t('verification.redirecting') || 'Redirecting to dashboard in'} {countdown} {t('verification.seconds') || 'seconds...'}
+            </p>
             <Link
               href="/login"
               className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
             >
-              {t('login') || 'Login'}
+              {t('login') || 'Go to Login'}
             </Link>
           </div>
         )}

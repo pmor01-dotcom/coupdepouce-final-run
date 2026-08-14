@@ -45,7 +45,11 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Failed to verify email' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, message: 'Email verified successfully' })
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Email verified successfully',
+      role: user.role 
+    })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
