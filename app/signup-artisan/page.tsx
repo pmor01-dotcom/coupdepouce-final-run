@@ -248,10 +248,9 @@ export default function ArtisanSignupPage() {
               id="terms"
               checked={termsAccepted}
               onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-              required
+              className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded cursor-pointer"
             />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700 cursor-pointer">
               {t('signup.acceptTerms')}{' '}
               <Link href="/terms-artisan" className="text-blue-600 hover:text-blue-800">
                 {t('signup.termsOfService')}

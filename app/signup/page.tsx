@@ -83,13 +83,6 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300 px-4">
         <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-md w-full mx-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 text-center">
-            {t('signup.title')}
-          </h1>
-          <p className="text-gray-600 text-center mb-8">
-            {t('signup.subtitle')}
-          </p>
-
           <div className="space-y-4">
             <button
               onClick={() => setSelectedRole('client')}
@@ -103,7 +96,6 @@ export default function SignupPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{t('signup.client')}</h3>
-                  <p className="text-sm text-gray-600">{t('signup.client.desc')}</p>
                 </div>
               </div>
             </button>
@@ -120,7 +112,6 @@ export default function SignupPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{t('signup.artisan')}</h3>
-                  <p className="text-sm text-gray-600">{t('signup.artisan.desc')}</p>
                 </div>
               </div>
             </button>
