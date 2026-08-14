@@ -6,18 +6,43 @@ import { useRouter } from 'next/navigation'
 import { useLanguage } from '../components/LanguageProvider'
 import DemandCarousel from '../components/DemandCarousel'
 import { useState, useEffect } from 'react'
+import { getSupabaseClient } from '@/lib/supabase-client'
 
 export default function ArtisanDashboard() {
   const { logout, user } = useAuth()
   const router = useRouter()
   const { t } = useLanguage()
+  const supabase = getSupabaseClient()
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     if (user?.id) {
       fetchUnreadCount()
+
+      // Set up real-time subscription for new messages
+      const channel = supabase
+        .channel('artisan-dashboard-messages')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'messages',
+            filter: `receiver_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Real-time message change:', payload)
+            // Update unread count when a new message is received
+            fetchUnreadCount()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
-  }, [user?.id])
+  }, [user?.id, supabase])
 
   const fetchUnreadCount = async () => {
     try {

@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
+import { getSupabaseClient } from '@/lib/supabase-client'
 
 export default function ArtisanMessagesPage() {
   const [conversations, setConversations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()
   const { t } = useLanguage()
+  const supabase = getSupabaseClient()
 
   const handleDeleteConversation = async (otherUserId: string) => {
     if (!confirm(t('clientDashboard.confirmDeleteMessage'))) {
@@ -55,7 +57,32 @@ export default function ArtisanMessagesPage() {
     }
 
     loadConversations()
-  }, [user])
+
+    // Set up real-time subscription for new messages
+    if (user?.id) {
+      const channel = supabase
+        .channel('artisan-messages-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'messages',
+            filter: `sender_id=eq.${user.id} OR receiver_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Real-time message change:', payload)
+            // Reload conversations when a message changes
+            loadConversations()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
+  }, [user, supabase])
 
   if (loading) {
     return (

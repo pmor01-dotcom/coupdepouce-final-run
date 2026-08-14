@@ -62,7 +62,30 @@ export default function MessagesPage() {
     }
 
     loadConversations()
-  }, [user])
+
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `sender_id=eq.${user.id} OR receiver_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Real-time message change:', payload)
+          // Reload conversations when a message changes
+          loadConversations()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user, supabase])
 
   const handleBack = () => {
     if (user?.role === 'client') {

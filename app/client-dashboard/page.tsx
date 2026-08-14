@@ -6,6 +6,7 @@ import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import WelcomeUser from '@/app/components/WelcomeUser'
+import { getSupabaseClient } from '@/lib/supabase-client'
 
 interface Demand {
   id: number
@@ -42,6 +43,7 @@ export default function ClientDashboard() {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
   const router = useRouter()
+  const supabase = getSupabaseClient()
 
   const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
   const [demands, setDemands] = useState<Demand[]>([])
@@ -57,8 +59,31 @@ export default function ClientDashboard() {
     fetchDemands()
     if (user?.id) {
       fetchUnreadCount()
+
+      // Set up real-time subscription for new messages
+      const channel = supabase
+        .channel('client-dashboard-messages')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'messages',
+            filter: `receiver_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Real-time message change:', payload)
+            // Update unread count when a new message is received
+            fetchUnreadCount()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
-  }, [user?.id])
+  }, [user?.id, supabase])
 
   const fetchDemands = async () => {
     try {
