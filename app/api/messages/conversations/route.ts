@@ -55,10 +55,13 @@ export async function GET(request: NextRequest) {
         conversationMap.set(otherUserId, {
           id: otherUserId,
           otherUser: otherUser && otherUser.length > 0 ? otherUser[0] : { id: otherUserId, name: 'Unknown User' },
-          lastMessage: message
+          lastMessage: message,
+          messages: [message]
         });
       } else {
         const conv = conversationMap.get(otherUserId);
+        // Add message to conversation
+        conv.messages.push(message);
         // Update last message if newer
         if (new Date(message.created_at) > new Date(conv.lastMessage.created_at)) {
           conv.lastMessage = message;
@@ -66,7 +69,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const conversations = Array.from(conversationMap.values());
+    // Sort messages within each conversation by created_at
+    const conversations = Array.from(conversationMap.values()).map(conv => ({
+      ...conv,
+      messages: conv.messages.sort((a: any, b: any) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
+    }));
 
     return NextResponse.json({
       success: true,

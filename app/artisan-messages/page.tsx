@@ -23,7 +23,7 @@ export default function ArtisanMessagesPage() {
       })
 
       if (res.ok) {
-        setConversations(conversations.filter(c => c.otherUserId !== otherUserId))
+        setConversations(conversations.filter(c => c.id !== otherUserId))
       } else {
         console.error('Failed to delete conversation')
       }
@@ -40,10 +40,12 @@ export default function ArtisanMessagesPage() {
       }
 
       try {
-        const res = await fetch('/api/messages/conversations')
+        const res = await fetch(`/api/messages/conversations?userId=${user.id}`)
         if (res.ok) {
           const data = await res.json()
-          setConversations(data)
+          if (data.success && data.conversations) {
+            setConversations(data.conversations)
+          }
         }
       } catch (err) {
         console.error('Erreur lors du chargement des conversations :', err)
@@ -91,37 +93,37 @@ export default function ArtisanMessagesPage() {
           <div className="space-y-6">
             {conversations.map((conversation: any) => (
               <div
-                key={conversation.otherUserId}
+                key={conversation.id}
                 className="rounded-2xl p-6 border-4 border-white"
                 style={{ background: 'linear-gradient(to bottom, #6B8E23, #D4E4BC)' }}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-xl font-semibold text-white">
-                      {conversation.otherUserName || t('clientDashboard.unknownArtisan')}
+                      {conversation.otherUser?.name || t('clientDashboard.unknownArtisan')}
                     </h2>
                     <p className="text-sm text-white opacity-90">
-                      {conversation.lastMessage || t('messages.noMessages')}
+                      {conversation.lastMessage?.content || t('messages.noMessages')}
                     </p>
                   </div>
                   <span className="text-xs text-white opacity-75">
-                    {conversation.lastMessageTime ? new Date(conversation.lastMessageTime).toLocaleDateString() : ''}
+                    {conversation.lastMessage?.created_at ? new Date(conversation.lastMessage.created_at).toLocaleDateString() : ''}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-white border-opacity-30">
                   <div className="text-sm text-white">
-                    <strong>{t('clientDashboard.messageCount')}:</strong> {conversation.messageCount || 0}
+                    <strong>{t('clientDashboard.messageCount')}:</strong> {conversation.messages?.length || 0}
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleDeleteConversation(conversation.otherUserId)}
+                      onClick={() => handleDeleteConversation(conversation.id)}
                       className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-medium"
                     >
                       {t('clientDashboard.delete')}
                     </button>
                     <Link
-                      href={`/messages/${conversation.otherUserId}?name=${encodeURIComponent(conversation.otherUserName || 'User')}`}
+                      href={`/messages/${conversation.id}?name=${encodeURIComponent(conversation.otherUser?.name || 'User')}`}
                       className="px-4 py-2 bg-white text-green-700 rounded-lg hover:bg-gray-100 text-sm font-medium"
                     >
                       {t('clientDashboard.openConversation')}
