@@ -37,17 +37,23 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   // Restore user from localStorage
   useEffect(() => {
+    console.log('AuthProvider - Restoring user from localStorage')
     const stored = localStorage.getItem('user')
+    console.log('AuthProvider - localStorage content:', stored)
     if (stored) {
       try {
         const parsedUser = JSON.parse(stored)
+        console.log('AuthProvider - Parsed user:', parsedUser)
         // Validate that the user object has required fields
         if (parsedUser && parsedUser.id && parsedUser.email) {
+          console.log('AuthProvider - User is valid, setting state')
           setUser(parsedUser)
         } else {
+          console.log('AuthProvider - User is invalid, removing from localStorage')
           localStorage.removeItem('user')
         }
       } catch (e) {
+        console.log('AuthProvider - Error parsing user:', e)
         localStorage.removeItem('user')
       }
     }

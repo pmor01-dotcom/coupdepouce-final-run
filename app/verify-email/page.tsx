@@ -45,7 +45,9 @@ function VerifyEmailContent() {
               metier: data.user.metier,
               isPaid: data.user.isPaid ?? false,
             }
+            console.log('Storing user profile in localStorage:', userProfile)
             localStorage.setItem('user', JSON.stringify(userProfile))
+            console.log('User stored in localStorage successfully')
             
             // Redirect to appropriate dashboard based on role
             const dashboard = userProfile.role === 'artisan' 
@@ -59,7 +61,8 @@ function VerifyEmailContent() {
               setCountdown(count)
               if (count <= 0) {
                 clearInterval(interval)
-                router.push(dashboard)
+                // Use window.location.href to force full page reload so AuthProvider picks up localStorage
+                window.location.href = dashboard
               }
             }, 1000)
           } else {

@@ -16,6 +16,10 @@ export default function ArtisanDashboard() {
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
+    console.log('ArtisanDashboard - User state:', user)
+    console.log('ArtisanDashboard - User ID:', user?.id)
+    console.log('ArtisanDashboard - localStorage user:', localStorage.getItem('user'))
+    
     if (user?.id) {
       fetchUnreadCount()
 
