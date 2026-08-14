@@ -27,60 +27,52 @@ export default function ConversationPage() {
     const nameFromUrl = urlParams.get('name')
 
     const loadMessages = async () => {
-      // Load messages between current user and other user
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
-        .order('created_at', { ascending: true })
+      // Load messages between current user and other user using API
+      try {
+        const response = await fetch(`/api/messages/conversations?userId=${user.id}`)
+        const result = await response.json()
 
-      if (!error && data) {
-        setMessages(data)
+        if (result.success && result.conversations) {
+          // Find the specific conversation with the other user
+          const conversation = result.conversations.find((c: any) => c.id === otherUserId)
+          if (conversation && conversation.messages) {
+            setMessages(conversation.messages)
+          } else {
+            setMessages([])
+          }
+        } else {
+          setMessages([])
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error)
+        setMessages([])
       }
 
-      // Get other user info
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id, name')
-        .eq('id', otherUserId)
-        .limit(1)
+      // Get other user info using service role API
+      try {
+        const response = await fetch(`/api/auth/user-info?userId=${otherUserId}`)
+        const result = await response.json()
 
-      if (userData && userData.length > 0) {
-        setOtherUser(userData[0])
-      } else if (nameFromUrl) {
-        // Use name from URL parameter if user not found in database
-        setOtherUser({ id: otherUserId, name: decodeURIComponent(nameFromUrl) })
-      } else {
-        console.error('User not found:', otherUserId)
-        setOtherUser({ id: otherUserId, name: 'Unknown User' })
+        if (result.user) {
+          setOtherUser(result.user)
+        } else if (nameFromUrl) {
+          // Use name from URL parameter if user not found in database
+          setOtherUser({ id: otherUserId, name: decodeURIComponent(nameFromUrl) })
+        } else {
+          console.error('User not found:', otherUserId)
+          setOtherUser({ id: otherUserId, name: 'Unknown User' })
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+        if (nameFromUrl) {
+          setOtherUser({ id: otherUserId, name: decodeURIComponent(nameFromUrl) })
+        } else {
+          setOtherUser({ id: otherUserId, name: 'Unknown User' })
+        }
       }
     }
 
     loadMessages()
-
-    // Real-time subscription for new messages
-    const channel = supabase
-      .channel(`messages_${user.id}_${otherUserId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `or(and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id}))`
-        },
-        (payload) => {
-          console.log('New message received via real-time:', payload.new)
-          setMessages((prev) => [...prev, payload.new])
-        }
-      )
-      .subscribe((status) => {
-        console.log('Real-time subscription status:', status)
-      })
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
   }, [otherUserId, user?.id])
 
   useEffect(() => {
@@ -113,6 +105,17 @@ export default function ConversationPage() {
       }
 
       setText('')
+
+      // Reload messages after sending
+      const loadResponse = await fetch(`/api/messages/conversations?userId=${user.id}`)
+      const loadResult = await loadResponse.json()
+
+      if (loadResult.success && loadResult.conversations) {
+        const conversation = loadResult.conversations.find((c: any) => c.id === otherUserId)
+        if (conversation && conversation.messages) {
+          setMessages(conversation.messages)
+        }
+      }
     } catch (error: any) {
       console.error('Error sending message:', error)
     }
