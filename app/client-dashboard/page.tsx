@@ -152,6 +152,17 @@ export default function ClientDashboard() {
           </div>
 
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
+            <Link
+              href="/artisan-directory"
+              style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+            >
+              {t('clientDashboard.artisanDirectory')}
+            </Link>
+          </div>
+
+          <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
             <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
