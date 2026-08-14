@@ -33,16 +33,47 @@ function VerifyEmailContent() {
           setStatus('success')
           setMessage(data.message || 'Email verified successfully')
           
-          // Redirect to login page with success message
-          let count = 3
-          const interval = setInterval(() => {
-            count -= 1
-            setCountdown(count)
-            if (count <= 0) {
-              clearInterval(interval)
-              router.push('/login?verified=true')
+          // Auto-login user by storing user data in localStorage
+          if (data.user) {
+            const userProfile = {
+              id: data.user.id,
+              email: data.user.email,
+              role: data.user.role?.toLowerCase() || 'client',
+              name: data.user.name,
+              phone: data.user.phone,
+              location: data.user.ville,
+              metier: data.user.metier,
+              isPaid: data.user.isPaid ?? false,
             }
-          }, 1000)
+            localStorage.setItem('user', JSON.stringify(userProfile))
+            
+            // Redirect to appropriate dashboard based on role
+            const dashboard = userProfile.role === 'artisan' 
+              ? '/artisan-dashboard' 
+              : '/client-dashboard'
+            
+            // Countdown before redirect
+            let count = 3
+            const interval = setInterval(() => {
+              count -= 1
+              setCountdown(count)
+              if (count <= 0) {
+                clearInterval(interval)
+                router.push(dashboard)
+              }
+            }, 1000)
+          } else {
+            // Fallback to login if no user data
+            let count = 3
+            const interval = setInterval(() => {
+              count -= 1
+              setCountdown(count)
+              if (count <= 0) {
+                clearInterval(interval)
+                router.push('/login?verified=true')
+              }
+            }, 1000)
+          }
         } else {
           setStatus('error')
           setMessage(data.error || 'Verification failed')

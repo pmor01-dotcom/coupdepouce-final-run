@@ -45,10 +45,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Failed to verify email' }, { status: 500 })
     }
 
+    // Return user data for auto-login
+    const { password_hash, verification_token, verification_token_expires, ...userWithoutSensitive } = user
+
     return NextResponse.json({ 
       success: true, 
       message: 'Email verified successfully',
-      role: user.role 
+      user: userWithoutSensitive
     })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
