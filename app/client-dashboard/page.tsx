@@ -139,13 +139,13 @@ export default function ClientDashboard() {
           <div className="flex items-center ml-5">
             <Link
               href="/messages"
-              className="flex items-center hover:bg-gray-100 transition-colors rounded-full p-4"
+              className="flex items-center hover:bg-gray-100 transition-colors rounded-full p-2"
               title={t('messages') || 'Messages'}
             >
-              <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <span className="ml-2 bg-red-500 text-white text-2xl font-bold rounded-full h-12 w-12 flex items-center justify-center border-4 border-white">
+              <span className="ml-2 bg-red-500 text-white text-lg font-bold rounded-full h-8 w-8 flex items-center justify-center border-2 border-white">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             </Link>
