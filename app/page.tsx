@@ -9,21 +9,31 @@ import { useEffect, useState } from 'react'
 export default function Home() {
   const { t } = useLanguage()
   const [demands, setDemands] = useState<any[]>([])
+  const [artisans, setArtisans] = useState<any[]>([])
 
   useEffect(() => {
-    const fetchDemands = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/public-demands')
-        if (res.ok) {
-          const data = await res.json()
-          setDemands(data)
+        const [demandsRes, artisansRes] = await Promise.all([
+          fetch('/api/public-demands'),
+          fetch('/api/public-artisans')
+        ])
+
+        if (demandsRes.ok) {
+          const demandsData = await demandsRes.json()
+          setDemands(demandsData)
+        }
+
+        if (artisansRes.ok) {
+          const artisansData = await artisansRes.json()
+          setArtisans(artisansData.slice(0, 6)) // Show first 6 artisans
         }
       } catch (err) {
-        console.error('Error fetching demands:', err)
+        console.error('Error fetching data:', err)
       }
     }
 
-    fetchDemands()
+    fetchData()
   }, [])
 
   return (
@@ -158,6 +168,72 @@ export default function Home() {
                   <p className="text-gray-300 mb-4 max-w-md">
                     {t('footerDescription')}
                   </p>
+
+                  {/* Artisan Directory Section */}
+                  <div className="mt-8">
+                    <h4 className="text-lg font-semibold text-white mb-4">
+                      {t('artisanDirectory.title') || 'Nos Artisans'}
+                    </h4>
+                    {artisans.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {artisans.map((artisan) => (
+                          <div
+                            key={artisan.id}
+                            className="bg-gray-800 rounded-lg p-4 border border-gray-700"
+                          >
+                            <div className="flex items-center mb-3">
+                              {artisan.photo_url ? (
+                                <img
+                                  src={artisan.photo_url}
+                                  alt={artisan.name}
+                                  className="w-12 h-12 rounded-full object-cover mr-3 border-2 border-green-600"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center mr-3 border-2 border-green-600">
+                                  <span className="text-gray-400 text-lg">👷</span>
+                                </div>
+                              )}
+                              <div>
+                                <h5 className="text-sm font-semibold text-white">
+                                  {artisan.name}
+                                </h5>
+                                <p className="text-xs text-green-400">
+                                  {artisan.trade}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center text-xs text-gray-400">
+                                <span className="mr-2">📍</span>
+                                <span>{artisan.city}</span>
+                              </div>
+                              {artisan.experience_years && (
+                                <div className="flex items-center text-xs text-gray-400">
+                                  <span className="mr-2">⏱️</span>
+                                  <span>{artisan.experience_years} {t('artisanDirectory.years') || 'ans'}</span>
+                                </div>
+                              )}
+                              {artisan.description && (
+                                <p className="text-xs text-gray-400 line-clamp-2 mt-2">
+                                  {artisan.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm">
+                        {t('artisanDirectory.noArtisans') || 'Aucun artisan disponible'}
+                      </p>
+                    )}
+                    <Link
+                      href="/artisan-directory"
+                      className="inline-block mt-4 text-green-400 hover:text-green-300 text-sm font-medium"
+                    >
+                      {t('viewAllArtisans') || 'Voir tous les artisans →'}
+                    </Link>
+                  </div>
 
                   {/* Social Icons */}
                   <div className="flex space-x-4">

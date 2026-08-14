@@ -192,6 +192,12 @@ const translations: Record<Language, Record<string, string>> = {
     "messages.downloadFile": "Télécharger le fichier",
     "no_conversations": "Aucune conversation",
     "clickToReply": "Cliquez pour répondre",
+    /* ---------------- ARTISAN DIRECTORY ---------------- */
+    "artisanDirectory.title": "Nos Artisans",
+    "artisanDirectory.subtitle": "Découvrez nos artisans qualifiés",
+    "artisanDirectory.noArtisans": "Aucun artisan disponible pour le moment",
+    "artisanDirectory.years": "ans d'expérience",
+    "viewAllArtisans": "Voir tous les artisans →",
     /* ---------------- HOME SLIDESHOW ---------------- */
     "slideshow.title": "Dernières demandes",
     "slideshow.noProposals": "Aucune proposition disponible",
@@ -541,6 +547,12 @@ const translations: Record<Language, Record<string, string>> = {
     "messages.downloadFile": "Download file",
     "no_conversations": "No conversations",
     "clickToReply": "Click to reply",
+    /* ---------------- ARTISAN DIRECTORY ---------------- */
+    "artisanDirectory.title": "Our Artisans",
+    "artisanDirectory.subtitle": "Discover our qualified artisans",
+    "artisanDirectory.noArtisans": "No artisans available at the moment",
+    "artisanDirectory.years": "years of experience",
+    "viewAllArtisans": "View all artisans →",
     /* ---------------- HOME SLIDESHOW ---------------- */
     "slideshow.title": "Latest Demands",
     "slideshow.noProposals": "No proposals available",
