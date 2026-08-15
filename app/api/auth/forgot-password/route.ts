@@ -25,9 +25,12 @@ export async function POST(req: Request) {
       .eq('email', email)
       .single()
 
+    console.log('User lookup result:', user ? 'Found' : 'Not found')
+    console.log('User error:', userError)
+
     if (userError || !user) {
       // Don't reveal if user exists or not for security
-      console.log('User not found or error:', userError)
+      console.log('User not found or error, returning success message for security')
       return NextResponse.json({ 
         success: true, 
         message: 'If an account exists with this email, a password reset link has been sent.' 
@@ -39,6 +42,7 @@ export async function POST(req: Request) {
     const tokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000) // 1 hour from now
 
     // Store reset token in database
+    console.log('Storing reset token for user ID:', user.id)
     const { error: updateError } = await supabase
       .from('users')
       .update({
@@ -49,7 +53,8 @@ export async function POST(req: Request) {
 
     if (updateError) {
       console.error('Error storing reset token:', updateError)
-      return NextResponse.json({ error: 'Failed to process request' }, { status: 500 })
+      console.error('Error details:', JSON.stringify(updateError, null, 2))
+      return NextResponse.json({ error: 'Failed to process request: ' + updateError.message }, { status: 500 })
     }
 
     // Generate reset URL
