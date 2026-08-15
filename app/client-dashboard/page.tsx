@@ -233,10 +233,27 @@ export default function ClientDashboard() {
       {/* UNSUBSCRIBE BUTTON */}
       <div className="max-w-3xl mx-auto px-4 pb-10 flex flex-col items-center">
         <button
-          onClick={() => {
+          onClick={async () => {
             if (confirm(t('unsubscribe.confirm'))) {
-              logout()
-              router.push('/')
+              try {
+                const response = await fetch('/api/auth/delete-account', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ userId: user?.id }),
+                })
+
+                if (response.ok) {
+                  logout()
+                  router.push('/')
+                } else {
+                  const data = await response.json()
+                  alert('Failed to delete account: ' + (data.error || 'Unknown error'))
+                }
+              } catch (error) {
+                alert('Failed to delete account. Please try again.')
+              }
             }
           }}
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 md:py-3 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-colors duration-200"
