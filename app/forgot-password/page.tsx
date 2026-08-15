@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import { useLanguage } from "../components/LanguageProvider";
 
 export default function ForgotPasswordPage() {
@@ -12,25 +11,29 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // ⭐ Supabase client (frontend)
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  // ⭐ NEW handleReset — Supabase only, no backend route
+  // ⭐ NEW handleReset — Custom API route with Resend
   const handleReset = async () => {
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
 
-    if (error) {
-      setMessage(t('common.error') + " : " + error.message);
-    } else {
-      setMessage(t('forgotPassword.emailSentDesc'));
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message || t('forgotPassword.emailSentDesc'));
+      } else {
+        setMessage(data.error || t('common.error'));
+      }
+    } catch (error) {
+      setMessage(t('common.error'));
     }
 
     setLoading(false);

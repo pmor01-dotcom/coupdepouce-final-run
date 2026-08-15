@@ -18,6 +18,24 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { name, email, password, role, ville, metier, phone } = body
 
+    console.log('Signup attempt for email:', email, 'role:', role)
+
+    // Check if user already exists
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('email, email_verified')
+      .eq('email', email)
+      .single()
+
+    if (existingUser) {
+      console.log('User already exists:', email, 'verified:', existingUser.email_verified)
+      if (existingUser.email_verified) {
+        return NextResponse.json({ error: 'An account with this email already exists' }, { status: 400 })
+      } else {
+        return NextResponse.json({ error: 'An account with this email already exists but is not verified. Please check your email or request a new verification email.' }, { status: 400 })
+      }
+    }
+
     // Hash password before storing
     const password_hash = await bcrypt.hash(password, 10)
 
@@ -40,6 +58,7 @@ export async function POST(req: Request) {
       .single()
 
     if (userError) {
+      console.error('User creation error:', userError)
       return NextResponse.json({ error: userError.message }, { status: 400 })
     }
 

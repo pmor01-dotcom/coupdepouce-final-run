@@ -2,61 +2,71 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import { useLanguage } from "../components/LanguageProvider";
 
 export default function ResetPasswordPage() {
   const { t } = useLanguage();
   const router = useRouter();
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const accessToken = params.get("access_token");
-
-    if (accessToken) {
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: params.get("refresh_token") || ""
-      });
+    const resetToken = params.get("token");
+    if (resetToken) {
+      setToken(resetToken);
+    } else {
+      setError("Invalid or missing reset token");
     }
   }, []);
 
   async function handleSubmit(e: any) {
     e.preventDefault();
 
-    const { error } = await supabase.auth.updateUser({ password });
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
-    if (error) {
-      setMessage(t('common.error'));
-    } else {
-      setMessage(t('forgotPassword.passwordUpdated'));
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
 
-      // Get user's role to redirect to correct dashboard
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role')
-          .eq('email', user.email)
-          .single();
+    setLoading(true);
+    setError("");
+    setMessage("");
 
-        if (userData?.role === 'client') {
-          router.push('/client-dashboard');
-        } else if (userData?.role === 'artisan') {
-          router.push('/artisan-dashboard');
-        } else {
-          router.push('/');
-        }
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message || t('forgotPassword.passwordUpdated'));
+        
+        // Redirect to login after successful reset
+        setTimeout(() => {
+          router.push('/login?passwordReset=true');
+        }, 2000);
       } else {
-        router.push('/');
+        setError(data.error || t('common.error'));
       }
+    } catch (error) {
+      setError(t('common.error'));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -87,6 +97,18 @@ export default function ResetPasswordPage() {
           {t('forgotPassword.title')}
         </h1>
 
+        {error && (
+          <p style={{ marginBottom: "15px", fontSize: "14px", color: "#d32f2f" }}>
+            {error}
+          </p>
+        )}
+
+        {message && (
+          <p style={{ marginBottom: "15px", fontSize: "14px", color: "#388e3c" }}>
+            {message}
+          </p>
+        )}
+
         <input
           type="password"
           placeholder={t('login.password')}
@@ -103,28 +125,39 @@ export default function ResetPasswordPage() {
           }}
         />
 
-        <button
-          onClick={handleSubmit}
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           style={{
             width: "100%",
             padding: "12px 16px",
             borderRadius: "10px",
-            background: "#4CAF50",
+            border: "1px solid #ccc",
+            background: "#f2f2f2",
+            fontSize: "16px",
+            marginBottom: "15px",
+          }}
+        />
+
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            background: loading ? "#9e9e9e" : "#4CAF50",
             color: "white",
             fontWeight: "bold",
             border: "none",
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
             marginBottom: "15px",
           }}
         >
-          {t('forgotPassword.updatePassword')}
+          {loading ? t('forgotPassword.sending') : t('forgotPassword.updatePassword')}
         </button>
-
-        {message && (
-          <p style={{ marginBottom: "15px", fontSize: "14px", color: "#333" }}>
-            {message}
-          </p>
-        )}
       </div>
     </div>
   );
