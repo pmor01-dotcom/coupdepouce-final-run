@@ -45,6 +45,10 @@ export default function ClientDashboard() {
   const router = useRouter()
   const supabase = getSupabaseClient()
 
+  // Debug user state
+  console.log('ClientDashboard - Auth user:', user)
+  console.log('ClientDashboard - localStorage user:', localStorage.getItem('user'))
+
   const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
   const [demands, setDemands] = useState<Demand[]>([])
   const [isLoading, setIsLoading] = useState(true)
