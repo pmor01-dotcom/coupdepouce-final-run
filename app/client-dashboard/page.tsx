@@ -236,9 +236,26 @@ export default function ClientDashboard() {
           onClick={async () => {
             if (confirm(t('unsubscribe.confirm'))) {
               try {
+                console.log('=== DELETE ACCOUNT DEBUG ===')
+                console.log('Auth user:', user)
+                console.log('Auth user ID:', user?.id)
+                
                 // Check localStorage as fallback for user ID
                 const storedUser = localStorage.getItem('user')
-                const userId = user?.id || (storedUser ? JSON.parse(storedUser).id : null)
+                console.log('localStorage user:', storedUser)
+                
+                let userId = user?.id
+                if (!userId && storedUser) {
+                  try {
+                    const parsed = JSON.parse(storedUser)
+                    console.log('Parsed localStorage user:', parsed)
+                    userId = parsed.id
+                  } catch (e) {
+                    console.error('Error parsing localStorage user:', e)
+                  }
+                }
+                
+                console.log('Final user ID:', userId)
 
                 if (!userId) {
                   alert('User not authenticated. Please log in again.')
