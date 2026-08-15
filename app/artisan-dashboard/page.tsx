@@ -216,10 +216,7 @@ export default function ArtisanDashboard() {
             if (confirm(t('unsubscribeConfirm'))) {
               try {
                 // Check localStorage as fallback for user ID
-                let storedUser = null
-                if (typeof window !== 'undefined') {
-                  storedUser = localStorage.getItem('user')
-                }
+                const storedUser: string | null = typeof window !== 'undefined' ? localStorage.getItem('user') : null
                 const userId = user?.id || (storedUser ? JSON.parse(storedUser).id : null)
 
                 if (!userId) {

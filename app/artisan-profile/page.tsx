@@ -119,7 +119,10 @@ export default function ArtisanProfilePage() {
     e.preventDefault()
 
     // Check localStorage directly as fallback
-    const storedUser = localStorage.getItem('user')
+    let storedUser = null
+    if (typeof window !== 'undefined') {
+      storedUser = localStorage.getItem('user')
+    }
     const userId = user?.id || (storedUser ? JSON.parse(storedUser).id : null)
 
     if (!userId) {
