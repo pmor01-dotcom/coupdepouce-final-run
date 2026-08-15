@@ -18,8 +18,10 @@ export default function ArtisanDashboard() {
   useEffect(() => {
     console.log('ArtisanDashboard - User state:', user)
     console.log('ArtisanDashboard - User ID:', user?.id)
-    console.log('ArtisanDashboard - localStorage user:', localStorage.getItem('user'))
-    
+    if (typeof window !== 'undefined') {
+      console.log('ArtisanDashboard - localStorage user:', localStorage.getItem('user'))
+    }
+
     if (user?.id) {
       fetchUnreadCount()
 
@@ -214,7 +216,10 @@ export default function ArtisanDashboard() {
             if (confirm(t('unsubscribeConfirm'))) {
               try {
                 // Check localStorage as fallback for user ID
-                const storedUser = localStorage.getItem('user')
+                let storedUser = null
+                if (typeof window !== 'undefined') {
+                  storedUser = localStorage.getItem('user')
+                }
                 const userId = user?.id || (storedUser ? JSON.parse(storedUser).id : null)
 
                 if (!userId) {
