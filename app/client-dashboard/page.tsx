@@ -45,14 +45,18 @@ export default function ClientDashboard() {
   const router = useRouter()
   const supabase = getSupabaseClient()
 
-  // Debug user state
-  console.log('ClientDashboard - Auth user:', user)
-  console.log('ClientDashboard - localStorage user:', localStorage.getItem('user'))
-
   const [activeTab, setActiveTab] = useState<'demands' | 'proposals' | 'messages'>('demands')
   const [demands, setDemands] = useState<Demand[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [unreadCount, setUnreadCount] = useState(0)
+
+  // Debug user state (client-side only)
+  useEffect(() => {
+    console.log('ClientDashboard - Auth user:', user)
+    if (typeof window !== 'undefined') {
+      console.log('ClientDashboard - localStorage user:', localStorage.getItem('user'))
+    }
+  }, [user])
 
   const handleLogout = () => {
     logout()
@@ -243,11 +247,14 @@ export default function ClientDashboard() {
                 console.log('=== DELETE ACCOUNT DEBUG ===')
                 console.log('Auth user:', user)
                 console.log('Auth user ID:', user?.id)
-                
+
                 // Check localStorage as fallback for user ID
-                const storedUser = localStorage.getItem('user')
-                console.log('localStorage user:', storedUser)
-                
+                let storedUser = null
+                if (typeof window !== 'undefined') {
+                  storedUser = localStorage.getItem('user')
+                  console.log('localStorage user:', storedUser)
+                }
+
                 let userId = user?.id
                 if (!userId && storedUser) {
                   try {
@@ -258,7 +265,7 @@ export default function ClientDashboard() {
                     console.error('Error parsing localStorage user:', e)
                   }
                 }
-                
+
                 console.log('Final user ID:', userId)
 
                 if (!userId) {
