@@ -238,7 +238,9 @@ export default function ArtisanDashboard() {
 
                 if (response.ok) {
                   logout()
-                  localStorage.removeItem('user')
+                  if (typeof window !== 'undefined') {
+                    localStorage.removeItem('user')
+                  }
                   router.push('/')
                 } else {
                   const data = await response.json()
