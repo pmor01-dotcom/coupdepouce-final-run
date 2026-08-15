@@ -213,16 +213,27 @@ export default function ArtisanDashboard() {
           onClick={async () => {
             if (confirm(t('unsubscribeConfirm'))) {
               try {
+                // Check localStorage as fallback for user ID
+                const storedUser = localStorage.getItem('user')
+                const userId = user?.id || (storedUser ? JSON.parse(storedUser).id : null)
+
+                if (!userId) {
+                  alert('User not authenticated. Please log in again.')
+                  router.push('/login')
+                  return
+                }
+
                 const response = await fetch('/api/auth/delete-account', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ userId: user?.id }),
+                  body: JSON.stringify({ userId }),
                 })
 
                 if (response.ok) {
                   logout()
+                  localStorage.removeItem('user')
                   router.push('/')
                 } else {
                   const data = await response.json()
