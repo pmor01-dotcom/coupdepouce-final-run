@@ -82,7 +82,23 @@ export default function ConversationPage() {
   const sendMessage = async () => {
     if (!text.trim() || !user?.id || !otherUserId) return
 
+    console.log('=== MESSAGE SENDING DEBUG ===')
+    console.log('Current user from AuthProvider:', user)
+    console.log('Current user ID:', user.id)
+    console.log('Other user ID (receiver):', otherUserId)
+    console.log('Are they the same?', user.id === otherUserId)
     console.log('Sending message:', { senderId: user.id, receiverId: otherUserId, content: text })
+
+    // Check localStorage as well
+    if (typeof window !== 'undefined') {
+      const localStorageUser = localStorage.getItem('user')
+      console.log('localStorage user:', localStorageUser)
+      if (localStorageUser) {
+        const parsedUser = JSON.parse(localStorageUser)
+        console.log('localStorage user ID:', parsedUser.id)
+        console.log('localStorage user role:', parsedUser.role)
+      }
+    }
 
     try {
       const response = await fetch('/api/messages/send', {
