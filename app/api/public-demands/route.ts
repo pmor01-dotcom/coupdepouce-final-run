@@ -10,7 +10,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('demands')
-      .select('id, title, category, location, description, budget_range, urgency, client_id, status')
+      .select('id, title, category, location, description, budget_range, urgency, client_id, status, users!inner(email, name, phone)')
       .eq('status', 'OPEN')
       .order('created_at', { ascending: false })
       .limit(50)
@@ -20,25 +20,19 @@ export async function GET() {
       return NextResponse.json([], { status: 200 })
     }
 
-    // Fetch user information separately for each demand
-    const demandsWithUsers = await Promise.all(
-      (data || []).map(async (demand) => {
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('email, name, phone')
-          .eq('id', demand.client_id)
-          .single()
-
-        if (userError) {
-          console.error(`Error fetching user for demand ${demand.id}:`, userError)
-        }
-
-        return {
-          ...demand,
-          users: userData || null
-        }
-      })
-    )
+    // Transform data to match expected format
+    const demandsWithUsers = (data || []).map((demand: any) => ({
+      id: demand.id,
+      title: demand.title,
+      category: demand.category,
+      location: demand.location,
+      description: demand.description,
+      budget_range: demand.budget_range,
+      urgency: demand.urgency,
+      client_id: demand.client_id,
+      status: demand.status,
+      users: demand.users || null
+    }))
 
     return NextResponse.json(demandsWithUsers)
   } catch (err) {
