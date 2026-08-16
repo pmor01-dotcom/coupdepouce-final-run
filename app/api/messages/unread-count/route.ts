@@ -24,15 +24,14 @@ export async function GET(req: Request) {
       )
     }
 
-    // Count messages where the artisan is the receiver and hasn't read them
-    // For now, we'll count all messages received by the artisan
-    // You can add a 'read' column to the messages table later for true unread tracking
+    // Count all messages where the user is involved (either sender or receiver)
+    // This gives the total number of messages in the user's conversations
     const { count, error } = await supabase
       .from('messages')
       .select('*', { count: 'exact', head: true })
-      .eq('receiver_id', userId)
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
 
-    console.log('Messages count for receiver:', userId, 'Count:', count, 'Error:', error)
+    console.log('Messages count for user:', userId, 'Count:', count, 'Error:', error)
 
     if (error) {
       console.error('Error fetching unread count:', error)
