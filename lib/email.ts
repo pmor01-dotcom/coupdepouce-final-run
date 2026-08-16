@@ -106,6 +106,47 @@ export class EmailService {
 
     return this.sendEmail(to, "Nouvelle proposition reçue", html);
   }
+
+  static async sendNewMessageEmail(
+    to: string,
+    receiverName: string,
+    senderName: string,
+    senderRole: string,
+    messageContent: string
+  ): Promise<boolean> {
+    const roleText = senderRole === 'artisan' ? 'artisan' : 'client';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(to bottom, #6B8E23, #D4E4BC); padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Coup de Pouce</h1>
+          <p style="color: white; margin: 5px 0 0;">Nouveau message reçu</p>
+        </div>
+        <div style="background: white; padding: 30px;">
+          <h2 style="color: #333; margin-bottom: 20px;">Bonjour ${receiverName},</h2>
+          <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+            Vous avez reçu un nouveau message de <strong>${senderName}</strong> (${roleText})
+          </p>
+          <div style="margin: 20px 0;">
+            <h3 style="color: #333; margin-bottom: 10px;">Message :</h3>
+            <p style="color: #666; line-height: 1.6; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+              ${messageContent}
+            </p>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${getAppUrl()}/messages"
+               style="background: #6B8E23; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              Voir mes messages
+            </a>
+          </div>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+          <p>© ${getCurrentYear()} Coup de Pouce. Tous droits réservés.</p>
+        </div>
+      </div>
+    `;
+
+    return this.sendEmail(to, "Nouveau message reçu", html);
+  }
 }
 
 export default EmailService;

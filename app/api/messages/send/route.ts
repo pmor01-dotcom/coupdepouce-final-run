@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import EmailService from '@/lib/email'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,16 +20,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify both users exist
+    // Verify both users exist and get their details
     const { data: sender } = await supabase
       .from('users')
-      .select('id, role')
+      .select('id, role, name, email')
       .eq('id', senderId)
       .limit(1)
 
     const { data: receiver } = await supabase
       .from('users')
-      .select('id, role')
+      .select('id, role, name, email')
       .eq('id', receiverId)
       .limit(1)
 
@@ -79,6 +80,26 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create message' },
         { status: 500 }
       )
+    }
+
+    // Send email notification to receiver
+    try {
+      const senderData = sender[0]
+      const receiverData = receiver[0]
+
+      if (receiverData.email) {
+        await EmailService.sendNewMessageEmail(
+          receiverData.email,
+          receiverData.name || 'Utilisateur',
+          senderData.name || 'Utilisateur',
+          senderData.role || 'artisan',
+          content
+        )
+        console.log('Email notification sent to receiver:', receiverData.email)
+      }
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError)
+      // Don't fail the request if email fails
     }
 
     return NextResponse.json({
