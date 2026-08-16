@@ -26,7 +26,16 @@ export default function Home() {
         if (demandsRes.ok) {
           const demandsData = await demandsRes.json()
           console.log('Demands data received:', demandsData)
-          setDemands(demandsData)
+
+          // Filter to ensure we only have actual demands (not messages)
+          const validDemands = Array.isArray(demandsData) ? demandsData.filter(item => {
+            const hasDemandFields = item.title && item.category && item.location
+            console.log('Front page item validation:', item.id, 'has demand fields:', hasDemandFields)
+            return hasDemandFields
+          }) : []
+
+          console.log('Valid demands after filtering:', validDemands.length)
+          setDemands(validDemands)
         } else {
           console.error('Demands fetch failed:', demandsRes.status)
         }
