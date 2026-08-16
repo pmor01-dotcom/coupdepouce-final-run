@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
@@ -11,6 +11,16 @@ export default function CreateDemandPage() {
   const supabase = getSupabaseClient()
   const { user, isLoading: authLoading } = useAuth()
   const { t } = useLanguage()
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      console.log('No user found, redirecting to login')
+      router.push('/login')
+    } else if (!authLoading && user && user.role !== 'client') {
+      console.log('User is not a client, redirecting to appropriate dashboard')
+      router.push(user.role === 'artisan' ? '/artisan-dashboard' : '/client-dashboard')
+    }
+  }, [authLoading, user, router])
 
   const [formData, setFormData] = useState({
     title: '',
@@ -90,15 +100,8 @@ export default function CreateDemandPage() {
     )
   }
 
-  if (!user) {
-    router.push('/client-dashboard')
-    return null
-  }
-
-  // Check if user is a client
-  if (user.role !== 'client') {
-    router.push(user.role === 'artisan' ? '/artisan-dashboard' : '/client-dashboard')
-    return null
+  if (!user || user.role !== 'client') {
+    return null // Redirect is handled by useEffect
   }
 
   return (
