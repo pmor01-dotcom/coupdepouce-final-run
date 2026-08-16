@@ -27,7 +27,11 @@ export default function ArtisanDashboard() {
 
       // Set up real-time subscription for new messages
       const channel = supabase
-        .channel('artisan-dashboard-messages')
+        .channel('artisan-dashboard-messages', {
+          config: {
+            broadcast: { self: true }
+          }
+        })
         .on(
           'postgres_changes',
           {
@@ -53,10 +57,15 @@ export default function ArtisanDashboard() {
             console.log('Successfully subscribed to messages table for user:', user.id)
           } else if (status === 'CHANNEL_ERROR') {
             console.error('Subscription error for messages table')
+          } else if (status === 'TIMED_OUT') {
+            console.error('Subscription timed out for messages table')
+          } else if (status === 'CLOSED') {
+            console.log('Subscription closed for messages table')
           }
         })
 
       return () => {
+        console.log('=== CLEANING UP ARTISAN DASHBOARD SUBSCRIPTION ===')
         supabase.removeChannel(channel)
       }
     }
