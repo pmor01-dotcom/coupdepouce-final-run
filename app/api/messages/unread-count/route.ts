@@ -24,11 +24,12 @@ export async function GET(req: Request) {
       )
     }
 
-    // Count all messages where the user is the receiver
+    // Count all unread messages where the user is the receiver
     const { data: messages, error: messagesError } = await supabase
       .from('messages')
       .select('*')
       .eq('receiver_id', userId)
+      .is('read', false) // Only count unread messages
 
     if (messagesError) {
       console.error('Error fetching messages:', messagesError)
@@ -36,7 +37,7 @@ export async function GET(req: Request) {
     }
 
     const count = messages?.length || 0
-    console.log('Total messages received by user:', userId, 'Count:', count)
+    console.log('Unread messages received by user:', userId, 'Count:', count)
 
     return NextResponse.json({ count })
   } catch (error) {

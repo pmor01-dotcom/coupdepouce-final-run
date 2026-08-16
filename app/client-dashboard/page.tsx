@@ -68,9 +68,20 @@ export default function ClientDashboard() {
     if (user?.id) {
       fetchUnreadCount()
 
-      // Set up real-time subscription for new messages
+      // Set up polling as fallback for real-time updates
+      const pollingInterval = setInterval(() => {
+        console.log('=== CLIENT DASHBOARD POLLING ===')
+        console.log('Polling for message count updates...')
+        fetchUnreadCount()
+      }, 5000) // Poll every 5 seconds
+
+      // Also try real-time subscription (but don't rely on it)
       const channel = supabase
-        .channel('client-dashboard-messages')
+        .channel('client-dashboard-messages', {
+          config: {
+            broadcast: { self: true }
+          }
+        })
         .on(
           'postgres_changes',
           {
@@ -88,6 +99,7 @@ export default function ClientDashboard() {
         .subscribe()
 
       return () => {
+        clearInterval(pollingInterval)
         supabase.removeChannel(channel)
       }
     }

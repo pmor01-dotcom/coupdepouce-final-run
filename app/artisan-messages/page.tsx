@@ -56,7 +56,29 @@ export default function ArtisanMessagesPage() {
       }
     }
 
+    const markAllAsRead = async () => {
+      if (!user || !user.id) return
+
+      try {
+        // Mark all messages received by the user as read
+        const { error } = await supabase
+          .from('messages')
+          .update({ read: true })
+          .eq('receiver_id', user.id)
+          .eq('read', false)
+
+        if (error) {
+          console.error('Error marking messages as read:', error)
+        } else {
+          console.log('All messages marked as read for user:', user.id)
+        }
+      } catch (err) {
+        console.error('Error marking messages as read:', err)
+      }
+    }
+
     loadConversations()
+    markAllAsRead() // Mark all messages as read when user views messages page
 
     // Set up real-time subscription for new messages
     if (user?.id) {

@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
       .insert({
         content,
         sender_id: senderId,
-        receiver_id: receiverId
+        receiver_id: receiverId,
+        read: false // New messages are unread by default
       })
       .select()
       .limit(1)

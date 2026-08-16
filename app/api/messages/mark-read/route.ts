@@ -29,30 +29,12 @@ export async function POST(request: NextRequest) {
     // Mark all unread messages from the other user as read
     const { error } = await supabase
       .from('messages')
-      .update({ read_at: new Date().toISOString() })
+      .update({ read: true })
       .eq('receiver_id', userId)
       .eq('sender_id', userId === senderId ? receiverId : senderId)
-      .is('read_at', null)
+      .eq('read', false)
 
-    if (demandId) {
-      // Also filter by demand_id if present
-      const { error: errorWithDemand } = await supabase
-        .from('messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('receiver_id', userId)
-        .eq('sender_id', userId === senderId ? receiverId : senderId)
-        .eq('demand_id', demandId)
-        .is('read_at', null)
-
-      if (errorWithDemand) {
-        return NextResponse.json(
-          { error: errorWithDemand.message },
-          { status: 400 }
-        )
-      }
-    }
-
-    if (error && !demandId) {
+    if (error) {
       return NextResponse.json(
         { error: error.message },
         { status: 400 }
