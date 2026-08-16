@@ -34,7 +34,9 @@ export default function DemandCarousel() {
 
   const fetchDemands = async () => {
     try {
-      const response = await fetch(`/api/public-demands?t=${Date.now()}`)
+      const response = await fetch(`/api/public-demands?t=${Date.now()}`, {
+        cache: 'no-store'
+      })
       const data = await response.json()
 
       console.log('=== CAROUSEL DEMANDS DEBUG ===')
