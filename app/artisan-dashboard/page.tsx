@@ -25,7 +25,14 @@ export default function ArtisanDashboard() {
     if (user?.id) {
       fetchUnreadCount()
 
-      // Set up real-time subscription for new messages
+      // Set up polling as fallback for real-time updates
+      const pollingInterval = setInterval(() => {
+        console.log('=== ARTISAN DASHBOARD POLLING ===')
+        console.log('Polling for message count updates...')
+        fetchUnreadCount()
+      }, 5000) // Poll every 5 seconds
+
+      // Also try real-time subscription (but don't rely on it)
       const channel = supabase
         .channel('artisan-dashboard-messages', {
           config: {
@@ -60,12 +67,13 @@ export default function ArtisanDashboard() {
           } else if (status === 'TIMED_OUT') {
             console.error('Subscription timed out for messages table')
           } else if (status === 'CLOSED') {
-            console.log('Subscription closed for messages table')
+            console.log('Subscription closed for messages table - using polling instead')
           }
         })
 
       return () => {
         console.log('=== CLEANING UP ARTISAN DASHBOARD SUBSCRIPTION ===')
+        clearInterval(pollingInterval)
         supabase.removeChannel(channel)
       }
     }
