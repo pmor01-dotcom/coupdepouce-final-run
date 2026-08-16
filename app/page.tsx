@@ -14,19 +14,28 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('=== FRONTPAGE DATA FETCH DEBUG ===')
         const [demandsRes, artisansRes] = await Promise.all([
-          fetch('/api/public-demands'),
-          fetch('/api/public-artisans')
+          fetch(`/api/public-demands?t=${Date.now()}`),
+          fetch(`/api/public-artisans?t=${Date.now()}`)
         ])
+
+        console.log('Demands response status:', demandsRes.status)
+        console.log('Artisans response status:', artisansRes.status)
 
         if (demandsRes.ok) {
           const demandsData = await demandsRes.json()
+          console.log('Demands data received:', demandsData)
           setDemands(demandsData)
+        } else {
+          console.error('Demands fetch failed:', demandsRes.status)
         }
 
         if (artisansRes.ok) {
           const artisansData = await artisansRes.json()
           setArtisans(artisansData.slice(0, 6)) // Show first 6 artisans
+        } else {
+          console.error('Artisans fetch failed:', artisansRes.status)
         }
       } catch (err) {
         console.error('Error fetching data:', err)
