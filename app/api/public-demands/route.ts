@@ -26,6 +26,7 @@ export async function GET() {
     console.log('Total OPEN demands found:', demands?.length || 0)
     if (demands && demands.length > 0) {
       console.log('Sample demand:', JSON.stringify(demands[0], null, 2))
+      console.log('All demand IDs:', demands.map(d => d.id))
     }
 
     if (!demands || demands.length === 0) {
@@ -57,6 +58,8 @@ export async function GET() {
         const exists = existingUserIds.has(demand.client_id)
         if (!exists) {
           console.log('Filtered out demand from deleted user:', demand.id, 'client_id:', demand.client_id)
+        } else {
+          console.log('Demand passed user validation:', demand.id, 'client_id:', demand.client_id)
         }
         return exists
       })
