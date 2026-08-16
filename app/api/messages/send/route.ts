@@ -90,10 +90,13 @@ export async function POST(request: NextRequest) {
       console.log('=== MESSAGE EMAIL DEBUG ===')
       console.log('Sender data:', senderData)
       console.log('Receiver data:', receiverData)
+      console.log('Sender email:', senderData.email)
       console.log('Receiver email:', receiverData.email)
+      console.log('Are emails the same?', senderData.email === receiverData.email)
 
       if (receiverData.email) {
-        console.log('Attempting to send email notification to:', receiverData.email)
+        console.log('Attempting to send email notification to RECEIVER:', receiverData.email)
+        console.log('NOT sending to sender:', senderData.email)
         const emailResult = await EmailService.sendNewMessageEmail(
           receiverData.email,
           receiverData.name || 'Utilisateur',
