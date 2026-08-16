@@ -56,11 +56,13 @@ function CheckEmailContent() {
           {t('verification.required') || 'Please verify your email before logging in.'}
         </p>
 
-        {/* Development: Show verification URL for testing only on localhost */}
-        {verificationUrl && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+        {/* Show verification URL for testing if email doesn't arrive */}
+        {verificationUrl && typeof window !== 'undefined' && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-xs text-yellow-800 mb-2 font-semibold">
-              Development Mode - Manual Verification
+              {window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'Development Mode - Manual Verification'
+                : 'If you did not receive the email, you can verify manually:'}
             </p>
             <p className="text-xs text-gray-600 mb-2 break-all">
               {verificationUrl}
@@ -69,7 +71,7 @@ function CheckEmailContent() {
               onClick={handleVerifyClick}
               className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
             >
-              Click to verify (dev mode)
+              Click to verify
             </button>
           </div>
         )}
