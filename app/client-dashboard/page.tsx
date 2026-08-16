@@ -109,9 +109,13 @@ export default function ClientDashboard() {
 
   const fetchUnreadCount = async () => {
     try {
+      console.log('=== CLIENT DASHBOARD UNREAD COUNT DEBUG ===')
+      console.log('Fetching unread count for user:', user?.id)
       const response = await fetch(`/api/messages/unread-count?userId=${user?.id}`)
       const data = await response.json()
+      console.log('Unread count response:', data)
       setUnreadCount(data.count || 0)
+      console.log('Set unread count to:', data.count || 0)
     } catch (error) {
       console.error('Error fetching unread count:', error)
     }
