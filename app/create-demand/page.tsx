@@ -65,10 +65,14 @@ export default function CreateDemandPage() {
 
       if (!res.ok) {
         const errorData = await res.json()
+        console.error('Demand creation failed:', errorData)
         setError(errorData.error || t('error'))
         setLoading(false)
         return
       }
+
+      const successData = await res.json()
+      console.log('Demand creation successful:', successData)
 
       router.push('/client-dashboard')
     } catch (err: any) {

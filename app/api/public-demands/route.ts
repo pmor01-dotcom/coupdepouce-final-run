@@ -8,10 +8,12 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
+    console.log('=== PUBLIC DEMANDS DEBUG ===')
+
     // First, get all demands with their client IDs
     const { data: demands, error: demandsError } = await supabase
       .from('demands')
-      .select('id, title, category, location, description, budget_range, urgency, client_id, status')
+      .select('id, title, category, location, description, budget_range, urgency, client_id, status, created_at')
       .eq('status', 'OPEN')
       .order('created_at', { ascending: false })
       .limit(50)
@@ -21,12 +23,19 @@ export async function GET() {
       return NextResponse.json([], { status: 200 })
     }
 
+    console.log('Total OPEN demands found:', demands?.length || 0)
+    if (demands && demands.length > 0) {
+      console.log('Sample demand:', JSON.stringify(demands[0], null, 2))
+    }
+
     if (!demands || demands.length === 0) {
+      console.log('No OPEN demands found in database')
       return NextResponse.json([])
     }
 
     // Get all unique client IDs
     const clientIds = [...new Set(demands.map(d => d.client_id))]
+    console.log('Unique client IDs:', clientIds)
 
     // Check which users still exist
     const { data: existingUsers, error: usersError } = await supabase
@@ -38,11 +47,19 @@ export async function GET() {
       console.error('Error fetching users:', usersError)
     }
 
+    console.log('Existing users found:', existingUsers?.length || 0)
     const existingUserIds = new Set(existingUsers?.map(u => u.id) || [])
+    console.log('Existing user IDs:', Array.from(existingUserIds))
 
     // Filter out demands from deleted users and attach user info
     const demandsWithUsers = demands
-      .filter(demand => existingUserIds.has(demand.client_id))
+      .filter(demand => {
+        const exists = existingUserIds.has(demand.client_id)
+        if (!exists) {
+          console.log('Filtered out demand from deleted user:', demand.id, 'client_id:', demand.client_id)
+        }
+        return exists
+      })
       .map((demand: any) => {
         const userData = existingUsers?.find(u => u.id === demand.client_id)
         return {

@@ -102,6 +102,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    console.log("Demand created successfully:", data)
+    console.log("Demand ID:", data.id, "Client ID:", data.client_id, "Status:", data.status)
+
     return NextResponse.json({ success: true, demand: data })
   } catch (err: any) {
     console.error("Unexpected error:", err)
