@@ -13,11 +13,18 @@ export class EmailService {
         return false;
       }
 
-      // IMPORTANT: Use the ONLY mailbox that actually exists in IONOS
-      const from = process.env.EMAIL_FROM || "info@coupdepouce-aide.com";
+      // Use Resend's default from email for testing if custom domain not verified
+      const from = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+      const fromName = process.env.RESEND_FROM_NAME || 'Coup de Pouce';
+
+      console.log('=== EMAIL SERVICE DEBUG ===');
+      console.log('From email:', from);
+      console.log('From name:', fromName);
+      console.log('To email:', to);
+      console.log('Subject:', subject);
 
       const result = await resend.emails.send({
-        from,
+        from: `${fromName} <${from}>`,
         to,
         subject,
         html,
@@ -27,6 +34,7 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error("Resend email error:", error);
+      console.error("Email error details:", JSON.stringify(error, null, 2));
       return false;
     }
   }

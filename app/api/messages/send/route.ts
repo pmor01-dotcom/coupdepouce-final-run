@@ -87,18 +87,28 @@ export async function POST(request: NextRequest) {
       const senderData = sender[0]
       const receiverData = receiver[0]
 
+      console.log('=== MESSAGE EMAIL DEBUG ===')
+      console.log('Sender data:', senderData)
+      console.log('Receiver data:', receiverData)
+      console.log('Receiver email:', receiverData.email)
+
       if (receiverData.email) {
-        await EmailService.sendNewMessageEmail(
+        console.log('Attempting to send email notification to:', receiverData.email)
+        const emailResult = await EmailService.sendNewMessageEmail(
           receiverData.email,
           receiverData.name || 'Utilisateur',
           senderData.name || 'Utilisateur',
           senderData.role || 'artisan',
           content
         )
+        console.log('Email notification result:', emailResult)
         console.log('Email notification sent to receiver:', receiverData.email)
+      } else {
+        console.log('Receiver has no email address, skipping email notification')
       }
     } catch (emailError) {
       console.error('Failed to send email notification:', emailError)
+      console.error('Email error details:', JSON.stringify(emailError, null, 2))
       // Don't fail the request if email fails
     }
 
