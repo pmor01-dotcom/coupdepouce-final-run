@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLanguage } from './LanguageProvider'
 import { useRouter } from 'next/navigation'
+import { getSupabaseClient } from '@/lib/supabase-client'
 
 interface Demand {
   id: string | number
@@ -23,6 +24,7 @@ interface Demand {
 export default function DemandCarousel() {
   const { t } = useLanguage()
   const router = useRouter()
+  const supabase = getSupabaseClient()
   const [demands, setDemands] = useState<Demand[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null)
@@ -30,6 +32,29 @@ export default function DemandCarousel() {
 
   useEffect(() => {
     fetchDemands()
+
+    // Set up real-time subscription for demand changes
+    const channel = supabase
+      .channel('demand-carousel-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'demands'
+        },
+        (payload) => {
+          console.log('=== DEMAND CAROUSEL REAL-TIME UPDATE ===')
+          console.log('Demand change detected:', payload)
+          // Refetch demands when any change occurs
+          fetchDemands()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const fetchDemands = async () => {
