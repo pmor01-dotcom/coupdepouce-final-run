@@ -6,6 +6,17 @@ import Link from 'next/link'
 import { useLanguage } from '../components/LanguageProvider'
 import { useSearchParams } from 'next/navigation'
 
+interface UserProfile {
+  id: string
+  email: string
+  role: 'client' | 'artisan'
+  name?: string
+  phone?: string
+  location?: string
+  metier?: string
+  isPaid?: boolean
+}
+
 function LoginContent() {
   const { t } = useLanguage()
   const searchParams = useSearchParams()
@@ -30,34 +41,18 @@ function LoginContent() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      })
+      const result = await login(formData.email, formData.password)
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        if (data.requiresVerification) {
-          setError(t('verification.required'))
-        } else {
-          setError(data.error || t('login.incorrectCredentials'))
-        }
+      if (!result) {
+        setError(t('login.incorrectCredentials'))
         setIsLoading(false)
         return
       }
 
-      // Login successful - store user data and redirect
-      const role = data.user.role
-
-      if (role === 'client') window.location.href = '/client-dashboard'
-      else if (role === 'artisan') window.location.href = '/artisan-dashboard'
+      // Login successful - redirect based on role
+      const userProfile = result as UserProfile
+      if (userProfile.role === 'client') window.location.href = '/client-dashboard'
+      else if (userProfile.role === 'artisan') window.location.href = '/artisan-dashboard'
       else setError(t('login.noRole'))
 
     } catch {

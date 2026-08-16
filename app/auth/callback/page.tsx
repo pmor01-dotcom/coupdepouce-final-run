@@ -24,11 +24,26 @@ export default function AuthCallback() {
           // Get user role from users table (more reliable than metadata)
           const { data: profile } = await supabase
             .from('users')
-            .select('role')
+            .select('*')
             .eq('id', session.user.id)
             .single()
 
           const role = profile?.role?.toLowerCase()
+
+          // Store user data in localStorage for AuthProvider
+          if (profile && profile.id && profile.email) {
+            const userProfile = {
+              id: profile.id,
+              email: profile.email,
+              role: role as 'client' | 'artisan',
+              name: profile.name,
+              phone: profile.phone,
+              location: profile.location,
+              metier: profile.metier,
+              isPaid: profile.isPaid ?? false,
+            }
+            localStorage.setItem('user', JSON.stringify(userProfile))
+          }
 
           // Redirect to appropriate dashboard
           if (role === 'artisan') {
