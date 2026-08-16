@@ -37,12 +37,24 @@ export default function ArtisanDashboard() {
             filter: `receiver_id=eq.${user.id}`
           },
           (payload) => {
-            console.log('Real-time message change:', payload)
+            console.log('=== ARTISAN DASHBOARD REAL-TIME MESSAGE UPDATE ===')
+            console.log('Message change detected:', payload)
+            console.log('Event type:', payload.eventType)
+            console.log('New record:', payload.new)
+            console.log('Old record:', payload.old)
             // Update unread count when a new message is received
             fetchUnreadCount()
           }
         )
-        .subscribe()
+        .subscribe((status) => {
+          console.log('=== ARTISAN DASHBOARD SUBSCRIPTION STATUS ===')
+          console.log('Subscription status:', status)
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to messages table for user:', user.id)
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('Subscription error for messages table')
+          }
+        })
 
       return () => {
         supabase.removeChannel(channel)
