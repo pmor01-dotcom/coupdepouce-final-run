@@ -13,7 +13,11 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const userId = searchParams.get('userId')
 
+    console.log('=== UNREAD COUNT API DEBUG ===')
+    console.log('User ID:', userId)
+
     if (!userId) {
+      console.log('Missing userId')
       return NextResponse.json(
         { error: 'Missing userId' },
         { status: 400 }
@@ -28,11 +32,14 @@ export async function GET(req: Request) {
       .select('*', { count: 'exact', head: true })
       .eq('receiver_id', userId)
 
+    console.log('Messages count for receiver:', userId, 'Count:', count, 'Error:', error)
+
     if (error) {
       console.error('Error fetching unread count:', error)
       return NextResponse.json({ count: 0 })
     }
 
+    console.log('Returning count:', count || 0)
     return NextResponse.json({ count: count || 0 })
   } catch (error) {
     console.error('Unexpected error:', error)
