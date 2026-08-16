@@ -90,6 +90,7 @@ export async function POST(req: Request) {
     console.log('=== EMAIL SENDING DEBUG ===')
     console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY)
     console.log('RESEND_API_KEY length:', process.env.RESEND_API_KEY?.length)
+    console.log('EMAIL_FROM:', process.env.EMAIL_FROM)
     console.log('RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL)
     console.log('Recipient email:', email)
     console.log('Verification URL:', verificationUrl)
@@ -101,11 +102,13 @@ export async function POST(req: Request) {
     } else {
       try {
         console.log('Attempting to send email via Resend...')
-        const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+        // Use Resend's default from email for testing if custom domain not verified
+        const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev'
         const fromName = process.env.RESEND_FROM_NAME || 'Coup de Pouce'
-        
+
         console.log('From email:', fromEmail)
         console.log('From name:', fromName)
+        console.log('Note: Using onboarding@resend.dev for testing. For production, verify your custom domain in Resend.')
         
         const emailResult = await resend.emails.send({
           from: `${fromName} <${fromEmail}>`,
@@ -148,6 +151,8 @@ export async function POST(req: Request) {
       } catch (emailError: any) {
         console.error('Failed to send verification email:', emailError)
         console.error('Error details:', JSON.stringify(emailError, null, 2))
+        console.error('Error message:', emailError.message)
+        console.error('Error stack:', emailError.stack)
       }
     }
 
