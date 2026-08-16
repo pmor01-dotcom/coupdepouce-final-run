@@ -34,14 +34,25 @@ export default function DemandCarousel() {
 
   const fetchDemands = async () => {
     try {
-      const response = await fetch('/api/public-demands')
+      const response = await fetch(`/api/public-demands?t=${Date.now()}`)
       const data = await response.json()
-      
+
+      console.log('=== CAROUSEL DEMANDS DEBUG ===')
       console.log('Fetched demands data:', data)
-      
-      // Ensure data is an array
+      console.log('Data type:', typeof data)
+      console.log('Is array:', Array.isArray(data))
+      console.log('Data length:', data?.length)
+
+      // Ensure data is an array and has demand structure
       if (Array.isArray(data)) {
-        setDemands(data)
+        // Filter to ensure we only have actual demands (not messages)
+        const validDemands = data.filter(item => {
+          const hasDemandFields = item.title && item.category && item.location
+          console.log('Item validation:', item.id, 'has demand fields:', hasDemandFields)
+          return hasDemandFields
+        })
+        console.log('Valid demands after filtering:', validDemands.length)
+        setDemands(validDemands)
       } else {
         console.error('Invalid data format received:', data)
         setDemands([])
