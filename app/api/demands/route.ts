@@ -104,6 +104,9 @@ export async function POST(req: Request) {
 
     console.log("Demand created successfully:", data)
     console.log("Demand ID:", data.id, "Client ID:", data.client_id, "Status:", data.status)
+    console.log("=== DEMAND CREATION COMPLETE ===")
+    console.log("Demand should now be visible on public demands endpoint")
+    console.log("Demand status is:", data.status, "(should be 'OPEN')")
 
     return NextResponse.json({ success: true, demand: data })
   } catch (err: any) {
