@@ -249,11 +249,8 @@ export default function ClientDashboard() {
                 console.log('Auth user ID:', user?.id)
 
                 // Check localStorage as fallback for user ID
-                let storedUser = null
-                if (typeof window !== 'undefined') {
-                  storedUser = localStorage.getItem('user')
-                  console.log('localStorage user:', storedUser)
-                }
+                const storedUser: string | null = typeof window !== 'undefined' ? localStorage.getItem('user') : null
+                console.log('localStorage user:', storedUser)
 
                 let userId = user?.id
                 if (!userId && storedUser) {
