@@ -9,7 +9,7 @@ interface Message {
   senderId: number
   receiverId: number
   createdAt: string
-  readAt?: string
+  read?: boolean
   sender: {
     id: number
     name: string
@@ -143,7 +143,7 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
       socketInstance.on('messages-read', (data) => {
         // Update messages as read
         setMessages(prev => prev.map(msg =>
-          msg.senderId === data.readBy ? { ...msg, readAt: data.readAt } : msg
+          msg.senderId === data.readBy ? { ...msg, read: true } : msg
         ))
       })
 

@@ -43,7 +43,7 @@ export async function GET(
         sender_id,
         receiver_id,
         created_at,
-        read_at,
+        read,
         sender:sender_id (
           id,
           name,
@@ -112,7 +112,7 @@ export async function GET(
           senderId: msg.sender_id,
           receiverId: msg.receiver_id,
           createdAt: msg.created_at,
-          readAt: msg.read_at,
+          read: msg.read,
           sender: msg.sender
         })) || []
       }

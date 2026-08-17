@@ -9,8 +9,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(req: Request) {
   console.log('=== SIGNUP ROUTE HIT ===')
 
@@ -99,9 +97,11 @@ export async function POST(req: Request) {
     let emailSent = false
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not configured in environment variables')
+      console.log('Verification URL (email service not configured):', verificationUrl)
     } else {
       try {
         console.log('Attempting to send email via Resend...')
+        const resend = new Resend(process.env.RESEND_API_KEY)
         // Use Resend's default from email for testing if custom domain not verified
         const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev'
         const fromName = process.env.RESEND_FROM_NAME || 'Coup de Pouce'
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
         console.log('From email:', fromEmail)
         console.log('From name:', fromName)
         console.log('Note: Using onboarding@resend.dev for testing. For production, verify your custom domain in Resend.')
-        
+
         const emailResult = await resend.emails.send({
           from: `${fromName} <${fromEmail}>`,
           to: email,

@@ -259,7 +259,7 @@ app.use((req, res, next) => {
 
 ### Database Schema
 - ✅ `prisma/schema.prisma` - Message model already exists
-- ✅ `read_at` field for read receipts
+- ✅ `read` field for read receipts
 
 ## 🎯 Key Features Delivered
 

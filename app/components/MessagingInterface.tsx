@@ -225,7 +225,7 @@ export default function MessagingInterface() {
                       }`}
                     >
                       {formatTime(message.createdAt)}
-                      {message.readAt && message.senderId === parseInt(user.id) && ' • Lu'}
+                      {message.read && message.senderId === parseInt(user.id) && ' • Lu'}
                     </p>
                   </div>
                 </div>

@@ -7,10 +7,10 @@
 - Old: `https://spuivxrtopiawsmnmcku.supabase.co`
 - New: `https://ieorwwbujvhexsosrgyr.supabase.co` (from project url.txt)
 
-### 2. ✅ Missing read_at Field - FIXED
-**Problem**: Prisma schema Message model was missing `read_at` field for read receipts
-**Fix**: Added `read_at DateTime?` field to Message model in `prisma/schema.prisma`
-**Action**: Ran `npx prisma generate` to update Prisma client
+### 2. ✅ Missing read Field - FIXED
+**Problem**: Database Message table was missing `read` field for read receipts
+**Fix**: Added `read Boolean` field to Message table (using SQL script)
+**Action**: Updated all API routes and components to use `read` boolean instead of `read_at` DateTime
 
 ### 3. ✅ Missing API Routes - FIXED
 **Problem**: Messaging code referenced API routes that didn't exist:
@@ -76,7 +76,7 @@ The messaging API routes work without Socket.io - users can send/receive message
 ## Files Modified
 
 - `.env.local` - Fixed Supabase URL
-- `prisma/schema.prisma` - Added read_at field
+- `scripts/add-read-at-column.sql` - Added read boolean field to database
 - `vercel.json` - Removed Socket.io route
 - `app/api/messages/send/route.ts` - Created
 - `app/api/messages/conversations/route.ts` - Created

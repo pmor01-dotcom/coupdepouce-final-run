@@ -8,8 +8,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -66,10 +64,16 @@ export async function POST(req: Request) {
     // Send reset email using Resend
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not configured')
-      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
+      // Log the reset URL for development/testing
+      console.log('Reset URL (email service not configured):', resetUrl)
+      return NextResponse.json({
+        success: true,
+        message: 'If an account exists with this email, a password reset link has been sent.'
+      })
     }
 
     try {
+      const resend = new Resend(process.env.RESEND_API_KEY)
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
       const fromName = process.env.RESEND_FROM_NAME || 'Coup de Pouce'
 

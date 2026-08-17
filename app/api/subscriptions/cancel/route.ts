@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
-
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY
-  if (!key) throw new Error('Missing STRIPE_SECRET_KEY')
-  return new Stripe(key, { apiVersion: '2026-06-24.dahlia' })
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,15 +28,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If subscription has Stripe ID, cancel it in Stripe
-    if (subscription.stripe_subscription_id) {
-      try {
-        const stripe = getStripe()
-        await stripe.subscriptions.cancel(subscription.stripe_subscription_id)
-      } catch (stripeError) {
-        console.error('Error cancelling Stripe subscription:', stripeError)
-      }
-    }
+    // Stripe functionality disabled - artisans not being charged
+    // Skip Stripe cancellation
 
     // Update subscription in database
     const { error: updateError } = await supabase
