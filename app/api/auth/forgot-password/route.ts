@@ -62,6 +62,13 @@ export async function POST(req: Request) {
     console.log('Reset URL:', resetUrl)
 
     // Send reset email using Resend
+    console.log('=== RESEND EMAIL DEBUG ===')
+    console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY)
+    console.log('RESEND_API_KEY length:', process.env.RESEND_API_KEY?.length)
+    console.log('EMAIL_FROM:', process.env.EMAIL_FROM)
+    console.log('Recipient email:', email)
+    console.log('Reset URL:', resetUrl)
+
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not configured')
       // Log the reset URL for development/testing
@@ -74,8 +81,12 @@ export async function POST(req: Request) {
 
     try {
       const resend = new Resend(process.env.RESEND_API_KEY)
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+      const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev'
       const fromName = process.env.RESEND_FROM_NAME || 'Coup de Pouce'
+
+      console.log('Attempting to send email via Resend...')
+      console.log('From:', `${fromName} <${fromEmail}>`)
+      console.log('To:', email)
 
       const emailResult = await resend.emails.send({
         from: `${fromName} <${fromEmail}>`,
@@ -110,10 +121,58 @@ export async function POST(req: Request) {
         `,
       })
 
-      console.log('Reset email sent successfully:', emailResult)
+      console.log('=== EMAIL SEND RESULT ===')
+      console.log('Email result:', JSON.stringify(emailResult, null, 2))
+      console.log('Reset email sent successfully to:', email)
+        from: `${fromName} <${fromEmail}>`,
+        to: email,
+        subject: 'Réinitialisation de votre mot de passe',
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Réinitialisation du mot de passe</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(to bottom, #6B8E23, #D4E4BC); padding: 30px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+              <h1 style="color: white; margin: 0;">Coup de Pouce</h1>
+            </div>
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 10px;">
+              <h2 style="color: #6B8E23; margin-top: 0;">Réinitialisation du mot de passe</h2>
+              <p>Bonjour ${user.name},</p>
+              <p>Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe :</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="background: #6B8E23; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Réinitialiser mon mot de passe</a>
+              </div>
+              <p style="font-size: 12px; color: #666;">Ou copiez et collez ce lien dans votre navigateur :</p>
+              <p style="font-size: 12px; color: #666; word-break: break-all;">${resetUrl}</p>
+              <p style="font-size: 12px; color: #666; margin-top: 20px;">Ce lien expire dans 1 heure.</p>
+              <p style="font-size: 12px; color: #666;">Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
+            </div>
+          </body>
+          </html>
+        `,
+      })
+
+      console.log('=== EMAIL SEND RESULT ===')
+      console.log('Email result:', JSON.stringify(emailResult, null, 2))
+      console.log('Reset email sent successfully to:', email)
     } catch (emailError: any) {
-      console.error('Failed to send reset email:', emailError)
-      return NextResponse.json({ error: 'Failed to send reset email' }, { status: 500 })
+      console.error('=== EMAIL SEND ERROR ===')
+      console.error('Error details:', JSON.stringify(emailError, null, 2))
+      console.error('Error message:', emailError.message)
+      console.error('Error name:', emailError.name)
+      console.error('Error stack:', emailError.stack)
+
+      // Log the reset URL as fallback
+      console.log('FALLBACK - Reset URL:', resetUrl)
+
+      return NextResponse.json({
+        success: true,
+        message: 'If an account exists with this email, a password reset link has been sent. (Email service error - check console for reset URL)'
+      })
     }
 
     return NextResponse.json({ 
