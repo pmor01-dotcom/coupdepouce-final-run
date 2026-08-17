@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../components/LanguageProvider";
 
@@ -25,7 +25,7 @@ export default function ResetPasswordPage() {
     }
   }, []);
 
-  async function handleSubmit(e: any) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -56,14 +56,13 @@ export default function ResetPasswordPage() {
       if (response.ok) {
         setMessage(data.message || t("forgotPassword.passwordUpdated"));
 
-        // ⭐ Redirect to artisan dashboard after successful reset
         setTimeout(() => {
           router.push("/artisan-dashboard");
         }, 2000);
       } else {
         setError(data.error || t("common.error"));
       }
-    } catch (error) {
+    } catch {
       setError(t("common.error"));
     } finally {
       setLoading(false);
@@ -153,17 +152,4 @@ export default function ResetPasswordPage() {
             padding: "12px 16px",
             borderRadius: "10px",
             border: "1px solid #ccc",
-            background: "#f2f2f2",
-            fontSize: "16px",
-            marginBottom: "15px",
-          }}
-        />
-
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "12px 16px",
-            borderRadius: "10px",
-            background: loading
+            background: "#f
