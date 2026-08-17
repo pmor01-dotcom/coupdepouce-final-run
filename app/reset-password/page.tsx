@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
     const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
 
-    // ⭐ FIXED — email object is now valid
+    // ⭐ FIXED EMAIL OBJECT
     const emailPayload = {
       from: `Coup de Pouce <no-reply@coupdepouce.com>`,
       to: email,
