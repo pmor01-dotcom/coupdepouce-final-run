@@ -15,11 +15,36 @@ export default function ArtisanDashboard() {
   const supabase = getSupabaseClient()
   const [unreadCount, setUnreadCount] = useState(0)
 
+  const fetchUnreadCount = async () => {
+    try {
+      console.log('=== ARTISAN DASHBOARD UNREAD COUNT DEBUG ===')
+      console.log('Fetching unread count for user:', user?.id)
+      const response = await fetch(`/api/messages/unread-count?userId=${user?.id}`)
+      const data = await response.json()
+      console.log('Unread count response:', data)
+      setUnreadCount(data.count || 0)
+      console.log('Set unread count to:', data.count || 0)
+    } catch (error) {
+      console.error('Error fetching unread count:', error)
+    }
+  }
+
   useEffect(() => {
     console.log('ArtisanDashboard - User state:', user)
     console.log('ArtisanDashboard - User ID:', user?.id)
     if (typeof window !== 'undefined') {
       console.log('ArtisanDashboard - localStorage user:', localStorage.getItem('user'))
+    }
+
+    // Role validation - redirect if not an artisan
+    if (user && user.role !== 'artisan') {
+      console.error('ArtisanDashboard - User is not an artisan! Role:', user.role)
+      console.error('Redirecting to correct dashboard...')
+      if (user.role === 'client') {
+        router.push('/client-dashboard')
+      } else {
+        router.push('/login')
+      }
     }
 
     if (user?.id) {
@@ -77,21 +102,7 @@ export default function ArtisanDashboard() {
         supabase.removeChannel(channel)
       }
     }
-  }, [user?.id, supabase])
-
-  const fetchUnreadCount = async () => {
-    try {
-      console.log('=== ARTISAN DASHBOARD UNREAD COUNT DEBUG ===')
-      console.log('Fetching unread count for user:', user?.id)
-      const response = await fetch(`/api/messages/unread-count?userId=${user?.id}`)
-      const data = await response.json()
-      console.log('Unread count response:', data)
-      setUnreadCount(data.count || 0)
-      console.log('Set unread count to:', data.count || 0)
-    } catch (error) {
-      console.error('Error fetching unread count:', error)
-    }
-  }
+  }, [user?.id, supabase, user, router])
 
   const handleLogout = () => {
     logout()

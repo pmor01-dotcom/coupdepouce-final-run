@@ -50,13 +50,24 @@ export default function ClientDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [unreadCount, setUnreadCount] = useState(0)
 
-  // Debug user state (client-side only)
+  // Debug user state and role validation (client-side only)
   useEffect(() => {
     console.log('ClientDashboard - Auth user:', user)
     if (typeof window !== 'undefined') {
       console.log('ClientDashboard - localStorage user:', localStorage.getItem('user'))
     }
-  }, [user])
+
+    // Role validation - redirect if not a client
+    if (user && user.role !== 'client') {
+      console.error('ClientDashboard - User is not a client! Role:', user.role)
+      console.error('Redirecting to correct dashboard...')
+      if (user.role === 'artisan') {
+        router.push('/artisan-dashboard')
+      } else {
+        router.push('/login')
+      }
+    }
+  }, [user, router])
 
   const handleLogout = () => {
     logout()
