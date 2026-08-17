@@ -15,6 +15,13 @@ export default function MessagesPage() {
 
   const [conversations, setConversations] = useState<any[]>([])
 
+  // ⭐ FIX: If user is missing, redirect to login
+  useEffect(() => {
+    if (!user) {
+      router.push('/login')
+    }
+  }, [user])
+
   const handleDeleteConversation = async (otherUserId: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -45,7 +52,6 @@ export default function MessagesPage() {
 
     const loadConversations = async () => {
       try {
-        // Use API endpoint with service role to bypass RLS
         const response = await fetch(`/api/messages/conversations?userId=${user.id}`)
         const result = await response.json()
 
@@ -65,7 +71,6 @@ export default function MessagesPage() {
       if (!user || !user.id) return
 
       try {
-        // Mark all messages received by the user as read
         const { error } = await supabase
           .from('messages')
           .update({ read: true })
@@ -83,9 +88,8 @@ export default function MessagesPage() {
     }
 
     loadConversations()
-    markAllAsRead() // Mark all messages as read when user views messages page
+    markAllAsRead()
 
-    // Set up real-time subscription for new messages
     const channel = supabase
       .channel('messages-changes')
       .on(
@@ -98,7 +102,6 @@ export default function MessagesPage() {
         },
         (payload) => {
           console.log('Real-time message change:', payload)
-          // Reload conversations when a message changes
           loadConversations()
         }
       )
