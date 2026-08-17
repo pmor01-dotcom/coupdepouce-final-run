@@ -43,10 +43,10 @@ export default function ResetPasswordPage() {
     setMessage("");
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ token, password }),
       });
@@ -54,17 +54,17 @@ export default function ResetPasswordPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(data.message || t('forgotPassword.passwordUpdated'));
-        
-        // Redirect to login after successful reset
+        setMessage(data.message || t("forgotPassword.passwordUpdated"));
+
+        // ⭐ Redirect to artisan dashboard after successful reset
         setTimeout(() => {
-          router.push('/login?passwordReset=true');
+          router.push("/artisan-dashboard");
         }, 2000);
       } else {
-        setError(data.error || t('common.error'));
+        setError(data.error || t("common.error"));
       }
     } catch (error) {
-      setError(t('common.error'));
+      setError(t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -93,25 +93,43 @@ export default function ResetPasswordPage() {
           textAlign: "center",
         }}
       >
-        <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
-          {t('forgotPassword.title')}
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: "bold",
+            marginBottom: "20px",
+          }}
+        >
+          {t("forgotPassword.title")}
         </h1>
 
         {error && (
-          <p style={{ marginBottom: "15px", fontSize: "14px", color: "#d32f2f" }}>
+          <p
+            style={{
+              marginBottom: "15px",
+              fontSize: "14px",
+              color: "#d32f2f",
+            }}
+          >
             {error}
           </p>
         )}
 
         {message && (
-          <p style={{ marginBottom: "15px", fontSize: "14px", color: "#388e3c" }}>
+          <p
+            style={{
+              marginBottom: "15px",
+              fontSize: "14px",
+              color: "#388e3c",
+            }}
+          >
             {message}
           </p>
         )}
 
         <input
           type="password"
-          placeholder={t('login.password')}
+          placeholder={t("login.password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{
@@ -148,17 +166,4 @@ export default function ResetPasswordPage() {
             width: "100%",
             padding: "12px 16px",
             borderRadius: "10px",
-            background: loading ? "#9e9e9e" : "#4CAF50",
-            color: "white",
-            fontWeight: "bold",
-            border: "none",
-            cursor: loading ? "not-allowed" : "pointer",
-            marginBottom: "15px",
-          }}
-        >
-          {loading ? t('forgotPassword.sending') : t('forgotPassword.updatePassword')}
-        </button>
-      </div>
-    </div>
-  );
-}
+            background: loading
