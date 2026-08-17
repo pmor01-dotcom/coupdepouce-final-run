@@ -1,76 +1,183 @@
-import { NextResponse } from "next/server";
-import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
+"use client";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLanguage } from "../components/LanguageProvider";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export default function ResetPasswordPage() {
+  const { t } = useLanguage();
+  const router = useRouter();
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { email } = body;
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState("");
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const resetToken = params.get("token");
+    if (resetToken) {
+      setToken(resetToken);
+    } else {
+      setError("Invalid or missing reset token");
+    }
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
     }
 
-    // Find user
-    const { data: user } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .single();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "No account found with this email" },
-        { status: 404 }
-      );
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
     }
 
-    // Create reset token
-    const resetToken = crypto.randomUUID();
-    const expires = new Date(Date.now() + 1000 * 60 * 30).toISOString(); // 30 min
+    setLoading(true);
+    setError("");
+    setMessage("");
 
-    await supabase
-      .from("users")
-      .update({
-        reset_token: resetToken,
-        reset_token_expires: expires,
-      })
-      .eq("id", user.id);
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, password }),
+      });
 
-    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
+      const data = await response.json();
 
-    const emailPayload = {
-      from: `Coup de Pouce <no-reply@coupdepouce.com>`,
-      to: email,
-      subject: "Réinitialisation de votre mot de passe",
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <body>
-            <p>Bonjour,</p>
-            <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
-            <p><a href="${resetUrl}">Réinitialiser le mot de passe</a></p>
-            <p>Ce lien expire dans 30 minutes.</p>
-          </body>
-        </html>
-      `,
-    };
+      if (response.ok) {
+        setMessage(data.message || t("forgotPassword.passwordUpdated"));
 
-    const emailResult = await resend.emails.send(emailPayload);
-
-    console.log("=== EMAIL SEND RESULT ===");
-    console.log(JSON.stringify(emailResult, null, 2));
-
-    return NextResponse.json({ success: true });
-  } catch (err: any) {
-    console.error("Forgot password error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+        setTimeout(() => {
+          router.push("/artisan-dashboard");
+        }, 2000);
+      } else {
+        setError(data.error || t("common.error"));
+      }
+    } catch {
+      setError(t("common.error"));
+    } finally {
+      setLoading(false);
+    }
   }
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(to bottom, #4CAF50 0%, #A5D6A7 40%, #ffffff 100%)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "30px",
+          borderRadius: "16px",
+          width: "90%",
+          maxWidth: "420px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          textAlign: "center",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: "bold",
+            marginBottom: "20px",
+          }}
+        >
+          {t("forgotPassword.title")}
+        </h1>
+
+        {error && (
+          <p
+            style={{
+              marginBottom: "15px",
+              fontSize: "14px",
+              color: "#d32f2f",
+            }}
+          >
+            {error}
+          </p>
+        )}
+
+        {message && (
+          <p
+            style={{
+              marginBottom: "15px",
+              fontSize: "14px",
+              color: "#388e3c",
+            }}
+          >
+            {message}
+          </p>
+        )}
+
+        <input
+          type="password"
+          placeholder={t("login.password")}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            background: "#f2f2f2",
+            fontSize: "16px",
+            marginBottom: "15px",
+          }}
+        />
+
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            background: "#f2f2f2",
+            fontSize: "16px",
+            marginBottom: "15px",
+          }}
+        />
+
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            background: loading ? "#9e9e9e" : "#4CAF50",
+            color: "white",
+            fontWeight: "bold",
+            border: "none",
+            cursor: loading ? "not-allowed" : "pointer",
+            marginBottom: "15px",
+          }}
+        >
+          {loading
+            ? t("forgotPassword.sending")
+            : t("forgotPassword.updatePassword")}
+        </button>
+      </div>
+    </div>
+  );
 }
