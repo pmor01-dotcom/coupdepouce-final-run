@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+import crypto from "crypto";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -19,24 +20,26 @@ export async function POST(req: Request) {
     }
 
     // Find user
-    const { data: user } = await supabase
+    const { data: user, error: userError } = await supabase
       .from("users")
-      .select("*")
+      .select("id, email, name")
       .eq("email", email)
       .single();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "No account found with this email" },
-        { status: 404 }
-      );
+    // Security: never reveal if user exists
+    if (userError || !user) {
+      return NextResponse.json({
+        success: true,
+        message:
+          "If an account exists with this email, a password reset link has been sent.",
+      });
     }
 
     // Create reset token
-    const resetToken = crypto.randomUUID();
+    const resetToken = crypto.randomBytes(32).toString("hex");
     const expires = new Date(Date.now() + 1000 * 60 * 30).toISOString(); // 30 min
 
-    await supabase
+    const { error: updateError } = await supabase
       .from("users")
       .update({
         reset_token: resetToken,
@@ -44,20 +47,47 @@ export async function POST(req: Request) {
       })
       .eq("id", user.id);
 
-    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
+    if (updateError) {
+      return NextResponse.json(
+        { error: "Failed to store reset token" },
+        { status: 500 }
+      );
+    }
 
-    // ⭐ FIXED EMAIL OBJECT
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      `https://${req.headers.get("host")}`;
+
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+
+    // If Resend is not configured, still return success
+    if (!process.env.RESEND_API_KEY) {
+      console.log("RESEND_API_KEY missing — reset URL:", resetUrl);
+      return NextResponse.json({
+        success: true,
+        message:
+          "If an account exists with this email, a password reset link has been sent.",
+      });
+    }
+
+    // Send email
+    const fromEmail = process.env.EMAIL_FROM || "onboarding@resend.dev";
+    const fromName = process.env.RESEND_FROM_NAME || "Coup de Pouce";
+
     const emailPayload = {
-      from: `Coup de Pouce <no-reply@coupdepouce.com>`,
+      from: `${fromName} <${fromEmail}>`,
       to: email,
       subject: "Réinitialisation de votre mot de passe",
       html: `
         <!DOCTYPE html>
         <html>
-          <body>
-            <p>Bonjour,</p>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Réinitialisation du mot de passe</h2>
+            <p>Bonjour ${user.name},</p>
             <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
-            <p><a href="${resetUrl}">Réinitialiser le mot de passe</a></p>
+            <p><a href="${resetUrl}">Réinitialiser mon mot de passe</a></p>
+            <p>Ou copiez ce lien dans votre navigateur :</p>
+            <p>${resetUrl}</p>
             <p>Ce lien expire dans 30 minutes.</p>
           </body>
         </html>
@@ -69,7 +99,11 @@ export async function POST(req: Request) {
     console.log("=== EMAIL SEND RESULT ===");
     console.log(JSON.stringify(emailResult, null, 2));
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message:
+        "If an account exists with this email, a password reset link has been sent.",
+    });
   } catch (err: any) {
     console.error("Forgot password error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
