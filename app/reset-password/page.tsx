@@ -1,111 +1,183 @@
-import { NextResponse } from "next/server";
-import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
-import crypto from "crypto";
+"use client";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLanguage } from "../components/LanguageProvider";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export default function ResetPasswordPage() {
+  const { t } = useLanguage();
+  const router = useRouter();
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { email } = body;
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState("");
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const resetToken = params.get("token");
+    if (resetToken) {
+      setToken(resetToken);
+    } else {
+      setError("Invalid or missing reset token");
+    }
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
     }
 
-    // Find user
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id, email, name")
-      .eq("email", email)
-      .single();
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
 
-    // Security: never reveal if user exists
-    if (userError || !user) {
-      return NextResponse.json({
-        success: true,
-        message:
-          "If an account exists with this email, a password reset link has been sent.",
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, password }),
       });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message || t("forgotPassword.passwordUpdated"));
+
+        setTimeout(() => {
+          router.push("/artisan-dashboard");
+        }, 2000);
+      } else {
+        setError(data.error || t("common.error"));
+      }
+    } catch {
+      setError(t("common.error"));
+    } finally {
+      setLoading(false);
     }
-
-    // Create reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 1000 * 60 * 30).toISOString(); // 30 min
-
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({
-        reset_token: resetToken,
-        reset_token_expires: expires,
-      })
-      .eq("id", user.id);
-
-    if (updateError) {
-      return NextResponse.json(
-        { error: "Failed to store reset token" },
-        { status: 500 }
-      );
-    }
-
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      `https://${req.headers.get("host")}`;
-
-    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
-
-    // If Resend is not configured, still return success
-    if (!process.env.RESEND_API_KEY) {
-      console.log("RESEND_API_KEY missing — reset URL:", resetUrl);
-      return NextResponse.json({
-        success: true,
-        message:
-          "If an account exists with this email, a password reset link has been sent.",
-      });
-    }
-
-    // Send email
-    const fromEmail = process.env.EMAIL_FROM || "onboarding@resend.dev";
-    const fromName = process.env.RESEND_FROM_NAME || "Coup de Pouce";
-
-    const emailPayload = {
-      from: `${fromName} <${fromEmail}>`,
-      to: email,
-      subject: "Réinitialisation de votre mot de passe",
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6;">
-            <h2>Réinitialisation du mot de passe</h2>
-            <p>Bonjour ${user.name},</p>
-            <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
-            <p><a href="${resetUrl}">Réinitialiser mon mot de passe</a></p>
-            <p>Ou copiez ce lien dans votre navigateur :</p>
-            <p>${resetUrl}</p>
-            <p>Ce lien expire dans 30 minutes.</p>
-          </body>
-        </html>
-      `,
-    };
-
-    const emailResult = await resend.emails.send(emailPayload);
-
-    console.log("=== EMAIL SEND RESULT ===");
-    console.log(JSON.stringify(emailResult, null, 2));
-
-    return NextResponse.json({
-      success: true,
-      message:
-        "If an account exists with this email, a password reset link has been sent.",
-    });
-  } catch (err: any) {
-    console.error("Forgot password error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
   }
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(to bottom, #4CAF50 0%, #A5D6A7 40%, #ffffff 100%)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "30px",
+          borderRadius: "16px",
+          width: "90%",
+          maxWidth: "420px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          textAlign: "center",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: "bold",
+            marginBottom: "20px",
+          }}
+        >
+          {t("forgotPassword.title")}
+        </h1>
+
+        {error && (
+          <p
+            style={{
+              marginBottom: "15px",
+              fontSize: "14px",
+              color: "#d32f2f",
+            }}
+          >
+            {error}
+          </p>
+        )}
+
+        {message && (
+          <p
+            style={{
+              marginBottom: "15px",
+              fontSize: "14px",
+              color: "#388e3c",
+            }}
+          >
+            {message}
+          </p>
+        )}
+
+        <input
+          type="password"
+          placeholder={t("login.password")}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            background: "#f2f2f2",
+            fontSize: "16px",
+            marginBottom: "15px",
+          }}
+        />
+
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            background: "#f2f2f2",
+            fontSize: "16px",
+            marginBottom: "15px",
+          }}
+        />
+
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            background: loading ? "#9e9e9e" : "#4CAF50",
+            color: "white",
+            fontWeight: "bold",
+            border: "none",
+            cursor: loading ? "not-allowed" : "pointer",
+            marginBottom: "15px",
+          }}
+        >
+          {loading
+            ? t("forgotPassword.sending")
+            : t("forgotPassword.updatePassword")}
+        </button>
+      </div>
+    </div>
+  );
 }
