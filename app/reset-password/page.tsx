@@ -56,8 +56,20 @@ export default function ResetPasswordPage() {
       if (response.ok) {
         setMessage(data.message || t("forgotPassword.passwordUpdated"));
 
+        // ⭐ NEW: Clear old session
+        localStorage.removeItem("user");
+        localStorage.removeItem("role");
+        localStorage.removeItem("token");
+
+        // ⭐ NEW: Redirect based on role returned by API
+        const role = data.role || "client"; // fallback to client
+
         setTimeout(() => {
-          router.push("/artisan-dashboard");
+          if (role === "artisan") {
+            router.push("/artisan-dashboard");
+          } else {
+            router.push("/client-dashboard");
+          }
         }, 2000);
       } else {
         setError(data.error || t("common.error"));
