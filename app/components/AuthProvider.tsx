@@ -23,7 +23,7 @@ interface UserProfile {
 interface AuthContextType {
   user: UserProfile | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean | UserProfile>
+  login: (email: string, password: string) => Promise<UserProfile | false>
   logout: () => Promise<void>
 }
 
@@ -35,38 +35,49 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Restore user from localStorage
+  // ⭐ SINGLE SOURCE OF TRUTH: Restore session token ONLY
   useEffect(() => {
-    console.log('AuthProvider - Restoring user from localStorage')
-    const stored = localStorage.getItem('user')
-    console.log('AuthProvider - localStorage content:', stored)
-    if (stored) {
-      try {
-        const parsedUser = JSON.parse(stored)
-        console.log('AuthProvider - Parsed user:', parsedUser)
-        // Validate that the user object has required fields
-        if (parsedUser && parsedUser.id && parsedUser.email) {
-          console.log('AuthProvider - User is valid, setting state')
-          setUser(parsedUser)
-        } else {
-          console.log('AuthProvider - User is invalid, removing from localStorage')
-          localStorage.removeItem('user')
-        }
-      } catch (e) {
-        console.log('AuthProvider - Error parsing user:', e)
-        localStorage.removeItem('user')
-      }
+    const sessionToken = localStorage.getItem('session_token')
+
+    if (!sessionToken) {
+      setIsLoading(false)
+      return
     }
-    setIsLoading(false)
+
+    // Fetch user profile from Supabase using the session token
+    const restoreUser = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        })
+
+        const data = await response.json()
+
+        if (response.ok && data.user) {
+          setUser(data.user)
+        } else {
+          // Invalid token → clear it
+          localStorage.removeItem('session_token')
+        }
+      } catch (err) {
+        localStorage.removeItem('session_token')
+      }
+
+      setIsLoading(false)
+    }
+
+    restoreUser()
   }, [])
 
-  // CUSTOM LOGIN using password_hash
-  const login = async (email: string, password: string): Promise<boolean | UserProfile> => {
+  // ⭐ LOGIN: Store ONLY a session token, not the full user
+  const login = async (email: string, password: string): Promise<UserProfile | false> => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await response.json()
@@ -75,12 +86,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         return false
       }
 
-      const role = data.user.role?.toLowerCase() || 'client'
-
       const userProfile: UserProfile = {
         id: data.user.id,
         email: data.user.email,
-        role: role as 'client' | 'artisan',
+        role: data.user.role,
         name: data.user.name,
         phone: data.user.phone,
         location: data.user.location,
@@ -88,18 +97,20 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         isPaid: data.user.isPaid ?? false,
       }
 
-      setUser(userProfile)
-      localStorage.setItem('user', JSON.stringify(userProfile))
+      // Save session token ONLY
+      localStorage.setItem('session_token', data.token)
 
+      setUser(userProfile)
       return userProfile
     } catch (err) {
       return false
     }
   }
 
+  // ⭐ LOGOUT: Clear session token and user
   const logout = async () => {
+    localStorage.removeItem('session_token')
     setUser(null)
-    localStorage.removeItem('user')
     window.location.href = '/'
   }
 
