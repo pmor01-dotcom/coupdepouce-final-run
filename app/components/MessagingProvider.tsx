@@ -4,24 +4,15 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { io, Socket } from 'socket.io-client'
 import { useAuth } from '../components/AuthProvider'
 
-/* -------------------------------------------------------
-   TYPES
--------------------------------------------------------- */
+/* ------------------ TYPES ------------------ */
 
 export interface Message {
   id: string
-  conversationId?: string
   senderId: string
   receiverId: string
   content: string
-  demandId?: string
   createdAt: string
   read?: boolean
-  sender?: {
-    id: string
-    name: string
-    role: string
-  }
 }
 
 export interface Conversation {
@@ -30,26 +21,10 @@ export interface Conversation {
     id: string
     name: string
     role: string
-    metier?: string
-    location?: string
-  }
-  demand: {
-    id: string
-    title: string
-    description: string
-    category: string
-    budget_range?: string
-    location: string
-    department: string
-    status: string
   }
   lastMessage: Message
   unreadCount: number
 }
-
-/* -------------------------------------------------------
-   CONTEXT
--------------------------------------------------------- */
 
 interface MessagingContextType {
   socket: Socket | null
@@ -58,6 +33,11 @@ interface MessagingContextType {
   currentConversation: Conversation | null
   messages: Message[]
   unreadCount: number
+
+  joinUserRoom: (userId: string) => void
+  joinConversation: (conversationId: string) => void
+  leaveConversation: (conversationId: string) => void
+
   sendMessage: (data: {
     conversationId: string
     receiverId: string
@@ -66,34 +46,26 @@ interface MessagingContextType {
   }) => void
 }
 
+/* ------------------ CONTEXT ------------------ */
+
 const MessagingContext = createContext<MessagingContextType | undefined>(undefined)
 
-/* -------------------------------------------------------
-   PROVIDER
--------------------------------------------------------- */
+/* ------------------ PROVIDER ------------------ */
 
 export function MessagingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
 
   const [socket, setSocket] = useState<Socket | null>(null)
-  const [isConnected, setIsConnected] = useState<boolean>(false)
-
+  const [isConnected, setIsConnected] = useState(false)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
-  const [unreadCount, setUnreadCount] = useState<number>(0)
-
-  /* -------------------------------------------------------
-     SOCKET INITIALIZATION
-  -------------------------------------------------------- */
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     if (!user) return
 
-    const token = typeof window !== 'undefined'
-      ? localStorage.getItem('session_token')
-      : null
-
+    const token = localStorage.getItem('session_token')
     if (!token) return
 
     const socketInstance = io(
@@ -107,20 +79,14 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
 
     socketInstance.on('connect', () => {
       setIsConnected(true)
-      console.log('Socket connected as user:', user.id)
     })
 
     socketInstance.on('disconnect', () => {
       setIsConnected(false)
-      console.log('Socket disconnected')
     })
 
     socketInstance.on('new-message', (message: Message) => {
       setMessages(prev => [...prev, message])
-    })
-
-    socketInstance.on('message-error', (err) => {
-      console.error('Message error:', err)
     })
 
     setSocket(socketInstance)
@@ -130,9 +96,21 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
     }
   }, [user])
 
-  /* -------------------------------------------------------
-     SEND MESSAGE
-  -------------------------------------------------------- */
+  /* ------------------ ROOM FUNCTIONS ------------------ */
+
+  const joinUserRoom = (userId: string) => {
+    socket?.emit('join-user-room', userId)
+  }
+
+  const joinConversation = (conversationId: string) => {
+    socket?.emit('join-conversation', conversationId)
+  }
+
+  const leaveConversation = (conversationId: string) => {
+    socket?.emit('leave-conversation', conversationId)
+  }
+
+  /* ------------------ SEND MESSAGE ------------------ */
 
   const sendMessage = (data: {
     conversationId: string
@@ -140,17 +118,8 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
     content: string
     demandId: string
   }) => {
-    if (!socket) return
-
-    socket.emit('send-message', {
-      ...data
-      // senderId is NOT sent — backend uses authenticated user
-    })
+    socket?.emit('send-message', data)
   }
-
-  /* -------------------------------------------------------
-     PROVIDER VALUE
-  -------------------------------------------------------- */
 
   return (
     <MessagingContext.Provider
@@ -161,6 +130,9 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
         currentConversation,
         messages,
         unreadCount,
+        joinUserRoom,
+        joinConversation,
+        leaveConversation,
         sendMessage
       }}
     >
@@ -169,9 +141,7 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
   )
 }
 
-/* -------------------------------------------------------
-   HOOK
--------------------------------------------------------- */
+/* ------------------ HOOK ------------------ */
 
 export function useMessaging() {
   const ctx = useContext(MessagingContext)
