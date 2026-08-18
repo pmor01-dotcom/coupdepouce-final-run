@@ -13,10 +13,7 @@ export default function CreateDemandPage() {
   const { t } = useLanguage()
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      console.log('No user found, redirecting to login')
-      router.push('/login')
-    } else if (!authLoading && user && user.role !== 'client') {
+    if (!authLoading && user && user.role !== 'client') {
       console.log('User is not a client, redirecting to appropriate dashboard')
       router.push(user.role === 'artisan' ? '/artisan-dashboard' : '/client-dashboard')
     }
@@ -100,8 +97,25 @@ export default function CreateDemandPage() {
     )
   }
 
-  if (!user || user.role !== 'client') {
-    return null // Redirect is handled by useEffect
+  if (!user) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Connexion requise</h2>
+          <p className="text-gray-600 mb-6">Vous devez être connecté en tant que client pour créer une demande.</p>
+          <button
+            onClick={() => router.push('/login')}
+            className="bg-green-700 text-white px-6 py-3 rounded-md font-medium hover:bg-green-800"
+          >
+            Se connecter
+          </button>
+        </div>
+      </main>
+    )
+  }
+
+  if (user.role !== 'client') {
+    return null
   }
 
   return (
