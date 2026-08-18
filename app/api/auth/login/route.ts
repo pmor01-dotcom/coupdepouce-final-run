@@ -11,14 +11,19 @@ const supabase = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { email, password } = body
+    const email = String(body?.email ?? '').trim().toLowerCase()
+    const password = String(body?.password ?? '')
 
-    // 1. Find user by email
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+    }
+
+    // 1. Find user by email (normalize to avoid false invalid-email failures)
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email)
-      .single()
+      .ilike('email', email)
+      .maybeSingle()
 
     if (userError || !user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
