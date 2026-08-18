@@ -2,32 +2,39 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { io, Socket } from 'socket.io-client'
+import { useAuth } from '../components/AuthProvider'
 
-interface Message {
-  id: number
+/* -------------------------------------------------------
+   TYPES
+-------------------------------------------------------- */
+
+export interface Message {
+  id: string
+  conversationId?: string
+  senderId: string
+  receiverId: string
   content: string
-  senderId: number
-  receiverId: number
+  demandId?: string
   createdAt: string
   read?: boolean
-  sender: {
-    id: number
+  sender?: {
+    id: string
     name: string
     role: string
   }
 }
 
-interface Conversation {
+export interface Conversation {
   conversationId: string
   otherUser: {
-    id: number
+    id: string
     name: string
     role: string
     metier?: string
     location?: string
   }
   demand: {
-    id: number
+    id: string
     title: string
     description: string
     category: string
@@ -36,217 +43,114 @@ interface Conversation {
     department: string
     status: string
   }
-  lastMessage: {
-    id: number
-    content: string
-    senderId: number
-    createdAt: string
-  }
+  lastMessage: Message
   unreadCount: number
 }
+
+/* -------------------------------------------------------
+   CONTEXT
+-------------------------------------------------------- */
 
 interface MessagingContextType {
   socket: Socket | null
   isConnected: boolean
   conversations: Conversation[]
-  currentConversation: any | null
+  currentConversation: Conversation | null
   messages: Message[]
   unreadCount: number
-  joinUserRoom: (userId: number) => void
-  joinConversation: (conversationId: string) => void
-  leaveConversation: (conversationId: string) => void
   sendMessage: (data: {
     conversationId: string
-    senderId: number
-    receiverId: number
+    receiverId: string
     content: string
-    demandId: number
+    demandId: string
   }) => void
-  markMessagesAsRead: (conversationId: string, userId: number) => void
-  loadConversations: (userId: number) => void
-  loadConversation: (conversationId: string, userId: number) => void
-  setTyping: (conversationId: string, userId: number, userName: string) => void
-  stopTyping: (conversationId: string, userId: number) => void
 }
 
 const MessagingContext = createContext<MessagingContextType | undefined>(undefined)
 
+/* -------------------------------------------------------
+   PROVIDER
+-------------------------------------------------------- */
+
 export function MessagingProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth()
+
   const [socket, setSocket] = useState<Socket | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
+  const [isConnected, setIsConnected] = useState<boolean>(false)
+
   const [conversations, setConversations] = useState<Conversation[]>([])
-  const [currentConversation, setCurrentConversation] = useState<any | null>(null)
+  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [unreadCount, setUnreadCount] = useState<number>(0)
+
+  /* -------------------------------------------------------
+     SOCKET INITIALIZATION
+  -------------------------------------------------------- */
 
   useEffect(() => {
-    let socketInstance: Socket | null = null
+    if (!user) return
 
-    // Only initialize socket if we're on the messages page
-    const needsMessaging = typeof window !== 'undefined' &&
-      window.location.pathname.startsWith('/messages')
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem('session_token')
+      : null
 
-    if (!needsMessaging) {
-      return
-    }
+    if (!token) return
 
-    try {
-      socketInstance = io(process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000', {
+    const socketInstance = io(
+      process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000',
+      {
         path: '/api/socket/io',
-        reconnectionAttempts: 2,
-        reconnectionDelay: 2000,
-        timeout: 5000,
-        transports: ['polling', 'websocket']
-      })
-
-      socketInstance.on('connect', () => {
-        setIsConnected(true)
-        console.log('Connected to messaging server')
-      })
-
-      socketInstance.on('disconnect', () => {
-        setIsConnected(false)
-        console.log('Disconnected from messaging server')
-      })
-
-      socketInstance.on('connect_error', (error) => {
-        console.log('Socket connection unavailable - messaging disabled')
-        setIsConnected(false)
-      })
-
-      if (typeof window !== 'undefined') {
-        ;(window as any).socket = socketInstance
+        auth: { token },
+        transports: ['websocket', 'polling']
       }
-    } catch (error) {
-      console.log('Socket initialization failed - messaging disabled')
+    )
+
+    socketInstance.on('connect', () => {
+      setIsConnected(true)
+      console.log('Socket connected as user:', user.id)
+    })
+
+    socketInstance.on('disconnect', () => {
       setIsConnected(false)
-    }
+      console.log('Socket disconnected')
+    })
 
-    if (socketInstance) {
-      socketInstance.on('new-message', (message: Message) => {
-        setMessages(prev => [...prev, message])
+    socketInstance.on('new-message', (message: Message) => {
+      setMessages(prev => [...prev, message])
+    })
 
-        // Update conversations list
-        setConversations(prev => prev.map(conv =>
-          conv.conversationId === message.senderId + '-' + message.receiverId + '-' ||
-          conv.conversationId === message.receiverId + '-' + message.senderId + '-'
-            ? { ...conv, lastMessage: message, unreadCount: conv.unreadCount + 1 }
-            : conv
-        ))
-      })
-
-      socketInstance.on('new-message-notification', (notification) => {
-        // Handle new message notification
-        setUnreadCount(prev => prev + 1)
-      })
-
-      socketInstance.on('messages-read', (data) => {
-        // Update messages as read
-        setMessages(prev => prev.map(msg =>
-          msg.senderId === data.readBy ? { ...msg, read: true } : msg
-        ))
-      })
-
-      socketInstance.on('user-typing', (data) => {
-        // Handle typing indicator
-        console.log('User is typing:', data)
-      })
-
-      socketInstance.on('user-stop-typing', (data) => {
-        // Handle stop typing indicator
-        console.log('User stopped typing:', data)
-      })
-
-      socketInstance.on('message-error', (error) => {
-        console.error('Message error:', error)
-      })
-    }
+    socketInstance.on('message-error', (err) => {
+      console.error('Message error:', err)
+    })
 
     setSocket(socketInstance)
 
     return () => {
-      if (socketInstance) {
-        socketInstance.disconnect()
-      }
+      socketInstance.disconnect()
     }
-  }, [])
+  }, [user])
 
-  const joinUserRoom = (userId: number) => {
-    if (socket) {
-      socket.emit('join-user-room', userId.toString())
-    }
-  }
-
-  const joinConversation = (conversationId: string) => {
-    if (socket) {
-      socket.emit('join-conversation', conversationId)
-    }
-  }
-
-  const leaveConversation = (conversationId: string) => {
-    if (socket) {
-      socket.emit('leave-conversation', conversationId)
-    }
-  }
+  /* -------------------------------------------------------
+     SEND MESSAGE
+  -------------------------------------------------------- */
 
   const sendMessage = (data: {
     conversationId: string
-    senderId: number
-    receiverId: number
+    receiverId: string
     content: string
-    demandId: number
+    demandId: string
   }) => {
-    if (socket) {
-      socket.emit('send-message', data)
-    }
+    if (!socket) return
+
+    socket.emit('send-message', {
+      ...data
+      // senderId is NOT sent — backend uses authenticated user
+    })
   }
 
-  const markMessagesAsRead = (conversationId: string, userId: number) => {
-    if (socket) {
-      socket.emit('mark-messages-read', { conversationId, userId })
-    }
-  }
-
-  const loadConversations = async (userId: number) => {
-    try {
-      const response = await fetch(`/api/messages/conversations?userId=${userId}`)
-      const data = await response.json()
-      
-      if (data.success) {
-        setConversations(data.conversations)
-        setUnreadCount(data.conversations.reduce((sum: number, conv: Conversation) => sum + conv.unreadCount, 0))
-      }
-    } catch (error) {
-      console.error('Error loading conversations:', error)
-    }
-  }
-
-  const loadConversation = async (conversationId: string, userId: number) => {
-    try {
-      const response = await fetch(`/api/messages/conversation/${conversationId}?userId=${userId}`)
-      const data = await response.json()
-      
-      if (data.success) {
-        setCurrentConversation(data.conversation)
-        setMessages(data.conversation.messages)
-        joinConversation(conversationId)
-      }
-    } catch (error) {
-      console.error('Error loading conversation:', error)
-    }
-  }
-
-  const setTyping = (conversationId: string, userId: number, userName: string) => {
-    if (socket) {
-      socket.emit('typing', { conversationId, userId, userName })
-    }
-  }
-
-  const stopTyping = (conversationId: string, userId: number) => {
-    if (socket) {
-      socket.emit('stop-typing', { conversationId, userId })
-    }
-  }
+  /* -------------------------------------------------------
+     PROVIDER VALUE
+  -------------------------------------------------------- */
 
   return (
     <MessagingContext.Provider
@@ -257,15 +161,7 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
         currentConversation,
         messages,
         unreadCount,
-        joinUserRoom,
-        joinConversation,
-        leaveConversation,
-        sendMessage,
-        markMessagesAsRead,
-        loadConversations,
-        loadConversation,
-        setTyping,
-        stopTyping
+        sendMessage
       }}
     >
       {children}
@@ -273,10 +169,12 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
   )
 }
 
+/* -------------------------------------------------------
+   HOOK
+-------------------------------------------------------- */
+
 export function useMessaging() {
-  const context = useContext(MessagingContext)
-  if (context === undefined) {
-    throw new Error('useMessaging must be used within a MessagingProvider')
-  }
-  return context
+  const ctx = useContext(MessagingContext)
+  if (!ctx) throw new Error('useMessaging must be used within a MessagingProvider')
+  return ctx
 }

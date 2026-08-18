@@ -1,6 +1,7 @@
 import { Server as NetServer } from 'http'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Server as ServerIO } from 'socket.io'
+import { createClient } from '@supabase/supabase-js'
 
 declare global {
   var socketIO: ServerIO | undefined
@@ -18,6 +19,11 @@ export const config = {
   },
 }
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
 const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any }) => {
   if (res.socket.server.io) {
     console.log('Socket is already running')
@@ -28,28 +34,54 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
       path: '/api/socket/io',
       addTrailingSlash: false,
       cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+        origin: '*',
+        methods: ['GET', 'POST'],
+      },
+    })
+
+    // Authenticate each socket connection using session token
+    io.use(async (socket, next) => {
+      try {
+        const token = socket.handshake.auth?.token
+        if (!token) {
+          console.log('Socket rejected: missing token')
+          return next(new Error('Authentication required'))
+        }
+
+        const { data: session, error } = await supabase
+          .from('sessions')
+          .select('user_id')
+          .eq('token', token)
+          .single()
+
+        if (error || !session) {
+          console.log('Socket rejected: invalid token')
+          return next(new Error('Invalid session token'))
+        }
+
+        ;(socket as any).userId = session.user_id
+        console.log('Socket authenticated as user:', session.user_id)
+        next()
+      } catch (err) {
+        console.error('Socket auth error:', err)
+        next(new Error('Authentication failed'))
       }
     })
 
-    // Socket connection handling
     io.on('connection', (socket) => {
-      console.log(`User connected: ${socket.id}`)
+      const userId = (socket as any).userId
+      console.log(`User connected: ${socket.id} (userId: ${userId})`)
 
-      // Join user to their personal room for notifications
-      socket.on('join-user-room', (userId: string) => {
-        socket.join(`user-${userId}`)
-        console.log(`User ${userId} joined their room`)
+      socket.on('join-user-room', (uid: string) => {
+        socket.join(`user-${uid}`)
+        console.log(`User ${uid} joined their room`)
       })
 
-      // Join a conversation room
       socket.on('join-conversation', (conversationId: string) => {
         socket.join(`conversation-${conversationId}`)
         console.log(`User joined conversation: ${conversationId}`)
       })
 
-      // Leave a conversation room
       socket.on('leave-conversation', (conversationId: string) => {
         socket.leave(`conversation-${conversationId}`)
         console.log(`User left conversation: ${conversationId}`)
@@ -57,28 +89,34 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
 
       // Send message in conversation
       socket.on('send-message', async (data) => {
-        const { conversationId, senderId, receiverId, content, demandId } = data
-        
+        const { conversationId, receiverId, content, demandId } = data
+        const senderId = (socket as any).userId
+
+        if (!senderId) {
+          socket.emit('message-error', { error: 'Vous devez être connecté pour envoyer un message' })
+          return
+        }
+
         try {
-          // Validate that sender is a client (business rule: only clients can initiate contact)
           const response = await fetch(`${req.headers.origin}/api/messages/send`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              // if your /api/messages/send expects Authorization, add it here:
+              // Authorization: `Bearer ${socket.handshake.auth?.token}`,
             },
             body: JSON.stringify({
               senderId,
               receiverId,
               content,
               demandId,
-              conversationId
-            })
+              conversationId,
+            }),
           })
 
           const result = await response.json()
 
           if (result.success) {
-            // Broadcast message to both users in the conversation
             const messageData = {
               id: result.messageId,
               conversationId,
@@ -87,22 +125,19 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
               content,
               demandId,
               createdAt: new Date().toISOString(),
-              sender: result.sender
+              sender: result.sender,
             }
 
-            // Send to conversation room
             io.to(`conversation-${conversationId}`).emit('new-message', messageData)
-            
-            // Send notification to receiver's personal room
+
             io.to(`user-${receiverId}`).emit('new-message-notification', {
               conversationId,
               senderId,
               senderName: result.sender.name,
               content,
-              demandTitle: result.demandTitle
+              demandTitle: result.demandTitle,
             })
 
-            // Send email notification (async, don't wait)
             fetch(`${req.headers.origin}/api/notifications/message`, {
               method: 'POST',
               headers: {
@@ -112,10 +147,9 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
                 senderId,
                 receiverId,
                 demandId,
-                messageContent: content
-              })
-            }).catch(err => console.error('Email notification failed:', err))
-
+                messageContent: content,
+              }),
+            }).catch((err) => console.error('Email notification failed:', err))
           } else {
             socket.emit('message-error', { error: result.error })
           }
@@ -125,10 +159,9 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
         }
       })
 
-      // Mark messages as read
-      socket.on('mark-messages-read', async (data) => {
-        const { conversationId, userId } = data
-        
+      socket.on('mark-messages-as-read', async (data) => {
+        const { conversationId, userId: readBy } = data
+
         try {
           const response = await fetch(`${req.headers.origin}/api/messages/mark-read`, {
             method: 'POST',
@@ -137,18 +170,17 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
             },
             body: JSON.stringify({
               conversationId,
-              userId
-            })
+              userId: readBy,
+            }),
           })
 
           const result = await response.json()
 
           if (result.success) {
-            // Notify other user in conversation that messages were read
             socket.to(`conversation-${conversationId}`).emit('messages-read', {
               conversationId,
-              readBy: userId,
-              readAt: new Date().toISOString()
+              readBy,
+              readAt: new Date().toISOString(),
             })
           }
         } catch (error) {
@@ -156,13 +188,12 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
         }
       })
 
-      // Typing indicators
       socket.on('typing', (data) => {
         const { conversationId, userId, userName } = data
         socket.to(`conversation-${conversationId}`).emit('user-typing', {
           conversationId,
           userId,
-          userName
+          userName,
         })
       })
 
@@ -170,13 +201,12 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponse & { socket: any
         const { conversationId, userId } = data
         socket.to(`conversation-${conversationId}`).emit('user-stop-typing', {
           conversationId,
-          userId
+          userId,
         })
       })
 
-      // Handle disconnection
       socket.on('disconnect', () => {
-        console.log(`User disconnected: ${socket.id}`)
+        console.log(`User disconnected: ${socket.id} (userId: ${userId})`)
       })
     })
 
