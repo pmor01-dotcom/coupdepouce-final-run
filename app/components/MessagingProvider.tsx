@@ -4,13 +4,17 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { io, Socket } from 'socket.io-client'
 import { useAuth } from '../components/AuthProvider'
 
-/* ------------------ TYPES ------------------ */
+/* -------------------------------------------------------
+   TYPES
+-------------------------------------------------------- */
 
 export interface Message {
   id: string
+  conversationId: string
   senderId: string
   receiverId: string
   content: string
+  demandId: string
   createdAt: string
   read?: boolean
 }
@@ -44,13 +48,24 @@ interface MessagingContextType {
     content: string
     demandId: string
   }) => void
+
+  markMessagesAsRead: (conversationId: string) => void
+
+  loadConversations: () => Promise<void>
+  loadConversation: (conversationId: string) => Promise<void>
+
+  setTyping: (conversationId: string, isTyping: boolean) => void
 }
 
-/* ------------------ CONTEXT ------------------ */
+/* -------------------------------------------------------
+   CONTEXT
+-------------------------------------------------------- */
 
 const MessagingContext = createContext<MessagingContextType | undefined>(undefined)
 
-/* ------------------ PROVIDER ------------------ */
+/* -------------------------------------------------------
+   PROVIDER
+-------------------------------------------------------- */
 
 export function MessagingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
@@ -61,6 +76,10 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
+
+  /* -------------------------------------------------------
+     SOCKET INITIALIZATION
+  -------------------------------------------------------- */
 
   useEffect(() => {
     if (!user) return
@@ -89,6 +108,14 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
       setMessages(prev => [...prev, message])
     })
 
+    socketInstance.on('messages-read', ({ conversationId }) => {
+      setMessages(prev =>
+        prev.map(m =>
+          m.conversationId === conversationId ? { ...m, read: true } : m
+        )
+      )
+    })
+
     setSocket(socketInstance)
 
     return () => {
@@ -96,7 +123,9 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
     }
   }, [user])
 
-  /* ------------------ ROOM FUNCTIONS ------------------ */
+  /* -------------------------------------------------------
+     ROOM FUNCTIONS
+  -------------------------------------------------------- */
 
   const joinUserRoom = (userId: string) => {
     socket?.emit('join-user-room', userId)
@@ -110,7 +139,9 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
     socket?.emit('leave-conversation', conversationId)
   }
 
-  /* ------------------ SEND MESSAGE ------------------ */
+  /* -------------------------------------------------------
+     SEND MESSAGE
+  -------------------------------------------------------- */
 
   const sendMessage = (data: {
     conversationId: string
@@ -121,30 +152,22 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
     socket?.emit('send-message', data)
   }
 
-  return (
-    <MessagingContext.Provider
-      value={{
-        socket,
-        isConnected,
-        conversations,
-        currentConversation,
-        messages,
-        unreadCount,
-        joinUserRoom,
-        joinConversation,
-        leaveConversation,
-        sendMessage
-      }}
-    >
-      {children}
-    </MessagingContext.Provider>
-  )
-}
+  /* -------------------------------------------------------
+     MARK MESSAGES AS READ
+  -------------------------------------------------------- */
 
-/* ------------------ HOOK ------------------ */
+  const markMessagesAsRead = (conversationId: string) => {
+    if (!socket || !user) return
 
-export function useMessaging() {
-  const ctx = useContext(MessagingContext)
-  if (!ctx) throw new Error('useMessaging must be used within a MessagingProvider')
-  return ctx
-}
+    socket.emit('mark-messages-read', {
+      conversationId,
+      userId: user.id
+    })
+  }
+
+  /* -------------------------------------------------------
+     LOAD CONVERSATIONS
+  -------------------------------------------------------- */
+
+  const loadConversations = async () => {
+    const res = await fetch('/api/messages
