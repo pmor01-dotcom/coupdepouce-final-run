@@ -90,12 +90,17 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      const sessionToken = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null
+
       socketInstance = io(process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000', {
         path: '/api/socket/io',
         reconnectionAttempts: 2,
         reconnectionDelay: 2000,
         timeout: 5000,
-        transports: ['polling', 'websocket']
+        transports: ['polling', 'websocket'],
+        auth: {
+          token: sessionToken ?? ''
+        }
       })
 
       socketInstance.on('connect', () => {
