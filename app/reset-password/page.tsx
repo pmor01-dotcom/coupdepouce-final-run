@@ -66,14 +66,14 @@ export default function ResetPasswordPage() {
         localStorage.removeItem("role");
         localStorage.removeItem("token");
 
-        // ⭐ NEW: Redirect based on role returned by API
+        // ⭐ NEW: Redirect based on role returned by API (use window.location for hard reload so AuthProvider picks up the token)
         const role = data.role || "client"; // fallback to client
 
         setTimeout(() => {
           if (role === "artisan") {
-            router.push("/artisan-dashboard");
+            window.location.href = "/artisan-dashboard";
           } else {
-            router.push("/client-dashboard");
+            window.location.href = "/client-dashboard";
           }
         }, 2000);
       } else {
