@@ -138,7 +138,12 @@ export default function ConversationPage() {
   }
 
   const handleBack = () => {
-    router.push('/messages')
+    // Redirect to appropriate dashboard based on user role
+    if (user?.role === 'artisan') {
+      router.push('/artisan-dashboard')
+    } else {
+      router.push('/client-dashboard')
+    }
   }
 
   if (!user) {
