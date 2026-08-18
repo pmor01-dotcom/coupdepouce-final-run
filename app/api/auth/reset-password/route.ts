@@ -59,21 +59,38 @@ export async function POST(req: Request) {
 
     console.log('Password updated successfully for user:', user.id)
 
-    // Create session token (same as login flow)
+    // Create session token
     const sessionToken = crypto.randomBytes(32).toString('hex')
 
-    const { error: sessionError } = await supabase
+    // Delete any existing session for this user
+    await supabase
       .from('sessions')
-      .upsert({
+      .delete()
+      .eq('user_id', user.id)
+
+    // Insert new session
+    const { error: sessionError, data: sessionData } = await supabase
+      .from('sessions')
+      .insert({
         user_id: user.id,
         token: sessionToken,
         created_at: new Date().toISOString()
-      }, { onConflict: 'user_id' })
+      })
 
     if (sessionError) {
-      console.error('Session creation failed:', sessionError)
-      return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
+      console.error('Session creation failed:', JSON.stringify({
+        message: sessionError.message,
+        details: sessionError.details,
+        hint: sessionError.hint,
+        code: sessionError.code
+      }))
+      return NextResponse.json({ 
+        error: 'Failed to create session',
+        details: sessionError.message 
+      }, { status: 500 })
     }
+
+    console.log('Session created successfully:', { user_id: user.id, sessionData })
 
     // Return user data without password hash
     const userDataToReturn = {
