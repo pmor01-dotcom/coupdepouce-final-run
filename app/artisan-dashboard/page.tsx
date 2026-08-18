@@ -126,27 +126,11 @@ export default function ArtisanDashboard() {
         </div>
       </header>
 
-      {/* WELCOME WITH NOTIFICATION */}
+      {/* WELCOME */}
       <div className="max-w-3xl mx-auto px-4 pt-6">
-        <div className="flex items-center">
-          <p className="text-sm md:text-base text-gray-900">
-            {t('welcome')}, {user?.name || 'Artisan'}
-          </p>
-          <div className="flex items-center ml-5">
-            <Link
-              href="/artisan-messages"
-              className="flex items-center hover:bg-gray-100 transition-colors rounded-full p-4"
-              title={t('messages') || 'Messages'}
-            >
-              <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="ml-2 bg-red-500 text-white text-2xl font-bold rounded-full h-12 w-12 flex items-center justify-center border-4 border-white">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            </Link>
-          </div>
-        </div>
+        <p className="text-sm md:text-base text-gray-900">
+          {t('welcome')}, {user?.name || 'Artisan'}
+        </p>
       </div>
 
       {/* BUTTONS */}
@@ -165,7 +149,13 @@ export default function ArtisanDashboard() {
               fontWeight: '500',
               width: '100%',
               cursor: 'pointer',
-              border: 'none'
+              border: 'none',
+              display: 'block',
+              textAlign: 'center',
+              textDecoration: 'none',
+              height: '44px',
+              lineHeight: '1',
+              boxSizing: 'border-box'
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
@@ -190,7 +180,10 @@ export default function ArtisanDashboard() {
               border: 'none',
               display: 'block',
               textAlign: 'center',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              height: '44px',
+              lineHeight: '1',
+              boxSizing: 'border-box'
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
@@ -213,14 +206,27 @@ export default function ArtisanDashboard() {
               width: '100%',
               cursor: 'pointer',
               border: 'none',
-              display: 'block',
-              textAlign: 'center',
-              textDecoration: 'none'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none',
+              height: '44px',
+              lineHeight: '1',
+              overflow: 'hidden',
+              boxSizing: 'border-box'
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}
           >
-            {t('messages')}
+            <svg style={{ width: '20px', height: '20px', marginRight: '8px', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span style={{ flexShrink: 0 }}>{t('messages')}</span>
+            {unreadCount > 0 && (
+              <span style={{ marginLeft: '8px', backgroundColor: '#ef4444', color: 'white', fontSize: '12px', fontWeight: 'bold', borderRadius: '50%', height: '20px', width: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white', flexShrink: 0 }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </Link>
         </div>
 
@@ -240,7 +246,10 @@ export default function ArtisanDashboard() {
               border: 'none',
               display: 'block',
               textAlign: 'center',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              height: '44px',
+              lineHeight: '1',
+              boxSizing: 'border-box'
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6b7280')}

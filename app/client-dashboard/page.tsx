@@ -169,23 +169,7 @@ export default function ClientDashboard() {
 
       {/* WELCOME */}
       <div className="max-w-3xl mx-auto px-4 pt-6">
-        <div className="flex items-center">
-          <WelcomeUser />
-          <div className="flex items-center ml-5">
-            <Link
-              href="/messages"
-              className="flex items-center hover:bg-gray-100 transition-colors rounded-full p-2"
-              title={t('messages') || 'Messages'}
-            >
-              <svg className="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="ml-2 bg-red-500 text-white text-lg font-bold rounded-full h-8 w-8 flex items-center justify-center border-2 border-white">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            </Link>
-          </div>
-        </div>
+        <WelcomeUser />
       </div>
 
       {/* BUTTONS STACKED VERTICALLY */}
@@ -194,7 +178,7 @@ export default function ClientDashboard() {
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
             <button
               onClick={handleLogout}
-              style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block' }}
+              style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none', height: '44px', lineHeight: '1', boxSizing: 'border-box' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
@@ -203,7 +187,7 @@ export default function ClientDashboard() {
           </div>
 
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
-            <Link href="/client-dashboard/demandes" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+            <Link href="/client-dashboard/demandes" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none', height: '44px', lineHeight: '1', boxSizing: 'border-box' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
@@ -212,7 +196,7 @@ export default function ClientDashboard() {
           </div>
 
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
-            <Link href="/create-demand" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+            <Link href="/create-demand" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none', height: '44px', lineHeight: '1', boxSizing: 'border-box' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
@@ -221,7 +205,7 @@ export default function ClientDashboard() {
           </div>
 
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
-            <Link href="/client-dashboard/proposals" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+            <Link href="/client-dashboard/proposals" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none', height: '44px', lineHeight: '1', boxSizing: 'border-box' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
@@ -232,18 +216,26 @@ export default function ClientDashboard() {
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
             <Link
               href="/messages"
-              style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+              style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', height: '44px', lineHeight: '1', overflow: 'hidden', boxSizing: 'border-box' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
-              {t('clientDashboard.messages')}
+              <svg style={{ width: '20px', height: '20px', marginRight: '8px', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span style={{ flexShrink: 0 }}>{t('clientDashboard.messages')}</span>
+              {unreadCount > 0 && (
+                <span style={{ marginLeft: '8px', backgroundColor: '#ef4444', color: 'white', fontSize: '12px', fontWeight: 'bold', borderRadius: '50%', height: '20px', width: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white', flexShrink: 0 }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </Link>
           </div>
 
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
             <Link
               href="/artisan-directory"
-              style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+              style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none', height: '44px', lineHeight: '1', boxSizing: 'border-box' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
@@ -252,7 +244,7 @@ export default function ClientDashboard() {
           </div>
 
           <div style={{ marginBottom: '12px', width: '66%', marginLeft: 'auto', marginRight: 'auto' }}>
-            <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+            <Link href="/profile/edit" style={{ backgroundColor: '#6b7280', color: 'white', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', width: '100%', cursor: 'pointer', border: 'none', display: 'block', textAlign: 'center', textDecoration: 'none', height: '44px', lineHeight: '1', boxSizing: 'border-box' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
             >
