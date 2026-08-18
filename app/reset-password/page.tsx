@@ -56,6 +56,11 @@ export default function ResetPasswordPage() {
       if (response.ok) {
         setMessage(data.message || t("forgotPassword.passwordUpdated"));
 
+        // ⭐ NEW: Store session token (critical for authenticated requests)
+        if (data.token) {
+          localStorage.setItem("session_token", data.token);
+        }
+
         // ⭐ NEW: Clear old session
         localStorage.removeItem("user");
         localStorage.removeItem("role");
