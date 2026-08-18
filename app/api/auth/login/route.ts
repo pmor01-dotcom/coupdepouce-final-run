@@ -65,17 +65,29 @@ export async function POST(req: Request) {
     // 4. Create session token and save it
     const token = crypto.randomBytes(32).toString('hex')
 
+    // Delete any existing session for this user
+    await supabase
+      .from('sessions')
+      .delete()
+      .eq('user_id', user.id)
+
+    // Insert new session
     const { error: sessionError } = await supabase
       .from('sessions')
-      .upsert({
+      .insert({
         user_id: user.id,
         token,
         created_at: new Date().toISOString()
-      }, { onConflict: 'user_id' })
+      })
 
     if (sessionError) {
-      console.error('Session creation failed:', sessionError)
-      return NextResponse.json({ error: 'Unable to create session' }, { status: 500 })
+      console.error('Session creation failed:', JSON.stringify({
+        message: sessionError.message,
+        details: sessionError.details,
+        hint: sessionError.hint,
+        code: sessionError.code
+      }))
+      return NextResponse.json({ error: 'Unable to create session', details: sessionError.message }, { status: 500 })
     }
 
     // 5. Return user data and the token
