@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,13 +57,30 @@ export async function POST(req: Request) {
       }, { status: 403 })
     }
 
-    // 4. Return user data (without password hash)
+    // 4. Create session token and save it
+    const token = crypto.randomBytes(32).toString('hex')
+
+    const { error: sessionError } = await supabase
+      .from('sessions')
+      .upsert({
+        user_id: user.id,
+        token,
+        created_at: new Date().toISOString()
+      }, { onConflict: 'user_id' })
+
+    if (sessionError) {
+      console.error('Session creation failed:', sessionError)
+      return NextResponse.json({ error: 'Unable to create session' }, { status: 500 })
+    }
+
+    // 5. Return user data and the token
     const { password_hash, ...userWithoutPassword } = user
 
-    console.log("Login successful - User ID:", user.id, "Type:", typeof user.id)
+    console.log('Login successful - User ID:', user.id, 'Token created:', !!token)
 
     return NextResponse.json({
       user: userWithoutPassword,
+      token,
       success: true
     })
 
