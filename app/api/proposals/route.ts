@@ -8,6 +8,36 @@ const supabase = createClient(
 
 export const dynamic = 'force-dynamic';
 
+// Helper: validate session token and return artisan user
+async function getAuthenticatedUser(request: NextRequest) {
+  const authHeader = request.headers.get("Authorization");
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.replace("Bearer ", "").trim();
+
+  // Look up user by session token
+  const { data: session, error: sessionError } = await supabase
+    .from("sessions")
+    .select("user_id")
+    .eq("token", token)
+    .single();
+
+  if (sessionError || !session) return null;
+
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", session.user_id)
+    .single();
+
+  if (userError || !user) return null;
+
+  return user;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -71,22 +101,39 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // ⭐ Authenticate artisan
+    const artisan = await getAuthenticatedUser(request);
+
+    if (!artisan) {
+      return NextResponse.json(
+        { error: 'Vous devez être connecté pour soumettre une proposition' },
+        { status: 401 }
+      );
+    }
+
+    if (artisan.role !== "artisan") {
+      return NextResponse.json(
+        { error: "Seuls les artisans peuvent envoyer une proposition" },
+        { status: 403 }
+      );
+    }
+
     const {
       message,
       proposed_price,
       estimated_duration,
       availability,
-      demand_id,
-      artisan_id
+      demand_id
     } = await request.json();
 
-    if (!message || !proposed_price || !demand_id || !artisan_id) {
+    if (!message || !proposed_price || !demand_id) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
+    // ⭐ Insert proposal with authenticated artisan_id
     const { data: proposal, error } = await supabase
       .from('proposals')
       .insert({
@@ -94,8 +141,8 @@ export async function POST(request: NextRequest) {
         proposed_price,
         estimated_duration: estimated_duration || null,
         availability: availability || null,
-        demand_id: demand_id,
-        artisan_id: artisan_id,
+        demand_id,
+        artisan_id: artisan.id,
         updated_at: new Date().toISOString()
       })
       .select()
@@ -103,29 +150,21 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    // Send a message to the client about the new proposal
-    try {
-      // Fetch demand to get client_id and title
-      const { data: demand } = await supabase
-        .from('demands')
-        .select('id, title, client_id')
-        .eq('id', demand_id)
-        .single();
+    // ⭐ Send message to client
+    const { data: demand } = await supabase
+      .from('demands')
+      .select('id, title, client_id')
+      .eq('id', demand_id)
+      .single();
 
-      if (demand && demand.client_id) {
-        const messageContent = `Nouvelle proposition pour "${demand.title}": ${message}\n\nPrix proposé: ${proposed_price}`;
+    if (demand && demand.client_id) {
+      const messageContent = `Nouvelle proposition pour "${demand.title}": ${message}\n\nPrix proposé: ${proposed_price}`;
 
-        await supabase.from('messages').insert({
-          sender_id: artisan_id,
-          receiver_id: demand.client_id,
-          content: messageContent
-        });
-
-        console.log('Message sent to client:', demand.client_id);
-      }
-    } catch (messageError) {
-      console.error('Failed to send message to client:', messageError);
-      // Don't fail the request if message fails
+      await supabase.from('messages').insert({
+        sender_id: artisan.id,
+        receiver_id: demand.client_id,
+        content: messageContent
+      });
     }
 
     return NextResponse.json({
@@ -135,9 +174,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Create proposal error:', error);
-    console.error('Error details:', JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { error: error.message || 'Internal server error', details: error },
+      { error: error.message || 'Internal server error' },
       { status: 500 }
     );
   }
