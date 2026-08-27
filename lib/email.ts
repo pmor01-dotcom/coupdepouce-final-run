@@ -141,7 +141,7 @@ export class EmailService {
             </p>
           </div>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${getAppUrl()}/messages"
+            <a href="${getAppUrl()}/login?redirect=%2Fmessages"
                style="background: #6B8E23; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
               Voir mes messages
             </a>
