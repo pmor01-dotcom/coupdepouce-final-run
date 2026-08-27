@@ -51,7 +51,13 @@ function LoginContent() {
 
       // Login successful - redirect based on role
       const userProfile = result as UserProfile
-      if (userProfile.role === 'client') window.location.href = '/client-dashboard'
+      const requestedRedirect = searchParams.get('redirect')
+      const redirectPath = requestedRedirect?.startsWith('/') && !requestedRedirect.startsWith('//')
+        ? requestedRedirect
+        : null
+
+      if (redirectPath) window.location.href = redirectPath
+      else if (userProfile.role === 'client') window.location.href = '/client-dashboard'
       else if (userProfile.role === 'artisan') window.location.href = '/artisan-dashboard'
       else setError(t('login.noRole'))
 
