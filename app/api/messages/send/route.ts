@@ -9,11 +9,15 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== API MESSAGES SEND CALLED ===')
     const body = await request.json()
 
     const { senderId, receiverId, content, demandId } = body
 
+    console.log('Request body parsed:', { senderId, receiverId, contentLength: content?.length, demandId })
+
     if (!senderId || !receiverId || !content) {
+      console.error('❌ Missing required fields')
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -59,8 +63,7 @@ export async function POST(request: NextRequest) {
       .insert({
         content,
         sender_id: senderId,
-        receiver_id: receiverId,
-        read: false // New messages are unread by default
+        receiver_id: receiverId
       })
       .select()
       .limit(1)
@@ -83,37 +86,50 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('=== MESSAGE CREATED SUCCESSFULLY ===')
+    console.log('Message ID:', message[0].id)
+    console.log('Now attempting email notification...')
+
     // Send email notification to receiver
     try {
       const senderData = sender[0]
       const receiverData = receiver[0]
 
-      console.log('=== MESSAGE EMAIL DEBUG ===')
-      console.log('Sender data:', senderData)
-      console.log('Receiver data:', receiverData)
-      console.log('Sender email:', senderData.email)
+      console.log('=== EMAIL NOTIFICATION ATTEMPT ===')
+      console.log('Sender role:', senderData.role)
       console.log('Receiver email:', receiverData.email)
-      console.log('Are emails the same?', senderData.email === receiverData.email)
+      console.log('Receiver name:', receiverData.name)
+      console.log('Message content length:', content.length)
+
+      if (!receiverData.email) {
+        console.warn('⚠️ RECEIVER EMAIL IS EMPTY/NULL - SKIPPING EMAIL')
+        return NextResponse.json({
+          success: true,
+          messageId: message[0].id,
+          message: message[0],
+          warning: 'Message created but email not sent - receiver has no email'
+        })
+      }
 
       if (receiverData.email) {
-        console.log('Attempting to send email notification to RECEIVER:', receiverData.email)
-        console.log('NOT sending to sender:', senderData.email)
+        console.log('✉️ Sending message notification email to:', receiverData.email)
         const emailResult = await EmailService.sendNewMessageEmail(
           receiverData.email,
           receiverData.name || 'Utilisateur',
           senderData.name || 'Utilisateur',
-          senderData.role || 'artisan',
+          senderData.role || 'client',
           content
         )
-        console.log('Email notification result:', emailResult)
-        console.log('Email notification sent to receiver:', receiverData.email)
-      } else {
-        console.log('Receiver has no email address, skipping email notification')
+        console.log('📧 Email send result:', emailResult)
+        if (!emailResult) {
+          console.warn('⚠️ Email notification failed for:', receiverData.email)
+        } else {
+          console.log('✅ Email sent successfully to:', receiverData.email)
+        }
       }
     } catch (emailError) {
-      console.error('Failed to send email notification:', emailError)
-      console.error('Email error details:', JSON.stringify(emailError, null, 2))
-      // Don't fail the request if email fails
+      console.error('❌ EXCEPTION in email notification:', emailError)
+      console.error('Error details:', JSON.stringify(emailError, null, 2))
     }
 
     return NextResponse.json({

@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (artisan.role !== "artisan") {
+    if (!artisan.role || artisan.role.toLowerCase() !== "artisan") {
       return NextResponse.json(
         { error: "Seuls les artisans peuvent envoyer une proposition" },
         { status: 403 }
