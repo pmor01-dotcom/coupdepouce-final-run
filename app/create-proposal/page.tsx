@@ -19,7 +19,7 @@ interface Demand {
 }
 
 export default function CreateProposal() {
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const { t } = useLanguage()
 
@@ -60,6 +60,10 @@ export default function CreateProposal() {
       return
     }
 
+    if (authLoading) {
+      return
+    }
+
     if (!user) {
       setError(t('proposal.mustBeLoggedIn'))
       return
@@ -92,6 +96,12 @@ export default function CreateProposal() {
       const result = await response.json()
 
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('session_token')
+          const returnPath = `${window.location.pathname}${window.location.search}`
+          router.push(`/login?redirect=${encodeURIComponent(returnPath)}`)
+          return
+        }
         throw new Error(result.error || t('proposal.errorCreating'))
       }
 
@@ -201,7 +211,7 @@ export default function CreateProposal() {
             </Link>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || authLoading || !user}
               className="btn-success disabled:opacity-50"
             >
               {isLoading ? t('proposal.sending') : t('proposal.sendProposal')}
