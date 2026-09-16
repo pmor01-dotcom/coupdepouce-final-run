@@ -37,7 +37,12 @@ export class EmailService {
       });
 
       console.log("Resend email result:", result);
-      return true;
+      if (result.error) {
+        console.error("Resend rejected the email:", result.error);
+        return false;
+      }
+
+      return Boolean(result.data);
     } catch (error) {
       console.error("Resend email error:", error);
       console.error("Email error details:", JSON.stringify(error, null, 2));

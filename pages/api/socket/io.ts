@@ -88,19 +88,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
               demandTitle: result.demandTitle
             })
 
-            fetch(`${req.headers.origin}/api/notifications/message`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                senderId,
-                receiverId,
-                demandId,
-                messageContent: content
-              })
-            }).catch(err => console.error('Email notification failed:', err))
-
           } else {
             socket.emit('message-error', { error: result.error })
           }
