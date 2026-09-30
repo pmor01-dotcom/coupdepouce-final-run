@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         name,
         email,
         password_hash,
-        role,
+        role: (role || '').toLowerCase(),
         email_verified: false,
         verification_token: verificationToken,
         verification_token_expires: tokenExpires.toISOString()

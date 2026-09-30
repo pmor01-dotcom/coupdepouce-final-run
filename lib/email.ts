@@ -1,6 +1,12 @@
 import { Resend } from "resend";
 
+console.log('=== EMAIL.TS INITIALIZATION ===');
+console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
+console.log('RESEND_API_KEY value starts with:', process.env.RESEND_API_KEY?.substring(0, 10));
+
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+console.log('Resend client initialized:', !!resend);
 
 const getAppUrl = () => process.env.APP_URL || "https://www.coupdepouce-aide.com";
 const getCurrentYear = () => new Date().getFullYear();

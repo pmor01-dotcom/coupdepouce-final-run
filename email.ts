@@ -2,7 +2,6 @@ import { Resend } from "resend";
 
 console.log('=== EMAIL.TS INITIALIZATION ===');
 console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
-console.log('RESEND_API_KEY value starts with:', process.env.RESEND_API_KEY?.substring(0, 10));
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -37,7 +36,12 @@ export class EmailService {
       });
 
       console.log("Resend email result:", result);
-      return true;
+      if (result.error) {
+        console.error("Resend rejected the email:", result.error);
+        return false;
+      }
+
+      return Boolean(result.data);
     } catch (error) {
       console.error("Resend email error:", error);
       console.error("Email error details:", JSON.stringify(error, null, 2));

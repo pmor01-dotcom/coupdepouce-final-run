@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useLanguage } from '../components/LanguageProvider'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface Contact {
   id: number
@@ -20,11 +21,13 @@ interface Contact {
   lastMessage: string
   artisanResponse: string
   proposedPrice: string
+  clientId?: string // Add client ID to contact
 }
 
 export default function ArtisanContacts() {
   const { user } = useAuth()
   const { t } = useLanguage()
+  const router = useRouter()
 
   // Helper function to get first name
   const getFirstName = (fullName?: string) => {
@@ -52,6 +55,7 @@ export default function ArtisanContacts() {
           // Transform proposals into contact format
           const contactList = proposals.map((proposal: any) => ({
             id: proposal.id,
+            clientId: proposal.demand?.client_id || '',
             clientName: proposal.demand?.client?.name || 'Unknown',
             clientEmail: proposal.demand?.client?.email || '',
             clientPhone: proposal.demand?.client?.phone || '',
@@ -352,6 +356,11 @@ export default function ArtisanContacts() {
                   {t('close')}
                 </button>
                 <button
+                  onClick={() => {
+                    if (selectedContact?.clientId) {
+                      router.push(`/messages/${selectedContact.clientId}?name=${encodeURIComponent(selectedContact.clientName)}`)
+                    }
+                  }}
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                 >
                   {t('contactClient')}
